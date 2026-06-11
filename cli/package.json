@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "analyze": "tsx analyze.ts",
+    "enrich": "tsx enrich.ts",
     "harness": "tsx harness.ts",
     "test": "tsx ../test/test.ts"
   },

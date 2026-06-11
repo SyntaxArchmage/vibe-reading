@@ -107,6 +107,7 @@ function getNodeKind(nodeType: string): string {
 function collectInterestingNodes(node: any, interestingTypes: Set<string>, results: any[]) {
   if (interestingTypes.has(node.type)) {
     results.push(node);
+    if (node.type === "decorated_definition") return;
   }
   for (const child of node.children) {
     collectInterestingNodes(child, interestingTypes, results);

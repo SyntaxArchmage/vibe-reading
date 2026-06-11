@@ -119,6 +119,23 @@ const harnessOut = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
 assert(harnessOut.includes("100% coverage"), "Harness reports 100% coverage");
 assert(harnessOut.includes("✓"), "Harness passes with checkmark");
 
+// === Test 9: Enrich tool updates entity data ===
+console.log("\nTest 9: Enrich tool");
+const enrichJson = JSON.stringify([
+  { name: "Task", summary: "Task contract for scheduler", description: "Defines the unit of work." },
+]);
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${enrichJson}'`);
+const enrichedData = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const taskEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Task");
+assert(taskEntity?.summary === "Task contract for scheduler", `Enriched summary (got "${taskEntity?.summary}")`);
+assert(taskEntity?.detail?.description === "Defines the unit of work.", `Enriched description (got "${taskEntity?.detail?.description}")`);
+
+// Non-enriched entities should keep placeholder
+const otherEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
+assert(otherEntity?.summary.includes("Scheduler"), `Non-enriched entity keeps name (got "${otherEntity?.summary}")`);
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
