@@ -38,7 +38,8 @@
     "watch": "tsc -watch -p ./",
     "build:webview": "node esbuild.webview.mjs",
     "watch:webview": "node esbuild.webview.mjs --watch",
-    "package": "vsce package"
+    "package": "vsce package",
+    "preview": "node esbuild.webview.mjs && npx tsx preview-server.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

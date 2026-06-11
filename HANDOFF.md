@@ -1,100 +1,98 @@
 # Vibe Reading — Handoff Document
 
 Session: 2026-06-08 → 2026-06-11
-Agent: Cursor (Opus 4.6) on 10.0.16.52
+Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
-## What Was Done
+## Current Status
 
-### 1. Socratic Skill Created (separate repo)
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 0: Foundation | ✓ Complete | Extension skeleton, schema, sidebar, harness, /learn skill |
+| Phase 1: Concept Push | ✓ Complete | Tree-sitter AST extraction (TS/JS/Py), Card component, Framer Motion |
+| Testing | ✓ Complete | 39 automated assertions, 3-language fixture |
+| Phase 2: Macro Flow | Not started | Call chain visualization |
+| Phase 3: Evolve Map | Not started | Git history timeline |
+| Phase 4: Vibe Jump | Not started | Semantic navigation |
 
-**Repo**: https://github.com/SyntaxArchmage/socratic
-**Location on 52**: `/home/albert/workspace/socratic/`
-**Dev symlink**: `~/.cursor/skills/socratic` → source
+## What Was Built in This Session
 
-A Cursor agent skill for dynamic PRD generation through Socratic
-questioning. Features:
-- Coverage Matrix: 8 mandatory dimensions with sufficiency conditions
-- Fixed-Point Convergence: hidden prediction + consecutive hit detection
-- Dynamic question generation (not fixed question list)
-- PRD + DevPlan + Decisions output template
+### Phase 0: Foundation
+- VS Code extension (TypeScript + React webview)
+- DataEntity JSON schema with LoC anchor
+- CLI analyzer (`cli/analyze.ts`) with per-file JSON output
+- Harness tool (`cli/harness.ts`) for 100% coverage verification
+- `/learn` Cursor skill definition
+- Sidebar with 4 tabs (Concept/Flow/History/Jump)
+- File-switch listener for auto-updating sidebar
 
-### 2. Vibe Reading PRD Completed (this repo)
+### Phase 1: Concept Push
+- Real concept extractor using web-tree-sitter (WASM)
+- Supports TypeScript, TSX, JavaScript, Python
+- Extracts functions, classes, interfaces, enums, type aliases, etc.
+- Accurate LoC anchors from AST node positions
+- Card component with Framer Motion expand/collapse animations
 
-**Repo**: https://github.com/SyntaxArchmage/vibe-reading (private)
-**Location on 52**: `/home/albert/workspace/vibe-reading/`
+### Testing
+- Automated test suite (`test/test.ts`) — 39 assertions
+- 3-language fixture project (scheduler.ts, engine.py, utils.js)
+- Tests: output structure, entity accuracy, schema, manifest, harness
 
-Full Socratic exploration completed. All 8 dimensions LOCKED:
+### Preview Server
+- Standalone HTML preview at `http://localhost:PORT`
+- Uses real analysis data, mock VS Code API
+- Run: `cd extension && npm run preview`
 
-| Dimension | Summary |
-|-----------|---------|
-| Problem & Value | Existing tools create "fake understanding" by pulling users away from source code |
-| Target Users | Any developer new to a codebase (everyone is a beginner on most projects) |
-| Core Scenarios | Install → `/learn` → toggle sidebar → read code with knowledge cards |
-| Interaction Model | Tab-based sidebar (Concept / Flow / History / Jump), cards anchored to LoC |
-| Data Model | DataEntity with LoC anchor (compiler debug info inspired), per-file JSON |
-| Tech & Architecture | Tree-sitter + LSP + LLM + Git → VS Code Extension (Webview) |
-| Scope Boundary | 4 phases, each a complete pipeline; no web dashboard, no real-time, no multi-IDE |
-| DevPlan | Phase 0 (foundation) → Phase 1-4 (one feature per phase), 25 verify checks total |
+## Key Decisions Made
 
-### Key Decisions Made
+See `prd/decisions.md` for full decision log (12 decisions).
 
-1. Source code as primary (not dashboard) — "touch the code"
-2. Offline `/learn` + static JSON (no real-time LLM)
-3. LSP + Tree-sitter + LLM three-layer analysis (competitive advantage over UA)
-4. Per-file JSON (not monolith graph)
-5. Tab-based sidebar (user controls focus)
-6. Harness-guaranteed 100% file coverage
-7. One complete feature pipeline per dev phase
-8. Visual quality as core requirement (livestream/screencast ready)
+New decisions this session:
+- Decision 9: Framer Motion (motion/react) for animations
+- Decision 10: LSP deferred to Phase 2
+- Decision 11: /learn skill is independent from Socratic
+- Decision 12: Toy project for dev, vLLM for demo
 
-## Files in This Repo
+## How to Run
 
-```
-prd/
-├── prd.md          # Complete PRD (8 sections, ~200 lines)
-├── devplan.md      # 5-phase plan with 25 verify conditions
-└── decisions.md    # 8 key decisions with rationale
+```bash
+# Clone
+git clone git@github.com:SyntaxArchmage/vibe-reading.git
+
+# Install deps
+cd vibe-reading/extension && npm install
+cd ../extension/webview && npm install
+cd ../../cli && npm install
+
+# Run analysis on any project
+cd cli && npx tsx analyze.ts /path/to/project
+
+# Verify coverage
+cd cli && npx tsx harness.ts /path/to/project
+
+# Run tests
+cd cli && npm test
+
+# Preview UI (opens browser)
+cd extension && npm run preview
+# Then open http://localhost:3457
+
+# Build extension
+cd extension && npm run compile && npm run build:webview
 ```
 
 ## What To Do Next
 
-### Immediate Next Step
+### Immediate: Visual Polish
+- Open preview server, iterate on card styles
+- Add smooth transitions, improve typography
+- Consider VS Code theme integration (--vscode-* CSS vars)
 
-Start **Phase 0: Foundation** — see `prd/devplan.md` for full task list.
+### Phase 2: Macro Flow
+- Implement flow extractor using LSP call hierarchy
+- Decision needed: use VS Code built-in LSP or standalone server
+- FlowTab visualization: vertical call chain diagram
 
-Key tasks:
-1. Initialize VS Code extension project (TypeScript + Webview + React)
-2. Define DataEntity JSON schema
-3. Create `/learn` Cursor skill
-4. Implement harness tool
-5. Sidebar panel with empty tab skeleton
-
-### To Clone This Repo on Another Machine
-
-```bash
-# Clone both repos
-git clone git@github.com:SyntaxArchmage/socratic.git ~/workspace/socratic
-git clone git@github.com:SyntaxArchmage/vibe-reading.git ~/workspace/vibe-reading
-
-# Install Socratic skill (dev mode)
-mkdir -p ~/.cursor/skills
-ln -sfn ~/workspace/socratic/.cursor/skills/socratic ~/.cursor/skills/socratic
-```
-
-### Open Questions for Next Session
-
-- Which feature pipeline to implement first (Concept Push is recommended)
-- Specific animation library for "fancy" visuals (Framer Motion? CSS-only?)
-- LSP integration strategy for `/learn` (use VS Code's built-in LSP, or
-  standalone language server?)
-- Demo project choice (vLLM? smaller project for faster iteration?)
-
-## Context That May Be Lost
-
-- The "Vibe Reading" name comes from idea.docx in
-  `/home/albert/workspace/croqtile-tuner-paper/idea.docx` (original
-  brainstorm document with full design rationale)
-- User's core philosophy: AI should help you read code, not read it for
-  you. "虚假理解" (fake understanding) is the anti-pattern to avoid.
-- Visual quality is non-negotiable — product will be shown in livestreams
-- The compiler/LSP advantage is the key differentiator vs Understand-Anything
+### Open Questions
+- Animation library evaluation: Framer Motion is chosen but not deeply tested in webview yet
+- LSP integration strategy for Phase 2
+- CI/CD pipeline for automated testing

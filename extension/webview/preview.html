@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Reading — Preview</title>
+  <style>
+    :root {
+      --vscode-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --vscode-font-size: 13px;
+      --vscode-foreground: #cccccc;
+      --vscode-descriptionForeground: #8b8b8b;
+      --vscode-panel-border: #3c3c3c;
+      --vscode-editor-background: #1e1e1e;
+      --vscode-focusBorder: #007acc;
+      --vscode-badge-background: #4d4d4d;
+      --vscode-badge-foreground: #cccccc;
+      --vscode-textCodeBlock-background: #2d2d2d;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #252526;
+      display: flex;
+      height: 100vh;
+    }
+    .preview-sidebar {
+      width: 320px;
+      border-right: 1px solid var(--vscode-panel-border);
+      overflow: hidden;
+    }
+    .preview-controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #333;
+      padding: 12px;
+      border-radius: 8px;
+      z-index: 100;
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      color: var(--vscode-foreground);
+    }
+    .preview-controls select, .preview-controls button {
+      margin: 4px 0;
+      padding: 4px 8px;
+      background: #2d2d2d;
+      color: #ccc;
+      border: 1px solid #555;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+    .preview-controls button:hover {
+      background: #3c3c3c;
+    }
+    .preview-main {
+      flex: 1;
+      padding: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #999;
+      white-space: pre;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-sidebar">
+    <div id="root"></div>
+  </div>
+  <div class="preview-main" id="code-preview">Open a file to see code here.</div>
+  <div class="preview-controls">
+    <label>File:</label>
+    <select id="file-select"></select>
+    <button id="reload-btn">Reload Data</button>
+    <div id="status" style="margin-top:8px; color:#888;">Ready</div>
+  </div>
+
+  <script>
+    // Mock VS Code API
+    const messageHandlers = [];
+    window.acquireVsCodeApi = function() {
+      return {
+        postMessage: function(msg) {
+          if (msg.type === 'navigateTo') {
+            document.getElementById('status').textContent =
+              `Navigate: ${msg.file}:L${msg.startLine}`;
+          }
+        },
+        getState: function() { return null; },
+        setState: function() {}
+      };
+    };
+
+    // Intercept addEventListener to capture the webview's message handler
+    const origAddEventListener = window.addEventListener;
+    window.addEventListener = function(type, handler, ...rest) {
+      if (type === 'message') {
+        messageHandlers.push(handler);
+      }
+      return origAddEventListener.call(this, type, handler, ...rest);
+    };
+  </script>
+  <script src="../out/webview.js"></script>
+  <script>
+    const ANALYSIS_DATA = PREVIEW_DATA; // will be injected
+
+    const select = document.getElementById('file-select');
+    const codePreview = document.getElementById('code-preview');
+    const status = document.getElementById('status');
+
+    function sendFileData(fileData) {
+      const event = new MessageEvent('message', {
+        data: {
+          type: 'fileChanged',
+          file: fileData.file,
+          entities: fileData.entities,
+          hasData: true
+        }
+      });
+      window.dispatchEvent(event);
+      status.textContent = `Loaded: ${fileData.file} (${fileData.entities.length} entities)`;
+    }
+
+    function loadPreviewData() {
+      select.innerHTML = '';
+      for (const [name, data] of Object.entries(ANALYSIS_DATA)) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = `${data.file} (${data.entities.length})`;
+        select.appendChild(opt);
+      }
+
+      select.addEventListener('change', () => {
+        const data = ANALYSIS_DATA[select.value];
+        if (data) sendFileData(data);
+      });
+
+      document.getElementById('reload-btn').addEventListener('click', () => {
+        location.reload();
+      });
+
+      // Auto-select first file
+      if (select.options.length > 0) {
+        const first = ANALYSIS_DATA[select.options[0].value];
+        if (first) sendFileData(first);
+      }
+    }
+
+    loadPreviewData();
+  </script>
+</body>
+</html>
