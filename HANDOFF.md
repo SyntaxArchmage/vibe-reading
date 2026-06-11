@@ -8,13 +8,36 @@ Machines: 10.0.16.52 (original) → current machine (codes1gn)
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 0: Foundation | ✓ Complete | Extension skeleton, schema, sidebar, harness, /learn skill |
-| Phase 1: Concept Push | ✓ Complete | Tree-sitter AST extraction (TS/JS/Py), Card component, Framer Motion |
-| Testing | ✓ Complete | 39 automated assertions, 3-language fixture |
+| Phase 1: Concept Push | ✓ Complete | AST extraction + agent enrichment + polished Card UI |
+| Testing | ✓ Complete | 42 automated assertions, 3-language fixture + enrich test |
+| Self-analysis | ✓ Complete | /learn ran on vibe-reading itself — 21 files, 76 entities |
 | Phase 2: Macro Flow | Not started | Call chain visualization |
 | Phase 3: Evolve Map | Not started | Git history timeline |
 | Phase 4: Vibe Jump | Not started | Semantic navigation |
 
-## What Was Built in This Session
+## Architecture: /learn Pipeline
+
+The `/learn` skill is agent-driven with 2 phases:
+
+1. **AST extraction** (CLI, automated):
+   ```
+   npx tsx analyze.ts <project>  →  .vibe-reading/files/*.json (skeleton)
+   ```
+
+2. **Concept enrichment** (agent, LLM-driven):
+   ```
+   Agent reads code → generates summaries/descriptions → calls:
+   npx tsx enrich.ts <project> <file> '<enrichments-json>'
+   ```
+
+3. **Verification**:
+   ```
+   npx tsx harness.ts <project>  →  must report 100%
+   ```
+
+Key insight: The agent IS the LLM. No external API calls. The agent reads source code and generates concept explanations, then calls `enrich.ts` to persist them.
+
+## What Was Built
 
 ### Phase 0: Foundation
 - VS Code extension (TypeScript + React webview)
@@ -26,31 +49,26 @@ Machines: 10.0.16.52 (original) → current machine (codes1gn)
 - File-switch listener for auto-updating sidebar
 
 ### Phase 1: Concept Push
-- Real concept extractor using web-tree-sitter (WASM)
+- Tree-sitter AST extraction via web-tree-sitter (WASM)
 - Supports TypeScript, TSX, JavaScript, Python
-- Extracts functions, classes, interfaces, enums, type aliases, etc.
-- Accurate LoC anchors from AST node positions
-- Card component with Framer Motion expand/collapse animations
+- `enrich.ts` CLI for agent to write enriched data
+- Polished Card component: kind badges, monospace names, line ranges,
+  expand chevron, structured detail with chips
+- File header showing filename + entity count
+- Pill-style tab bar, rich empty states
 
 ### Testing
-- Automated test suite (`test/test.ts`) — 39 assertions
+- Automated test suite (`test/test.ts`) — 42 assertions
 - 3-language fixture project (scheduler.ts, engine.py, utils.js)
-- Tests: output structure, entity accuracy, schema, manifest, harness
+- Tests: output structure, entity accuracy, schema, manifest, harness, enrich
 
-### Preview Server
-- Standalone HTML preview at `http://localhost:PORT`
-- Uses real analysis data, mock VS Code API
-- Run: `cd extension && npm run preview`
+### Self-Analysis
+- Ran `/learn` on vibe-reading itself: 21 files, 76 entities, 100% coverage
+- Preview available at `http://localhost:3460`
 
-## Key Decisions Made
+## Key Decisions
 
 See `prd/decisions.md` for full decision log (12 decisions).
-
-New decisions this session:
-- Decision 9: Framer Motion (motion/react) for animations
-- Decision 10: LSP deferred to Phase 2
-- Decision 11: /learn skill is independent from Socratic
-- Decision 12: Toy project for dev, vLLM for demo
 
 ## How to Run
 
@@ -63,18 +81,17 @@ cd vibe-reading/extension && npm install
 cd ../extension/webview && npm install
 cd ../../cli && npm install
 
-# Run analysis on any project
-cd cli && npx tsx analyze.ts /path/to/project
-
-# Verify coverage
-cd cli && npx tsx harness.ts /path/to/project
+# Run /learn on any project (manual steps)
+cd cli && npx tsx analyze.ts /path/to/project    # AST extraction
+# Then: agent reads code and calls enrich.ts per file
+cd cli && npx tsx harness.ts /path/to/project    # verify 100%
 
 # Run tests
 cd cli && npm test
 
-# Preview UI (opens browser)
-cd extension && npm run preview
-# Then open http://localhost:3457
+# Preview UI
+cd extension && npm run preview -- /path/to/project
+# Open http://localhost:3457
 
 # Build extension
 cd extension && npm run compile && npm run build:webview
@@ -82,17 +99,7 @@ cd extension && npm run compile && npm run build:webview
 
 ## What To Do Next
 
-### Immediate: Visual Polish
-- Open preview server, iterate on card styles
-- Add smooth transitions, improve typography
-- Consider VS Code theme integration (--vscode-* CSS vars)
-
 ### Phase 2: Macro Flow
 - Implement flow extractor using LSP call hierarchy
 - Decision needed: use VS Code built-in LSP or standalone server
 - FlowTab visualization: vertical call chain diagram
-
-### Open Questions
-- Animation library evaluation: Framer Motion is chosen but not deeply tested in webview yet
-- LSP integration strategy for Phase 2
-- CI/CD pipeline for automated testing
