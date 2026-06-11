@@ -62,19 +62,30 @@ export function App() {
       <style>{styles}</style>
 
       {!currentFile && (
-        <div className="vr-empty">Open a file to see knowledge cards.</div>
+        <div className="vr-empty">
+          <div className="vr-empty-icon">&#x1F4D6;</div>
+          <div className="vr-empty-title">Vibe Reading</div>
+          <div className="vr-empty-hint">Open a source file to see knowledge cards.</div>
+        </div>
       )}
 
       {currentFile && !hasData && (
         <div className="vr-empty">
-          No data for <code>{currentFile}</code>.
-          <br />
-          Run <code>/learn</code> to analyze this project.
+          <div className="vr-empty-icon">&#x26A1;</div>
+          <div className="vr-empty-title">No data for <code>{currentFile.split("/").pop()}</code></div>
+          <div className="vr-empty-hint">
+            Run <code>/learn</code> in Cursor to analyze this project.
+          </div>
         </div>
       )}
 
       {currentFile && hasData && (
         <>
+          <div className="vr-file-header">
+            <span className="vr-file-icon">&#x1F4C4;</span>
+            <span className="vr-file-name">{currentFile.split("/").pop()}</span>
+            <span className="vr-file-count">{entities.length} entities</span>
+          </div>
           <nav className="vr-tabs">
             {TABS.map((tab) => {
               const count = entities.filter((e) => e.type === tab.id).length;
@@ -109,10 +120,28 @@ const styles = `
   }
 
   .vr-empty {
-    padding: 20px;
+    padding: 48px 20px 32px;
     text-align: center;
     color: var(--vscode-descriptionForeground);
     line-height: 1.6;
+  }
+
+  .vr-empty-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  .vr-empty-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    margin-bottom: 6px;
+  }
+
+  .vr-empty-hint {
+    font-size: 12px;
+    opacity: 0.7;
   }
 
   .vr-empty code {
@@ -122,37 +151,66 @@ const styles = `
     font-size: 0.9em;
   }
 
+  .vr-file-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    flex-shrink: 0;
+  }
+
+  .vr-file-icon {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .vr-file-name {
+    color: var(--vscode-foreground);
+    font-weight: 500;
+  }
+
+  .vr-file-count {
+    margin-left: auto;
+    font-size: 11px;
+    opacity: 0.6;
+  }
+
   .vr-tabs {
     display: flex;
-    border-bottom: 1px solid var(--vscode-panel-border);
+    gap: 2px;
+    padding: 6px 8px;
     flex-shrink: 0;
   }
 
   .vr-tab {
     flex: 1;
-    padding: 8px 4px;
+    padding: 5px 4px;
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-radius: 4px;
     color: var(--vscode-foreground);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-family: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    opacity: 0.7;
-    transition: opacity 0.15s, border-color 0.15s;
+    opacity: 0.6;
+    transition: opacity 0.15s, background 0.15s;
   }
 
   .vr-tab:hover {
     opacity: 1;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   .vr-tab--active {
     opacity: 1;
-    border-bottom-color: var(--vscode-focusBorder);
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .vr-tab-count {
@@ -161,60 +219,155 @@ const styles = `
     padding: 0 5px;
     border-radius: 8px;
     font-size: 10px;
-    min-width: 16px;
+    min-width: 14px;
     text-align: center;
+    line-height: 16px;
   }
 
   .vr-content {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 6px 8px;
   }
 
   .vr-card {
     background: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
 
   .vr-card:hover {
     border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px rgba(0, 122, 204, 0.15);
   }
 
   .vr-card-header {
-    padding: 10px 12px;
+    padding: 8px 10px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 8px;
+  }
+
+  .vr-card-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .vr-card-badge {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 1px 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 16px;
+    margin-top: 1px;
+  }
+
+  .vr-card-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .vr-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--vscode-editor-font-family, 'Cascadia Code', Consolas, monospace);
+    color: var(--vscode-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .vr-card-summary {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.4;
+    color: var(--vscode-descriptionForeground);
+  }
+
+  .vr-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .vr-card-loc {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--vscode-descriptionForeground);
     white-space: nowrap;
-    margin-left: 8px;
+    font-family: var(--vscode-editor-font-family, monospace);
+  }
+
+  .vr-card-lines {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.6;
+  }
+
+  .vr-card-chevron {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    transition: transform 0.2s;
+    opacity: 0.5;
+  }
+
+  .vr-card-chevron--open {
+    transform: rotate(90deg);
   }
 
   .vr-card-detail {
-    padding: 0 12px 10px;
+    padding: 8px 10px 10px;
     font-size: 12px;
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--vscode-descriptionForeground);
     border-top: 1px solid var(--vscode-panel-border);
+    overflow: hidden;
+  }
+
+  .vr-card-desc {
+    margin: 4px 0 8px;
+  }
+
+  .vr-card-raw {
+    margin: 4px 0 8px;
+    font-size: 11px;
+    font-family: var(--vscode-editor-font-family, monospace);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .vr-card-chips {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .vr-card-chip {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--vscode-textCodeBlock-background);
+    color: var(--vscode-descriptionForeground);
+    white-space: nowrap;
   }
 
   .vr-no-cards {
     text-align: center;
-    padding: 20px;
+    padding: 32px 20px;
     color: var(--vscode-descriptionForeground);
     font-size: 12px;
   }
