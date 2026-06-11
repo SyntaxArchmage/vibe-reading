@@ -4,3 +4,7 @@
 *~
 node_modules/
 .vibe-reading/
+extension/out/
+extension/webview/dist/
+cli/dist/
+*.vsix

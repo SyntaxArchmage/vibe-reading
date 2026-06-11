@@ -103,3 +103,48 @@ Decisions made during Socratic exploration, with context and rationale.
   affects tech choices (animation libraries, CSS quality).
 - **Trade-offs**: More development time per feature. Worth it for the
   product positioning.
+
+## 9. Animation Library: Framer Motion
+
+- **Context**: Which animation library to use in VS Code webview?
+- **Options Considered**:
+  - A: CSS-only (transitions + animations)
+  - B: Framer Motion (motion/react)
+  - C: Motion One (@motionone/dom, WAAPI-based)
+- **Decision**: B — Framer Motion (motion/react)
+- **Rationale**: Motion One lacks official React binding (imperative API
+  via useRef/useEffect). Framer Motion is declarative, has AnimatePresence
+  for enter/exit, layout animations, stagger — exactly what card UI needs.
+  Already validated in production VS Code extensions (Vox Foundation 2026).
+  Tree-shakable, ~30KB gzipped.
+- **Trade-offs**: Larger than CSS-only. Known memory leak in visualElement
+  (fixed in latest). Must respect `vscode-reduce-motion` class manually.
+
+## 10. LSP Deferred to Phase 2
+
+- **Context**: When to integrate LSP for semantic analysis?
+- **Options Considered**:
+  - A: From Phase 0 — set up LSP infrastructure early
+  - B: Phase 2 — when call hierarchy is actually needed
+- **Decision**: B — Phase 0 uses Tree-sitter + LLM only
+- **Rationale**: Phase 0 is foundation (extension skeleton, schema, harness).
+  Phase 1 (Concept Push) only needs AST + LLM. LSP call hierarchy is
+  needed in Phase 2 (Macro Flow). Deferring reduces Phase 0 complexity
+  and lets the extension framework stabilize before adding LSP communication.
+- **Trade-offs**: May need to refactor pipeline when LSP is added.
+
+## 11. /learn Skill Independence
+
+- **Context**: Does /learn depend on the Socratic skill?
+- **Decision**: No — /learn is an independent Cursor skill within vibe-reading
+- **Rationale**: Socratic's mission was PRD generation (completed). /learn
+  orchestrates the analysis pipeline (Tree-sitter, LLM, harness). Different
+  purpose, different lifecycle.
+
+## 12. Demo Project Strategy
+
+- **Context**: Which project to use for testing /learn during development?
+- **Decision**: Toy project for development, vLLM for demo/showcase
+- **Rationale**: Small controlled project (10-20 files) enables fast
+  iteration and deterministic testing. vLLM is the showcase target but
+  too large for rapid dev cycles.

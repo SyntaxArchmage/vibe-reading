@@ -1,0 +1,49 @@
+{
+  "name": "vibe-reading",
+  "displayName": "Vibe Reading",
+  "description": "Read code with contextual knowledge pushed to a sidebar — AI helps you read, not read for you.",
+  "version": "0.0.1",
+  "publisher": "syntax-archmage",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibe-reading",
+          "title": "Vibe Reading",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vibe-reading": [
+        {
+          "type": "webview",
+          "id": "vibeReading.sidebar",
+          "name": "Vibe Reading"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && npm run build:webview",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build:webview": "node esbuild.webview.mjs",
+    "watch:webview": "node esbuild.webview.mjs --watch",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.0"
+  }
+}
