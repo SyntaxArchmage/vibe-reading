@@ -7,99 +7,119 @@ Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 0: Foundation | ✓ Complete | Extension skeleton, schema, sidebar, harness, /learn skill |
-| Phase 1: Concept Push | ✓ Complete | AST extraction + agent enrichment + polished Card UI |
-| Testing | ✓ Complete | 42 automated assertions, 3-language fixture + enrich test |
-| Self-analysis | ✓ Complete | /learn ran on vibe-reading itself — 21 files, 76 entities |
+| Phase 0: Foundation | Done | Extension skeleton, schema, sidebar, harness, /learn skill |
+| Phase 1: Concept Push | Done | AST extraction + agent enrichment + polished Card UI + source viewer |
+| Testing | Done | 42 automated assertions + enrich test |
+| Self-analysis | Done | /learn ran on vibe-reading itself — 21 files, 76 entities, 100% |
+| Pi demo | Blocked | GitHub unreachable from this machine — need network fix |
 | Phase 2: Macro Flow | Not started | Call chain visualization |
-| Phase 3: Evolve Map | Not started | Git history timeline |
-| Phase 4: Vibe Jump | Not started | Semantic navigation |
 
 ## Architecture: /learn Pipeline
 
-The `/learn` skill is agent-driven with 2 phases:
+Two-phase, agent-driven:
 
-1. **AST extraction** (CLI, automated):
-   ```
-   npx tsx analyze.ts <project>  →  .vibe-reading/files/*.json (skeleton)
-   ```
+```
+Step 1:  npx tsx analyze.ts <project>    → .vibe-reading/files/*.json (AST skeleton)
+Step 2:  Agent reads code, generates explanations, calls:
+         npx tsx enrich.ts <project> <file> '<enrichments-json>'
+Step 3:  npx tsx harness.ts <project>    → must report 100%
+```
 
-2. **Concept enrichment** (agent, LLM-driven):
-   ```
-   Agent reads code → generates summaries/descriptions → calls:
-   npx tsx enrich.ts <project> <file> '<enrichments-json>'
-   ```
+Key insight: The agent IS the LLM. No external API calls needed.
 
-3. **Verification**:
-   ```
-   npx tsx harness.ts <project>  →  must report 100%
-   ```
-
-Key insight: The agent IS the LLM. No external API calls. The agent reads source code and generates concept explanations, then calls `enrich.ts` to persist them.
+### CLI tools
+| Tool | Purpose |
+|------|---------|
+| `cli/analyze.ts` | Tree-sitter AST extraction, writes per-file JSON |
+| `cli/enrich.ts` | Agent writes enriched summary/description per entity |
+| `cli/harness.ts` | Verifies 100% coverage |
+| `cli/extractors/concept.ts` | web-tree-sitter WASM-based AST parser (TS/JS/Py) |
 
 ## What Was Built
 
 ### Phase 0: Foundation
 - VS Code extension (TypeScript + React webview)
 - DataEntity JSON schema with LoC anchor
-- CLI analyzer (`cli/analyze.ts`) with per-file JSON output
-- Harness tool (`cli/harness.ts`) for 100% coverage verification
+- CLI analyzer with per-file JSON output
+- Harness for 100% coverage verification
 - `/learn` Cursor skill definition
 - Sidebar with 4 tabs (Concept/Flow/History/Jump)
 - File-switch listener for auto-updating sidebar
 
 ### Phase 1: Concept Push
 - Tree-sitter AST extraction via web-tree-sitter (WASM)
-- Supports TypeScript, TSX, JavaScript, Python
-- `enrich.ts` CLI for agent to write enriched data
-- Polished Card component: kind badges, monospace names, line ranges,
-  expand chevron, structured detail with chips
+- Languages: TypeScript, TSX, JavaScript, Python
+- `enrich.ts` CLI for agent to persist enriched data
+- Fixed Python duplicate entities (@dataclass/@property decorators)
+- Polished Card UI:
+  - Kind badges (Function/Class/Interface) with VS Code-themed colors
+  - Monospace entity name, line range display
+  - Expand chevron with rotation animation
+  - Structured detail: description paragraph + metadata chips
 - File header showing filename + entity count
-- Pill-style tab bar, rich empty states
+- Pill-style tab bar
+- Rich empty states with icons
+- **Source code viewer in preview**: right panel shows source with line
+  numbers, clicking a card highlights the corresponding line range
 
 ### Testing
-- Automated test suite (`test/test.ts`) — 42 assertions
-- 3-language fixture project (scheduler.ts, engine.py, utils.js)
-- Tests: output structure, entity accuracy, schema, manifest, harness, enrich
+- 42 automated assertions in `test/test.ts`
+- 3-language fixture (scheduler.ts, engine.py, utils.js)
+- Tests: output structure, entity accuracy, schema, manifest, harness, enrich tool
 
 ### Self-Analysis
 - Ran `/learn` on vibe-reading itself: 21 files, 76 entities, 100% coverage
-- Preview available at `http://localhost:3460`
+- All entities have real concept explanations (not placeholders)
+
+## Preview
+
+```bash
+# Preview the self-analysis (vibe-reading analyzing itself)
+cd extension && node esbuild.webview.mjs && PORT=3460 npx tsx preview-server.ts /home/albert/workspace/vibe-reading
+
+# Preview the test fixture
+cd extension && npm run preview -- /path/to/project
+```
+
+Features:
+- Left panel: sidebar webview with concept cards
+- Right panel: source code with line numbers
+- Click card → highlights corresponding code lines
+- File selector (bottom-right) switches between files
+- Expand card → description + metadata chips
 
 ## Key Decisions
 
-See `prd/decisions.md` for full decision log (12 decisions).
+See `prd/decisions.md` for full log (12 decisions).
+
+## Blocked: Pi Demo
+
+Attempted to clone `github.com/earendil-works/pi` (61K stars, TypeScript
+agent toolkit). Both HTTPS and SSH to GitHub are timing out from this
+machine. Need network fix before running /learn on Pi.
 
 ## How to Run
 
 ```bash
-# Clone
-git clone git@github.com:SyntaxArchmage/vibe-reading.git
-
 # Install deps
 cd vibe-reading/extension && npm install
 cd ../extension/webview && npm install
 cd ../../cli && npm install
 
-# Run /learn on any project (manual steps)
-cd cli && npx tsx analyze.ts /path/to/project    # AST extraction
-# Then: agent reads code and calls enrich.ts per file
-cd cli && npx tsx harness.ts /path/to/project    # verify 100%
+# Full /learn pipeline
+cd cli && npx tsx analyze.ts /path/to/project
+# Agent enriches each file via: npx tsx enrich.ts <project> <file> '<json>'
+cd cli && npx tsx harness.ts /path/to/project
 
-# Run tests
-cd cli && npm test
+# Tests
+cd cli && npm test  # 42 assertions
 
-# Preview UI
+# Preview
 cd extension && npm run preview -- /path/to/project
-# Open http://localhost:3457
-
-# Build extension
-cd extension && npm run compile && npm run build:webview
 ```
 
 ## What To Do Next
 
-### Phase 2: Macro Flow
-- Implement flow extractor using LSP call hierarchy
-- Decision needed: use VS Code built-in LSP or standalone server
-- FlowTab visualization: vertical call chain diagram
+1. **Fix network** — clone earendil-works/pi and run /learn on it
+2. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
+3. **Consider**: syntax highlighting in preview source panel (Shiki or highlight.js)
