@@ -73,13 +73,56 @@
     }
     .preview-main {
       flex: 1;
-      padding: 20px;
+      overflow: auto;
+      background: var(--vscode-editor-background);
+    }
+    .code-container {
+      display: flex;
       font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
       font-size: 13px;
-      color: #888;
+      line-height: 20px;
+      min-height: 100%;
+    }
+    .line-numbers {
+      padding: 12px 8px 12px 16px;
+      text-align: right;
+      color: #555;
+      user-select: none;
+      flex-shrink: 0;
+      border-right: 1px solid #333;
+    }
+    .line-numbers div {
+      height: 20px;
+    }
+    .code-lines {
+      padding: 12px 16px;
+      flex: 1;
+      color: #ccc;
       white-space: pre;
-      overflow: auto;
-      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .code-lines div {
+      height: 20px;
+    }
+    .code-lines div.highlight {
+      background: rgba(0, 122, 204, 0.15);
+      margin: 0 -16px;
+      padding: 0 16px;
+    }
+    .code-placeholder {
+      padding: 48px 20px;
+      text-align: center;
+      color: #555;
+      font-family: var(--vscode-font-family);
+      font-size: 14px;
+    }
+    .preview-file-header {
+      padding: 6px 16px;
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      color: #888;
+      background: #2d2d2d;
+      border-bottom: 1px solid #333;
     }
   </style>
 </head>
@@ -87,7 +130,9 @@
   <div class="preview-sidebar">
     <div id="root"></div>
   </div>
-  <div class="preview-main" id="code-preview">Open a file to see code here.</div>
+  <div class="preview-main" id="code-preview">
+    <div class="code-placeholder">Select a file to view source code.</div>
+  </div>
   <div class="preview-controls">
     <label>File:</label>
     <select id="file-select"></select>
@@ -96,14 +141,16 @@
   </div>
 
   <script>
-    // Mock VS Code API
     const messageHandlers = [];
+    let currentHighlight = { startLine: 0, endLine: 0 };
+
     window.acquireVsCodeApi = function() {
       return {
         postMessage: function(msg) {
           if (msg.type === 'navigateTo') {
+            highlightLines(msg.startLine, msg.endLine || msg.startLine);
             document.getElementById('status').textContent =
-              `Navigate: ${msg.file}:L${msg.startLine}`;
+              `L${msg.startLine}–${msg.endLine || msg.startLine}`;
           }
         },
         getState: function() { return null; },
@@ -111,7 +158,6 @@
       };
     };
 
-    // Intercept addEventListener to capture the webview's message handler
     const origAddEventListener = window.addEventListener;
     window.addEventListener = function(type, handler, ...rest) {
       if (type === 'message') {
@@ -122,7 +168,7 @@
   </script>
   <script src="../out/webview.js"></script>
   <script>
-    const ANALYSIS_DATA = PREVIEW_DATA; // will be injected
+    const ANALYSIS_DATA = PREVIEW_DATA;
 
     const select = document.getElementById('file-select');
     const codePreview = document.getElementById('code-preview');
@@ -138,7 +184,71 @@
         }
       });
       window.dispatchEvent(event);
-      status.textContent = `Loaded: ${fileData.file} (${fileData.entities.length} entities)`;
+    }
+
+    function renderSource(filePath, content) {
+      const lines = content.split('\n');
+      const header = document.createElement('div');
+      header.className = 'preview-file-header';
+      header.textContent = filePath;
+
+      const container = document.createElement('div');
+      container.className = 'code-container';
+
+      const nums = document.createElement('div');
+      nums.className = 'line-numbers';
+      const code = document.createElement('div');
+      code.className = 'code-lines';
+      code.id = 'code-lines';
+
+      for (let i = 0; i < lines.length; i++) {
+        const numDiv = document.createElement('div');
+        numDiv.textContent = String(i + 1);
+        nums.appendChild(numDiv);
+
+        const lineDiv = document.createElement('div');
+        lineDiv.textContent = lines[i];
+        lineDiv.dataset.line = String(i + 1);
+        code.appendChild(lineDiv);
+      }
+
+      container.appendChild(nums);
+      container.appendChild(code);
+
+      codePreview.innerHTML = '';
+      codePreview.appendChild(header);
+      codePreview.appendChild(container);
+    }
+
+    function highlightLines(startLine, endLine) {
+      const codeLines = document.getElementById('code-lines');
+      if (!codeLines) return;
+
+      for (const div of codeLines.children) {
+        div.classList.remove('highlight');
+      }
+
+      for (let i = startLine; i <= endLine && i <= codeLines.children.length; i++) {
+        const div = codeLines.children[i - 1];
+        if (div) div.classList.add('highlight');
+      }
+
+      const target = codeLines.children[startLine - 1];
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function loadSourceFile(filePath) {
+      try {
+        const resp = await fetch(`/api/source?file=${encodeURIComponent(filePath)}`);
+        if (!resp.ok) {
+          codePreview.innerHTML = '<div class="code-placeholder">Source file not found.</div>';
+          return;
+        }
+        const data = await resp.json();
+        renderSource(data.file, data.content);
+      } catch {
+        codePreview.innerHTML = '<div class="code-placeholder">Failed to load source.</div>';
+      }
     }
 
     function loadPreviewData() {
@@ -152,17 +262,24 @@
 
       select.addEventListener('change', () => {
         const data = ANALYSIS_DATA[select.value];
-        if (data) sendFileData(data);
+        if (data) {
+          sendFileData(data);
+          loadSourceFile(data.file);
+          status.textContent = `${data.file} · ${data.entities.length} entities`;
+        }
       });
 
       document.getElementById('reload-btn').addEventListener('click', () => {
         location.reload();
       });
 
-      // Auto-select first file
       if (select.options.length > 0) {
         const first = ANALYSIS_DATA[select.options[0].value];
-        if (first) sendFileData(first);
+        if (first) {
+          sendFileData(first);
+          loadSourceFile(first.file);
+          status.textContent = `${first.file} · ${first.entities.length} entities`;
+        }
       }
     }
 

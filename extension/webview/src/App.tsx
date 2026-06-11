@@ -40,6 +40,7 @@ export function App() {
       type: "navigateTo",
       file: entity.anchor.file,
       startLine: entity.anchor.start_line,
+      endLine: entity.anchor.end_line,
       startCol: entity.anchor.start_col,
     });
   };
