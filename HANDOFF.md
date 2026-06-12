@@ -137,9 +137,22 @@ Key design decisions made in this session:
 See `prd/value-insight.md` for competitive analysis and `prd/decisions.md`
 for decisions #13-16.
 
+## Phase 1.5 Progress (2026-06-12)
+
+- [x] viewer/ extracted from extension/webview/ as standalone app
+- [x] skills renamed (learn → learn-code), teach-me skill created
+- [x] Monaco Editor integrated (CDN-loaded, syntax highlighting, decorations)
+- [x] App.tsx rewritten: React owns full layout (sidebar + Monaco + picker)
+- [x] extension/preview-server.ts removed (migrated to viewer/server.ts)
+- [ ] Playwright E2E tests
+- [ ] Schema validation in harness
+- [ ] File tree component (current search-based picker works well)
+
 ## What To Do Next
 
-1. **Phase 1.5: Viewer Foundation** — Extract viewer into standalone app,
-   add `/teach-me` skill, Playwright E2E tests, schema validation harness
-2. **Enrich remaining Pi packages** — coding-agent (404 files) and tui (59 files)
-3. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
+1. **Playwright E2E test suite** — headless browser tests for autonomous
+   UI verification (launch viewer → click cards → verify highlighting)
+2. **Schema validation harness** — enforce data contract between pipeline
+   and viewer
+3. **Enrich remaining Pi packages** — coding-agent (404 files) and tui
+4. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
