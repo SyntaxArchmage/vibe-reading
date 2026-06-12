@@ -30,10 +30,9 @@ function buildHtml(data: Record<string, unknown>): string {
     "utf-8"
   );
   const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};</script>`;
-  return template.replace(
-    '<script src="out/viewer.js"></script>',
-    `${dataScript}\n  <script src="/viewer.js"></script>`
-  );
+  return template
+    .replace("out/viewer.js", "/viewer.js")
+    .replace("<div id=\"root\"></div>", `<div id="root"></div>\n  ${dataScript}`);
 }
 
 if (!fs.existsSync(vibeDir)) {
