@@ -102,9 +102,13 @@ def test_card_click_highlights_code(page):
 
 def test_card_expand(page):
     """Clicking card header expands detail section."""
+    already_open = page.locator(".vr-card-detail").count() > 0
+    if already_open:
+        page.locator(".vr-card-header").first.click()
+        page.wait_for_timeout(400)
     card_header = page.locator(".vr-card-header").first
     card_header.click()
-    page.wait_for_timeout(300)
+    page.wait_for_timeout(400)
     detail = page.locator(".vr-card-detail")
     assert detail.count() > 0, "No detail section after expand"
 
