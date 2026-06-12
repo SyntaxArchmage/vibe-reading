@@ -212,3 +212,36 @@ Decisions made during Socratic exploration, with context and rationale.
   run Playwright, compare screenshots, repeat.
 - **Trade-offs**: Playwright is a heavy dependency. Only needed in dev,
   not in user-installed skills.
+
+## 17. Viewer Tech: Monaco + React Shell (Not a Web IDE Fork)
+
+- **Context**: What framework powers the web viewer's code display
+  and surrounding UI?
+- **Options Considered**:
+  - A: Current viewer + @monaco-editor/react (lightweight)
+  - B: Fork OpenSumi/CodeBlitz (React-based IDE framework)
+  - C: Fork Eclipse Theia (mature IDE framework)
+  - D: code-server (VS Code served over HTTP)
+- **Decision**: A — Monaco Editor as React component + custom React shell
+- **Rationale**:
+  1. Our sidebar (knowledge cards) is already React + Framer Motion.
+     With option A, cards are native DOM — no iframe, no webview bridge.
+     Playwright can directly query card elements.
+  2. We don't need IDE features (terminal, debugger, git, LSP).
+     Monaco alone provides: syntax highlighting, line numbers, minimap,
+     code folding, search, decorations — everything for a read-only
+     code viewer.
+  3. File tree and tabs are simple React components (~300 lines),
+     far less effort than learning OpenSumi DI or Theia widgets.
+  4. Dependency size: ~5MB (monaco) vs ~50MB (OpenSumi) vs ~100MB (Theia).
+  5. Card ↔ editor communication is direct JS calls (no postMessage).
+  6. Full pixel-level control over sidebar visualization — no framework
+     constraints on CSS, animations, or layout.
+- **Sidebar visualization comparison**:
+  - A: 100% custom (cards + shell, no constraints)
+  - B: 90% (cards free, shell constrained by OpenSumi theme/slots)
+  - C: 70% (cards in iframe, postMessage bridge, theme sync issues)
+- **Trade-offs**: Must build file tree and tab management ourselves.
+  Acceptable because our use case is simple (read-only viewer, not editor).
+- **Supersedes**: Decision #14's mention of "Monaco/OpenSumi components" —
+  now explicitly Monaco only, no IDE framework fork.

@@ -68,38 +68,47 @@ architecture concepts for every entity in the current file.
 ## Phase 1.5: Viewer Foundation (NEXT)
 
 **Goal**: Upgrade the preview prototype into a proper standalone web
-viewer. Add Playwright E2E testing for autonomous UI iteration.
+viewer with Monaco editor, file tree, and Playwright E2E testing.
 
 ### Tasks
 
-- [ ] Extract viewer from `extension/webview/` into `viewer/` as
+- [x] Extract viewer from `extension/webview/` into `viewer/` as
       standalone React app with its own build
-- [ ] `/teach-me` skill: starts viewer server + opens browser
-- [ ] Viewer reads `.vibe-reading/` data and serves source files
-- [ ] Syntax highlighting in viewer (Shiki or highlight.js)
+- [x] `/teach-me` skill: starts viewer server + opens browser
+- [x] Viewer reads `.vibe-reading/` data and serves source files
+- [ ] Integrate `@monaco-editor/react` for syntax highlighting, line
+      numbers, minimap, code folding, and decorations (replaces current
+      plain `<pre>` code display)
+- [ ] Monaco decorations: click card → highlight corresponding code
+      range via `editor.createDecorationsCollection()`
+- [ ] File tree component (React): renders project structure from
+      `.vibe-reading/` manifest, click to open file in Monaco
+- [ ] Tab bar component (React): multiple open files with tab switching
 - [ ] Playwright E2E test suite:
   - Launch headless browser → open viewer
   - Verify file list renders with correct count
-  - Click card → verify code line highlighting
+  - Click card → verify code line highlighting (Monaco decoration)
   - Expand card → verify description renders
   - Screenshot comparison for visual regression
 - [ ] Schema validation in harness (not just coverage — field types,
       required fields, value constraints)
-- [ ] INSTALL.md with `$SKILL_DIR` resolution instructions
+- [ ] Clean up extension/ (remove duplicated webview code)
 
 ### Verify
 
-- [ ] `/teach-me` opens browser automatically
+- [ ] `/teach-me` opens browser, Monaco shows syntax-highlighted code
+- [ ] Click card → Monaco highlights the code range
+- [ ] File tree allows navigation between files
 - [ ] Playwright tests pass headless (agent can run autonomously)
-- [ ] Visual regression screenshots baseline established
 - [ ] Harness rejects malformed JSON (schema validation)
 
 ### Files
 
-- `viewer/` — Standalone web viewer
-- `skills/teach-me/SKILL.md` — New skill
+- `viewer/src/MonacoEditor.tsx` — Monaco wrapper with decoration API
+- `viewer/src/FileTree.tsx` — Project file tree component
+- `viewer/src/TabBar.tsx` — Multi-file tab management
+- `skills/teach-me/SKILL.md` — `/teach-me` skill
 - `test/e2e/` — Playwright tests
-- `INSTALL.md`
 
 ### Depends On
 

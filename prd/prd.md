@@ -177,7 +177,7 @@ provide exact source positions.
 | Analysis — History | Git (Phase 3+) | Commit history, PR context, change frequency |
 | Analysis — AI | Agent IS the LLM | Zero external API cost — agent reads code and generates explanations |
 | Viewer | Web Viewer (standalone) | Zero-install, browser-based, Playwright-testable |
-| Viewer Tech | React + Monaco components | Code display with line numbers, syntax highlighting |
+| Viewer Tech | React + @monaco-editor/react | VS Code-grade code display, decorations, minimap |
 | UI Framework | React + Framer Motion | Card animations, expand/collapse, layout transitions |
 | Data Storage | Per-file JSON | Load only active file's data, git-committable |
 | Data Contract | CLI harness tools | Deterministic schema validation between pipeline and viewer |
