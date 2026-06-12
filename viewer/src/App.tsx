@@ -4,6 +4,7 @@ import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
+import { FileTree } from "./components/FileTree";
 import type { DataEntity, TabId } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
@@ -35,7 +36,7 @@ export function App() {
     endLine: number;
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -183,17 +184,18 @@ export function App() {
   };
 
   const filtered = entities.filter((e) => e.type === activeTab);
+  const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
 
   const tabContent = () => {
     switch (activeTab) {
       case "concept":
-        return <ConceptTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
+        return <ConceptTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
       case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
+        return <FlowTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
       case "history":
-        return <HistoryTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
+        return <HistoryTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
       case "jump":
-        return <JumpTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
+        return <JumpTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
     }
   };
 
@@ -201,6 +203,12 @@ export function App() {
     <div className="vr-layout">
       <style>{layoutStyles}</style>
       <style>{sidebarStyles}</style>
+      <style>{treeStyles}</style>
+
+      {/* File tree panel */}
+      <div className="vr-tree-panel">
+        <FileTree files={allFiles} currentFile={currentFile} onSelectFile={selectFile} />
+      </div>
 
       {/* Sidebar — knowledge cards */}
       <div className="vr-sidebar">
@@ -750,6 +758,50 @@ const sidebarStyles = `
     word-break: break-word;
   }
 
+  .vr-card-code-preview {
+    margin: 6px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1a1a1a;
+    border: 1px solid #333;
+  }
+
+  .vr-card-code {
+    margin: 0;
+    padding: 6px 0;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  .vr-card-code::-webkit-scrollbar { height: 4px; }
+  .vr-card-code::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+  .vr-card-code-line {
+    display: flex;
+    padding: 0 8px 0 0;
+    white-space: pre;
+  }
+
+  .vr-card-code-num {
+    color: #555;
+    text-align: right;
+    width: 32px;
+    padding-right: 8px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .vr-card-code-text {
+    color: #ccc;
+  }
+
+  .vr-card-code-more {
+    color: #666;
+    font-style: italic;
+  }
+
   .vr-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
 
   .vr-card-chip {
@@ -766,6 +818,166 @@ const sidebarStyles = `
     padding: 32px 20px;
     color: #8b8b8b;
     font-size: 12px;
+  }
+`;
+
+const treeStyles = `
+  .vr-tree-panel {
+    width: 220px;
+    min-width: 160px;
+    max-width: 300px;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #252526;
+    flex-shrink: 0;
+  }
+
+  .vr-tree {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .vr-tree-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8b8b8b;
+    border-bottom: 1px solid #3c3c3c;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-header-label { font-weight: 600; }
+
+  .vr-tree-header-count {
+    font-size: 10px;
+    background: #4d4d4d;
+    color: #ccc;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
+  }
+
+  .vr-tree-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .vr-tree-list::-webkit-scrollbar { width: 6px; }
+  .vr-tree-list::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+  .vr-tree-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 22px;
+  }
+
+  .vr-tree-item:hover { background: rgba(255,255,255,0.04); }
+  .vr-tree-item--active { background: rgba(0,122,204,0.15); color: #fff; }
+
+  .vr-tree-icon {
+    width: 12px;
+    font-size: 10px;
+    text-align: center;
+    color: #888;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .vr-tree-dir { color: #ccc; font-weight: 500; }
+
+  .vr-tree-count {
+    font-size: 10px;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .vr-tree-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 16px;
+  }
+
+  .vr-tree-btn:hover { color: #ccc; }
+
+  .vr-tree-filter {
+    position: relative;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-filter-input {
+    width: 100%;
+    padding: 3px 22px 3px 8px;
+    background: #3c3c3c;
+    border: 1px solid #555;
+    border-radius: 3px;
+    color: #ccc;
+    font-size: 11px;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .vr-tree-filter-input:focus { border-color: #007acc; }
+  .vr-tree-filter-input::placeholder { color: #666; }
+
+  .vr-tree-filter-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+  }
+
+  .vr-tree-filter-clear:hover { color: #ccc; }
+
+  .vr-tree-match {
+    color: #e8a838;
+    font-weight: 600;
+  }
+
+  .vr-tree-empty {
+    padding: 12px;
+    color: #666;
+    font-size: 11px;
+    font-style: italic;
+    text-align: center;
   }
 `;
 

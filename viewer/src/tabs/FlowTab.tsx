@@ -7,9 +7,10 @@ interface Props {
   onCardClick: (entity: DataEntity) => void;
   hoveredEntity?: DataEntity | null;
   onCardHover?: (entity: DataEntity | null) => void;
+  sourceLines?: string[];
 }
 
-export function FlowTab({ entities, onCardClick, hoveredEntity, onCardHover }: Props) {
+export function FlowTab({ entities, onCardClick, hoveredEntity, onCardHover, sourceLines }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No flow cards for this file.</div>;
   }
@@ -23,6 +24,7 @@ export function FlowTab({ entities, onCardClick, hoveredEntity, onCardHover }: P
           onClick={onCardClick}
           isHighlighted={hoveredEntity === e}
           onHover={onCardHover}
+          sourceLines={sourceLines}
         />
       ))}
     </AnimatePresence>

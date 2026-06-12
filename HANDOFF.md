@@ -72,16 +72,16 @@ npx tsx cli/harness.ts test/data/nano-vllm
 - Polished Card component with kind badges, expand/collapse
 - Demo: Pi agent project (663 files, 1465 entities enriched)
 
-### Phase 1.5: Viewer Foundation 🟡 (In Progress)
+### Phase 1.5: Viewer Foundation ✅
 - [x] `viewer/` extracted as standalone React app
 - [x] `skills/learn-code/` and `skills/teach-me/` skills
 - [x] Monaco Editor integrated (CDN-loaded, syntax highlighting)
-- [x] Full React layout: sidebar + Monaco + floating file picker
+- [x] 3-panel layout: file tree | cards sidebar | Monaco editor
+- [x] Bidirectional hover (code↔card with debounce + animations)
 - [x] Card click → Monaco decoration highlighting
-- [x] Playwright E2E test script (18 tests)
-- [x] Playwright browser install + 19/19 E2E tests passing
-- [x] Schema validation in harness
-- [ ] Visual regression baseline screenshots
+- [x] Ctrl+P file search picker (overlay)
+- [x] Playwright E2E test script (20 tests)
+- [x] Visual regression baselines + pixel-diff comparison script
 
 ## Architecture Decisions (2026-06-12)
 
@@ -113,12 +113,14 @@ vibe-reading/
 │   └── package.json            # Dependencies: web-tree-sitter, tsx
 ├── viewer/                     # Standalone web viewer
 │   ├── src/
-│   │   ├── App.tsx             # Full layout (sidebar + Monaco + picker)
-│   │   ├── MonacoEditor.tsx    # Monaco wrapper with decorations
+│   │   ├── App.tsx             # 3-panel layout (tree + sidebar + Monaco)
+│   │   ├── MonacoEditor.tsx    # Monaco wrapper with decorations + hover
 │   │   ├── index.tsx           # React entry point
 │   │   ├── shared-types.ts     # DataEntity type definitions
 │   │   ├── tabs/               # ConceptTab, FlowTab, HistoryTab, JumpTab
-│   │   └── components/Card.tsx # Knowledge card component
+│   │   └── components/
+│   │       ├── Card.tsx        # Knowledge card with hover interaction
+│   │       └── FileTree.tsx    # Hierarchical file tree navigator
 │   ├── index.html              # Entry HTML (Monaco from CDN)
 │   ├── server.ts               # Lightweight HTTP server (~80 lines)
 │   ├── build.mjs               # esbuild bundler config
@@ -136,8 +138,10 @@ vibe-reading/
 │   └── setup-test-data.sh      # Clone nano-vllm test data
 ├── test/
 │   ├── test.ts                 # 57 CLI pipeline tests
-│   ├── e2e/test_viewer.py      # 19 Playwright E2E tests
-│   ├── e2e/screenshots/        # Visual regression baselines
+│   ├── e2e/test_viewer.py      # 20 Playwright E2E tests
+│   ├── e2e/visual_diff.py      # Visual regression pixel-diff tool
+│   ├── e2e/baselines/          # Canonical baseline screenshots
+│   ├── e2e/screenshots/        # Current screenshots (regenerated)
 │   ├── fixture/                # Deterministic test fixture (3 files)
 │   └── data/                   # Larger test projects (gitignored)
 ├── prd/
@@ -218,5 +222,5 @@ Each file JSON:
 ## What To Do Next
 
 1. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-2. **Visual regression baseline screenshots** — diff against captured baselines
-3. **Consider**: file tree component, multi-tab support
+2. **Consider**: multi-tab / split-view support
+3. **Clean up** legacy `extension/` directory if no longer needed

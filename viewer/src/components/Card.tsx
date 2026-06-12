@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 
@@ -7,6 +7,7 @@ interface CardProps {
   onClick: (entity: DataEntity) => void;
   isHighlighted?: boolean;
   onHover?: (entity: DataEntity | null) => void;
+  sourceLines?: string[];
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -24,7 +25,7 @@ function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
-export function Card({ entity, onClick, isHighlighted, onHover }: CardProps) {
+export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: CardProps) {
   const [manualExpanded, setManualExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const kind = (entity.detail.kind as string) || "";
@@ -34,6 +35,16 @@ export function Card({ entity, onClick, isHighlighted, onHover }: CardProps) {
   const badgeColor = KIND_COLORS[kind] || "#b5cea8";
 
   const expanded = manualExpanded || !!isHighlighted;
+
+  const codePreview = useMemo(() => {
+    if (!sourceLines || sourceLines.length === 0) return null;
+    const start = entity.anchor.start_line - 1;
+    const maxPreviewLines = 4;
+    const end = Math.min(start + maxPreviewLines, entity.anchor.end_line, sourceLines.length);
+    const snippet = sourceLines.slice(start, end);
+    const hasMore = entity.anchor.end_line > end;
+    return { snippet, startLine: entity.anchor.start_line, hasMore };
+  }, [sourceLines, entity.anchor.start_line, entity.anchor.end_line]);
 
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
@@ -85,12 +96,32 @@ export function Card({ entity, onClick, isHighlighted, onHover }: CardProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.22, ease: [0.22, 0.1, 0.36, 1] }}
           >
             {typeof entity.detail.description === "string" ? (
               <p className="vr-card-desc">{entity.detail.description}</p>
             ) : (
               <pre className="vr-card-raw">{JSON.stringify(entity.detail, null, 2)}</pre>
+            )}
+            {codePreview && (
+              <div className="vr-card-code-preview">
+                <pre className="vr-card-code">
+                  {codePreview.snippet.map((line, i) => (
+                    <div key={i} className="vr-card-code-line">
+                      <span className="vr-card-code-num">{codePreview.startLine + i}</span>
+                      <span className="vr-card-code-text">{line || " "}</span>
+                    </div>
+                  ))}
+                  {codePreview.hasMore && (
+                    <div className="vr-card-code-line vr-card-code-more">
+                      <span className="vr-card-code-num">...</span>
+                      <span className="vr-card-code-text">
+                        {lines - codePreview.snippet.length} more lines
+                      </span>
+                    </div>
+                  )}
+                </pre>
+              </div>
             )}
             <div className="vr-card-chips">
               {kind && <span className="vr-card-chip">{kindLabel(kind)}</span>}

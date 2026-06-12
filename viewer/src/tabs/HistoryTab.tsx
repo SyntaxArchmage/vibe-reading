@@ -7,9 +7,10 @@ interface Props {
   onCardClick: (entity: DataEntity) => void;
   hoveredEntity?: DataEntity | null;
   onCardHover?: (entity: DataEntity | null) => void;
+  sourceLines?: string[];
 }
 
-export function HistoryTab({ entities, onCardClick, hoveredEntity, onCardHover }: Props) {
+export function HistoryTab({ entities, onCardClick, hoveredEntity, onCardHover, sourceLines }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No history cards for this file.</div>;
   }
@@ -23,6 +24,7 @@ export function HistoryTab({ entities, onCardClick, hoveredEntity, onCardHover }
           onClick={onCardClick}
           isHighlighted={hoveredEntity === e}
           onHover={onCardHover}
+          sourceLines={sourceLines}
         />
       ))}
     </AnimatePresence>
