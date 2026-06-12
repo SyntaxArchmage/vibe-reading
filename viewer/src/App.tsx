@@ -74,6 +74,7 @@ export function App() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
+  const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const treeResize = useResizable(220, 120, 400);
@@ -190,20 +191,50 @@ export function App() {
     }
   }, []);
 
+  const filtered = entities.filter((e) => e.type === activeTab);
+
+  // Reset focused card when file or tab changes
+  useEffect(() => { setFocusedCardIdx(null); }, [currentFile, activeTab]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "p") {
         e.preventDefault();
         setPickerOpen(true);
         setTimeout(() => searchRef.current?.focus(), 0);
+        return;
       }
       if (e.key === "Escape") {
-        setPickerOpen(false);
+        if (pickerOpen) setPickerOpen(false);
+        else setFocusedCardIdx(null);
+        return;
+      }
+
+      // Skip if user is typing in an input or the picker is open
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (pickerOpen || tag === "INPUT" || tag === "TEXTAREA") return;
+
+      if (e.key === "j" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setFocusedCardIdx((prev) => {
+          const max = filtered.length - 1;
+          if (max < 0) return null;
+          return prev == null ? 0 : Math.min(prev + 1, max);
+        });
+      } else if (e.key === "k" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setFocusedCardIdx((prev) => {
+          if (filtered.length === 0) return null;
+          return prev == null ? 0 : Math.max(prev - 1, 0);
+        });
+      } else if (e.key === "Enter" && focusedCardIdx != null && filtered[focusedCardIdx]) {
+        e.preventDefault();
+        onCardClick(filtered[focusedCardIdx]);
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, []);
+  }, [pickerOpen, filtered, focusedCardIdx, onCardClick]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -221,19 +252,17 @@ export function App() {
     }
   };
 
-  const filtered = entities.filter((e) => e.type === activeTab);
   const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
+  const focusedEntity = focusedCardIdx != null ? filtered[focusedCardIdx] ?? null : null;
+  const effectiveHighlight = focusedEntity ?? hoveredEntity;
 
   const tabContent = () => {
+    const props = { entities: filtered, onCardClick, hoveredEntity: effectiveHighlight, onCardHover, sourceLines };
     switch (activeTab) {
-      case "concept":
-        return <ConceptTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
-      case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
-      case "history":
-        return <HistoryTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
-      case "jump":
-        return <JumpTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} sourceLines={sourceLines} />;
+      case "concept": return <ConceptTab {...props} />;
+      case "flow": return <FlowTab {...props} />;
+      case "history": return <HistoryTab {...props} />;
+      case "jump": return <JumpTab {...props} />;
     }
   };
 
