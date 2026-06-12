@@ -6,5 +6,6 @@ node_modules/
 .vibe-reading/
 extension/out/
 extension/webview/dist/
+viewer/out/
 cli/dist/
 *.vsix

@@ -1,9 +1,9 @@
 ---
-name: learn
+name: learn-code
 description: Analyze a codebase and generate Vibe Reading concept cards. Two-phase pipeline — AST extraction (CLI) then concept enrichment (you, the agent, reading code and generating explanations).
 ---
 
-# /learn — Generate Vibe Reading Data
+# /learn-code — Generate Vibe Reading Data
 
 ## What This Does
 
@@ -76,7 +76,7 @@ Must report 100% coverage.
 Tell the user:
 - Number of files analyzed and entities enriched
 - Coverage percentage
-- How to preview: `cd <vibe-reading-repo>/extension && npm run preview -- <target-project-root>`
+- How to view: run `/teach-me` or `cd <vibe-reading-repo>/viewer && npm run dev -- <target-project-root>`
 
 ## Batch Processing
 

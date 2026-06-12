@@ -1,0 +1,22 @@
+{
+  "name": "vibe-reading-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "tsx server.ts",
+    "dev": "node build.mjs && tsx server.ts"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "motion": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}
