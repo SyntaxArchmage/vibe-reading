@@ -148,3 +148,67 @@ Decisions made during Socratic exploration, with context and rationale.
 - **Rationale**: Small controlled project (10-20 files) enables fast
   iteration and deterministic testing. vLLM is the showcase target but
   too large for rapid dev cycles.
+
+## 13. Skills-First Distribution
+
+- **Context**: How should users install and use Vibe Reading?
+- **Options Considered**:
+  - A: VS Code Extension (.vsix) — traditional extension marketplace
+  - B: Cursor Skills — agent-native, cross-IDE
+- **Decision**: B — Cursor Skills as primary distribution
+- **Rationale**: Skills are the native unit for agent workflows. Users
+  install with one command. Works with any agent environment (Cursor,
+  Claude Code, Codex, etc). `/learn-code` and `/teach-me` are natural
+  skill commands. VS Code extension locks us into one IDE.
+- **Trade-offs**: Requires agent environment. Pure VS Code users without
+  agent capabilities can't use it. Acceptable because our target user
+  already uses AI agents.
+
+## 14. Web Viewer, Not IDE
+
+- **Context**: What is the visualization layer? Previous decision (#1)
+  said "VS Code sidebar." Revisited after discovering agent cannot
+  self-test VS Code webview UI.
+- **Options Considered**:
+  - A: VS Code webview (original plan)
+  - B: Fork a Web IDE (Theia, OpenSumi) and ship as product
+  - C: Lightweight web viewer — browser opens a URL, code + cards
+- **Decision**: C — Web Viewer
+- **Rationale**: (1) Agent can self-test with Playwright (autonomous
+  E2E testing). (2) Zero-install for users — just open a URL. (3) No
+  identity conflict with user's existing IDE. (4) Shareable URLs for
+  team use. Technical implementation may use Monaco/OpenSumi components
+  internally, but user-facing positioning is "a webpage," not "an IDE."
+- **Trade-offs**: Less native than sidebar embedded in editor. User must
+  switch to browser. Mitigated by automatic browser launch from skill.
+- **Supersedes**: Decision #1 (sidebar-only) — expanded to web viewer
+  as primary, sidebar as optional future enhancement.
+
+## 15. Harness as Schema Contract
+
+- **Context**: How to ensure CLI-generated data works with the viewer?
+- **Options Considered**:
+  - A: Trust the pipeline — viewer handles malformed data gracefully
+  - B: Harness tools validate data matches viewer's expected schema
+- **Decision**: B — Deterministic schema validation in harness
+- **Rationale**: Non-deterministic LLM output must be validated
+  deterministically before reaching the viewer. Field types, required
+  fields, value constraints are all checked by harness tools. If data
+  is wrong, the pipeline fails — not the viewer. This is a data
+  contract between `/learn-code` (producer) and the web viewer (consumer).
+- **Trade-offs**: More harness code to maintain. Worth it for reliability.
+
+## 16. Playwright Autonomous Testing
+
+- **Context**: How can the agent self-test and tune the UI?
+- **Options Considered**:
+  - A: Manual testing (agent writes code, human verifies)
+  - B: Playwright E2E (agent launches headless browser, interacts, screenshots)
+- **Decision**: B — Playwright E2E
+- **Rationale**: The web viewer runs in a real browser. Playwright can
+  launch headless Chromium, navigate to localhost, click cards, verify
+  highlighting, take screenshots, and compare visual regression. This
+  enables the agent to autonomously iterate on UI polish — change CSS,
+  run Playwright, compare screenshots, repeat.
+- **Trade-offs**: Playwright is a heavy dependency. Only needed in dev,
+  not in user-installed skills.

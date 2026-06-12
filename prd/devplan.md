@@ -2,93 +2,108 @@
 
 ## Overview
 
-4 phases. Each phase delivers one complete feature pipeline:
-data generation → harness validation → VS Code sidebar tab.
+4 feature phases + 2 infrastructure phases. Each feature phase delivers
+one complete pipeline: data generation → harness validation → web viewer
+tab.
 
-A shared "Phase 0" creates the foundational infrastructure that all
-phases depend on.
+Phase 0 creates foundational infrastructure. Phase 1.5 builds the
+standalone web viewer and testing framework.
 
 ---
 
-## Phase 0: Foundation
+## Phase 0: Foundation ✅ DONE
 
-**Goal**: VS Code extension skeleton + data schema + `/learn` skill
-framework + harness tool.
+**Goal**: Data schema + `/learn-code` skill framework + CLI tools +
+harness + React sidebar prototype.
 
-### Tasks
+### Completed
 
-- [ ] Initialize VS Code extension project (TypeScript + Webview + React)
-- [ ] Define DataEntity JSON schema with LoC anchor
-- [ ] Create `.vibe-reading/` directory structure convention
-- [ ] Implement sidebar panel provider with tab skeleton (empty tabs)
-- [ ] Create `/learn` Cursor skill that orchestrates analysis pipeline
-- [ ] Implement harness tool: verify every non-ignored file has a JSON
-- [ ] Implement manifest.json generation (file list, coverage status)
-- [ ] Per-file JSON loading in extension (active file → load its JSON)
-- [ ] File-switch listener: auto-update sidebar when active editor changes
-
-### Verify
-
-- [ ] `code --install-extension vibe-reading.vsix` succeeds
-- [ ] Opening extension shows empty sidebar with 4 tab headers
-- [ ] Running `/learn` on a small test project creates `.vibe-reading/files/`
-      with one JSON per source file
-- [ ] Harness reports 100% coverage on test project
-- [ ] Switching files in editor triggers sidebar data reload (visible in
-      debug console)
+- [x] Define DataEntity JSON schema with LoC anchor
+- [x] Create `.vibe-reading/` directory structure convention
+- [x] Create `/learn-code` Cursor skill (orchestrates analysis pipeline)
+- [x] Implement harness tool: verify every non-ignored file has a JSON
+- [x] Implement manifest.json generation (file list, coverage status)
+- [x] React sidebar app with 4 tab skeleton
+- [x] File-switch listener for auto-updating sidebar
+- [x] 42 automated assertions in test suite
 
 ### Files
 
-- `extension/` — VS Code extension scaffolding
-- `extension/webview/` — React sidebar app
 - `cli/analyze.ts` — Analysis orchestrator
+- `cli/enrich.ts` — Agent writes enriched data
 - `cli/harness.ts` — Coverage verification tool
 - `skills/learn/SKILL.md` — Cursor skill definition
-
-### Depends On
-
-None (first phase)
+- `viewer/` — React web viewer prototype
 
 ---
 
-## Phase 1: Concept Push
+## Phase 1: Concept Push ✅ DONE
 
-**Goal**: When reading code, sidebar Concept tab shows knowledge cards
-explaining design patterns, algorithms, and architecture concepts found
-in the current file.
+**Goal**: Concept cards showing design patterns, algorithms, and
+architecture concepts for every entity in the current file.
 
-### Tasks
+### Completed
 
-- [ ] Implement concept extractor: AST + LLM pipeline
-  - Tree-sitter extracts function/class/pattern nodes with LoC
-  - LLM generates concept explanation for each node
-  - Output: DataEntity with type "concept"
-- [ ] Integrate concept extractor into `/learn` pipeline
-- [ ] Implement ConceptTab.tsx: render concept cards sorted by code position
-- [ ] Card component: summary (collapsed) + detail (expanded on click)
-- [ ] Anchor highlighting: clicking a card highlights the corresponding
-      code range in the editor
-- [ ] Visual polish: card animations, transitions, typography
-- [ ] Harness: verify concept data exists for every analyzed file
-
-### Verify
-
-- [ ] Run `/learn` on vLLM or similar project → concept data generated
-- [ ] Open a file → Concept tab shows relevant cards
-- [ ] Click card → corresponding code range highlighted in editor
-- [ ] Card expand/collapse animation is smooth (60fps)
-- [ ] Harness reports all files have concept data
+- [x] Tree-sitter AST extraction (web-tree-sitter WASM)
+- [x] Languages: TypeScript, TSX, JavaScript, Python
+- [x] Agent enrichment pipeline (agent IS the LLM)
+- [x] `enrich.ts` CLI for agent to persist enriched data
+- [x] `auto-enrich.ts` for batch enrichment from JSDoc
+- [x] ConceptTab with polished Card component
+- [x] Kind badges, monospace names, expand/collapse animation
+- [x] Source code viewer with line highlighting
+- [x] Searchable file picker (Ctrl+P, arrow keys)
+- [x] Harness: 100% coverage verification
+- [x] Demo: Pi agent (663 files, 1465 entities enriched)
 
 ### Files
 
 - `cli/extractors/concept.ts`
-- `extension/webview/tabs/ConceptTab.tsx`
-- `extension/webview/components/Card.tsx`
-- `extension/src/decorations.ts`
+- `viewer/src/tabs/ConceptTab.tsx`
+- `viewer/src/components/Card.tsx`
+- `viewer/preview.html` + `viewer/server.ts`
+
+---
+
+## Phase 1.5: Viewer Foundation (NEXT)
+
+**Goal**: Upgrade the preview prototype into a proper standalone web
+viewer. Add Playwright E2E testing for autonomous UI iteration.
+
+### Tasks
+
+- [ ] Extract viewer from `extension/webview/` into `viewer/` as
+      standalone React app with its own build
+- [ ] `/teach-me` skill: starts viewer server + opens browser
+- [ ] Viewer reads `.vibe-reading/` data and serves source files
+- [ ] Syntax highlighting in viewer (Shiki or highlight.js)
+- [ ] Playwright E2E test suite:
+  - Launch headless browser → open viewer
+  - Verify file list renders with correct count
+  - Click card → verify code line highlighting
+  - Expand card → verify description renders
+  - Screenshot comparison for visual regression
+- [ ] Schema validation in harness (not just coverage — field types,
+      required fields, value constraints)
+- [ ] INSTALL.md with `$SKILL_DIR` resolution instructions
+
+### Verify
+
+- [ ] `/teach-me` opens browser automatically
+- [ ] Playwright tests pass headless (agent can run autonomously)
+- [ ] Visual regression screenshots baseline established
+- [ ] Harness rejects malformed JSON (schema validation)
+
+### Files
+
+- `viewer/` — Standalone web viewer
+- `skills/teach-me/SKILL.md` — New skill
+- `test/e2e/` — Playwright tests
+- `INSTALL.md`
 
 ### Depends On
 
-Phase 0
+Phase 1
 
 ---
 
@@ -106,32 +121,32 @@ architectural layer.
   - LLM: architectural layer assignment + data flow description
   - Output: DataEntity with type "flow"
 - [ ] Global call-graph.json: cross-file call relationships
-- [ ] Integrate flow extractor into `/learn` pipeline
-- [ ] Implement FlowTab.tsx: vertical call chain visualization
+- [ ] Integrate flow extractor into `/learn-code` pipeline
+- [ ] Implement FlowTab in web viewer: vertical call chain visualization
   - Current function in center
   - Callers above, callees below
-  - Click to navigate to caller/callee location
+  - Click to navigate to caller/callee file + highlight
 - [ ] Visual polish: animated flow diagram, layer color coding
-- [ ] Harness: verify flow data exists for every analyzed file
+- [ ] Harness: verify flow data schema + coverage
+- [ ] Playwright E2E: test flow card interactions
 
 ### Verify
 
-- [ ] Run `/learn` → flow data + call-graph.json generated
+- [ ] Run `/learn-code` → flow data + call-graph.json generated
 - [ ] Open a function → Flow tab shows callers and callees
-- [ ] Click caller → editor navigates to caller's location
-- [ ] Call chain visualization renders correctly for functions with 5+
-      callers/callees
+- [ ] Click caller → code viewer navigates to caller's file + line
+- [ ] Playwright visual regression passes
 - [ ] Harness reports all files have flow data
 
 ### Files
 
 - `cli/extractors/flow.ts`
-- `extension/webview/tabs/FlowTab.tsx`
+- `viewer/src/tabs/FlowTab.tsx`
 - `.vibe-reading/global/call-graph.json`
 
 ### Depends On
 
-Phase 1 (card component reuse, pipeline infrastructure)
+Phase 1.5 (viewer foundation, Playwright infrastructure)
 
 ---
 
@@ -148,26 +163,27 @@ frequency, recent PRs, design decisions.
   - PR description extraction (if available via GitHub API or local)
   - LLM: summarize evolution narrative
   - Output: DataEntity with type "history"
-- [ ] Integrate history extractor into `/learn` pipeline
-- [ ] Implement HistoryTab.tsx:
+- [ ] Integrate history extractor into `/learn-code` pipeline
+- [ ] Implement HistoryTab in web viewer:
   - Timeline view: major changes over time
   - Hot spots: highlight frequently-changed code regions
   - Change summary cards
 - [ ] Visual polish: timeline animations, heat map overlay
-- [ ] Harness: verify history data exists for files with git history
+- [ ] Harness: verify history data schema + coverage
+- [ ] Playwright E2E: test timeline interactions
 
 ### Verify
 
-- [ ] Run `/learn` → history data generated for files with commits
+- [ ] Run `/learn-code` → history data generated for files with commits
 - [ ] Open a file → History tab shows change timeline
 - [ ] Hot spots are visually marked
-- [ ] Timeline shows meaningful PR/commit summaries (not just hashes)
+- [ ] Playwright visual regression passes
 - [ ] Harness reports coverage (new files without history get empty cards)
 
 ### Files
 
 - `cli/extractors/history.ts`
-- `extension/webview/tabs/HistoryTab.tsx`
+- `viewer/src/tabs/HistoryTab.tsx`
 
 ### Depends On
 
@@ -186,28 +202,27 @@ want to read this next" based on the code you're currently viewing.
   - LSP: go-to-definition targets, type definition locations
   - LLM: semantic relationship inference
   - Output: DataEntity with type "jump"
-- [ ] Integrate jump extractor into `/learn` pipeline
-- [ ] Implement JumpTab.tsx:
+- [ ] Integrate jump extractor into `/learn-code` pipeline
+- [ ] Implement JumpTab in web viewer:
   - Navigation suggestion cards with reasoning
-  - One-click jump to suggested location
+  - One-click jump to suggested file + line
   - Breadcrumb trail of previously visited locations
-- [ ] Inline ghost text hints (optional editor decorations)
 - [ ] Visual polish: smooth scroll animation on jump
-- [ ] Harness: verify jump data exists for analyzed files
+- [ ] Harness: verify jump data schema + coverage
+- [ ] Playwright E2E: test jump navigation
 
 ### Verify
 
-- [ ] Run `/learn` → jump data generated
+- [ ] Run `/learn-code` → jump data generated
 - [ ] Open a file → Jump tab shows relevant suggestions
-- [ ] Click suggestion → editor navigates to target with smooth scroll
-- [ ] Suggestions are contextually relevant (not random)
+- [ ] Click suggestion → code viewer navigates to target file + line
+- [ ] Playwright visual regression passes
 - [ ] Breadcrumb trail tracks navigation history
 
 ### Files
 
 - `cli/extractors/jump.ts`
-- `extension/webview/tabs/JumpTab.tsx`
-- `extension/src/decorations.ts` (ghost text)
+- `viewer/src/tabs/JumpTab.tsx`
 
 ### Depends On
 
@@ -217,10 +232,11 @@ Phase 3
 
 ## Phase Summary
 
-| Phase | Name | Goal | Verify Count |
-|-------|------|------|-------------|
-| 0 | Foundation | Extension + schema + /learn + harness | 5 checks |
-| 1 | Concept Push | Concept cards in sidebar | 5 checks |
-| 2 | Macro Flow | Call chain visualization | 5 checks |
-| 3 | Evolve Map | Git evolution timeline | 5 checks |
-| 4 | Vibe Jump | Semantic navigation suggestions | 5 checks |
+| Phase | Name | Status | Goal |
+|-------|------|--------|------|
+| 0 | Foundation | ✅ Done | Schema + /learn-code + harness + CLI |
+| 1 | Concept Push | ✅ Done | Concept cards in web viewer |
+| 1.5 | Viewer Foundation | Next | Standalone viewer + Playwright + /teach-me |
+| 2 | Macro Flow | Pending | Call chain visualization |
+| 3 | Evolve Map | Pending | Git evolution timeline |
+| 4 | Vibe Jump | Pending | Semantic navigation suggestions |

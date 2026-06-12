@@ -1,6 +1,6 @@
 # Vibe Reading — Handoff Document
 
-Session: 2026-06-08 → 2026-06-11
+Session: 2026-06-08 → 2026-06-12
 Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
 ## Current Status
@@ -123,8 +123,23 @@ cd cli && npm test  # 42 assertions
 cd extension && npm run preview -- /path/to/project
 ```
 
+## Architecture Pivot (2026-06-12)
+
+Key design decisions made in this session:
+
+1. **Skills-first distribution** — Users install Cursor Skills, not VS Code Extension
+2. **Web Viewer, not IDE** — Visualization is a browser-based web viewer (zero-install)
+3. **Positioning**: "UA is maps (bird's eye). We are GPS (turn-by-turn in code)."
+4. **Agent IS the LLM** — Zero external API cost for concept generation
+5. **Harness as schema contract** — Deterministic validation between pipeline and viewer
+6. **Playwright E2E** — Agent can autonomously test and tune UI
+
+See `prd/value-insight.md` for competitive analysis and `prd/decisions.md`
+for decisions #13-16.
+
 ## What To Do Next
 
-1. **Enrich remaining Pi packages** — coding-agent (404 files) and tui (59 files)
-2. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-3. **Consider**: syntax highlighting in preview source panel (Shiki or highlight.js)
+1. **Phase 1.5: Viewer Foundation** — Extract viewer into standalone app,
+   add `/teach-me` skill, Playwright E2E tests, schema validation harness
+2. **Enrich remaining Pi packages** — coding-agent (404 files) and tui (59 files)
+3. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab

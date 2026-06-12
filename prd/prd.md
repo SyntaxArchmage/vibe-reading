@@ -82,35 +82,39 @@ file count. A manifest file records coverage status.
 
 ### Modality
 
-VS Code Extension — sidebar panel (Webview) + inline decorations.
+**Skills + Web Viewer.** Users install Cursor Skills and view results
+in a browser. No IDE extension required.
 
 ### Core Flow
 
-1. Install tool (skills + VS Code extension)
-2. Open project in VS Code
-3. Run `/learn` in Cursor/agent — agent invokes analysis pipeline
-4. Wait for data ready (progress indicator in sidebar)
-5. Toggle sidebar panel → knowledge cards appear for active file
-6. Switch tabs to focus on different information types
-7. Click card to expand details
-8. Navigate to next file — sidebar auto-updates
+1. Install skills (one command: copy to `~/.cursor/skills/vibe-reading/`)
+2. Open project in any agent environment (Cursor, Claude Code, etc.)
+3. Run `/learn-code` — agent analyzes project, generates `.vibe-reading/` data
+4. Run `/teach-me` — agent starts local web server, browser opens automatically
+5. User reads code in web viewer with knowledge cards alongside
+6. Switch files via searchable file picker
+7. Click card → corresponding code lines highlighted
+8. Click card to expand → description, metadata, architecture role
+9. Close browser tab when done — nothing to uninstall
 
-### Sidebar Organization
+### Web Viewer Layout
 
-- **Tab-based layout**: One tab per information type
+- **Left panel**: Knowledge cards sidebar with tab-based filtering
   - Concept — design patterns, algorithms, architecture concepts
   - Flow — call chain, data flow, system position
   - History — git evolution, PR reasons, change frequency
   - Jump — semantic navigation suggestions
+- **Right panel**: Source code with line numbers and syntax highlighting
+- **File picker**: Searchable, sorted by entity count, Ctrl+P quick-open
 - **Within each tab**: Cards ordered by code position (top to bottom)
 - **Each card**: Anchored to a code location (LoC), shows summary,
-  click to expand detail
+  click to expand detail, click to highlight corresponding code
 
 ### Error Handling
 
-- No data yet → sidebar shows "Run /learn to analyze this project"
-- Analysis in progress → progress bar
-- File not in analysis scope (ignored) → sidebar shows nothing
+- No data yet → viewer shows "Run /learn-code to analyze this project"
+- File has no entities → viewer shows empty state with guidance
+- Source file missing → code panel shows "Source file not found"
 
 ## 5. Data Model
 
@@ -167,92 +171,136 @@ provide exact source positions.
 
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
-| Analysis — AST | Tree-sitter | Fast, multi-language, deterministic |
-| Analysis — Semantic | LSP | Type info, cross-file refs, call hierarchy — compiler-grade accuracy |
-| Analysis — History | Git | Commit history, PR context, change frequency |
-| Analysis — AI | LLM (via agent) | Concept explanation, pattern recognition, intent inference |
-| Frontend | VS Code Extension (Webview) | Embedded in editor, access to LSP, native performance |
-| UI Framework | React + TypeScript (in Webview) | Mature ecosystem, animation libraries |
-| Data Storage | Local JSON files | Simple, per-file granularity, git-committable |
-| Trigger | Cursor Skill (`/learn`) | Agent-driven, can orchestrate all analysis tools |
+| Distribution | Cursor Skills | Agent-native, cross-IDE, zero-install for users |
+| Analysis — AST | Tree-sitter (WASM) | Fast, multi-language, deterministic |
+| Analysis — Semantic | LSP (Phase 2+) | Type info, cross-file refs, call hierarchy |
+| Analysis — History | Git (Phase 3+) | Commit history, PR context, change frequency |
+| Analysis — AI | Agent IS the LLM | Zero external API cost — agent reads code and generates explanations |
+| Viewer | Web Viewer (standalone) | Zero-install, browser-based, Playwright-testable |
+| Viewer Tech | React + Monaco components | Code display with line numbers, syntax highlighting |
+| UI Framework | React + Framer Motion | Card animations, expand/collapse, layout transitions |
+| Data Storage | Per-file JSON | Load only active file's data, git-committable |
+| Data Contract | CLI harness tools | Deterministic schema validation between pipeline and viewer |
+| Testing | Playwright E2E | Agent can autonomously test and tune UI |
 
 ### Key Architectural Decisions
 
-1. **LSP over Tree-sitter-only**: Tree-sitter provides syntax structure.
-   LSP provides semantic information (type resolution, cross-file refs,
-   call hierarchy). This is our competitive advantage over UA.
+1. **Skills-first, not extension-first**: Users install Cursor Skills,
+   not a VS Code extension. Skills work with any agent environment.
+   See Decision #13.
 
-2. **Per-file JSON over monolith graph**: UA uses one large
+2. **Web Viewer, not IDE**: Visualization is a browser-based web viewer,
+   not an IDE. Zero-install, shareable URLs, cross-platform. Agent can
+   self-test with Playwright. See Decision #14.
+
+3. **Agent IS the LLM**: No external API calls for concept generation.
+   The agent running `/learn-code` reads the code itself and generates
+   explanations. Zero additional token cost vs UA's multi-agent pipeline.
+
+4. **Per-file JSON over monolith graph**: UA uses one large
    knowledge-graph.json. We split by file for:
    - Better load performance (load only active file's data)
    - Simpler incremental updates
    - Natural alignment with "source code as primary" philosophy
 
-3. **Agent-triggered analysis over auto-run**: `/learn` is explicitly
-   invoked because it uses LLM agent capabilities. The VS Code extension
-   only reads data, never triggers analysis.
+5. **Harness as schema contract**: CLI harness tools validate that
+   generated JSON matches the viewer's expected schema. Data contract
+   is enforced deterministically. See Decision #15.
 
-### Module Structure
+6. **LSP deferred to Phase 2**: Phase 1 uses Tree-sitter + agent LLM.
+   LSP call hierarchy is needed in Phase 2 (Macro Flow). See Decision #10.
+
+### Module Structure (Development Repo)
 
 ```
 vibe-reading/
-├── skills/                     # Cursor skills for /learn
-│   └── learn/
-│       └── SKILL.md
-├── cli/                        # CLI tools for analysis pipeline
-│   ├── analyze.ts              # Main analysis orchestrator
-│   ├── extractors/             # Data extractors by type
-│   │   ├── concept.ts          # LLM-based concept extraction
-│   │   ├── flow.ts             # LSP + Tree-sitter call analysis
-│   │   ├── history.ts          # Git history analysis
-│   │   └── jump.ts             # Semantic jump suggestions
-│   └── harness.ts              # Coverage verification
-├── extension/                  # VS Code extension
+├── skills/                     # Cursor skills
+│   ├── learn-code/
+│   │   └── SKILL.md            # /learn-code entry point
+│   └── teach-me/
+│       └── SKILL.md            # /teach-me entry point
+├── cli/                        # CLI tools (harness + analysis)
+│   ├── analyze.ts              # AST extraction orchestrator
+│   ├── enrich.ts               # Agent writes enriched data
+│   ├── harness.ts              # Coverage + schema verification
+│   ├── auto-enrich.ts          # Batch enrichment from JSDoc
+│   └── extractors/
+│       ├── concept.ts          # Tree-sitter AST extraction
+│       ├── flow.ts             # LSP call analysis (Phase 2)
+│       ├── history.ts          # Git history (Phase 3)
+│       └── jump.ts             # Semantic jump (Phase 4)
+├── viewer/                     # Web Viewer (standalone web app)
 │   ├── src/
-│   │   ├── extension.ts        # Extension entry point
-│   │   ├── sidebar.ts          # Sidebar panel provider
-│   │   └── decorations.ts      # Inline code decorations
-│   └── webview/                # React app for sidebar
-│       ├── App.tsx
-│       ├── tabs/
-│       │   ├── ConceptTab.tsx
-│       │   ├── FlowTab.tsx
-│       │   ├── HistoryTab.tsx
-│       │   └── JumpTab.tsx
-│       └── components/
-│           └── Card.tsx
-└── prd/                        # This directory
+│   │   ├── App.tsx             # Main React app
+│   │   ├── tabs/               # Tab components
+│   │   └── components/         # Card, code viewer, file picker
+│   ├── server.ts               # Local web server
+│   └── preview.html            # Standalone preview page
+├── test/                       # Automated tests
+│   ├── test.ts                 # CLI pipeline tests
+│   └── fixture/                # Test fixtures
+└── prd/                        # Product docs
+    ├── prd.md
+    ├── devplan.md
+    ├── decisions.md
+    └── value-insight.md
+```
+
+### Installed Layout (User's Machine)
+
+```
+~/.cursor/skills/vibe-reading/
+├── learn-code/SKILL.md         # /learn-code skill
+├── teach-me/SKILL.md           # /teach-me skill
+├── cli/                        # Analysis tools
+│   ├── analyze.ts
+│   ├── enrich.ts
+│   └── harness.ts
+├── bin/                        # Pre-built viewer binary/bundle
+│   └── serve                   # Lightweight web server
+└── INSTALL.md                  # Setup guide (handles $SKILL_DIR)
 ```
 
 ## 7. Scope Boundary
 
 ### In Scope (V1 — 4 phases, one feature pipeline per phase)
 
-- **Phase 1**: Concept Push — concept data generation + harness + sidebar tab
+- **Phase 1**: Concept Push — concept data generation + harness + web viewer
 - **Phase 2**: Macro Flow — call chain data from LSP/Tree-sitter + Flow tab
 - **Phase 3**: Evolve Map — git history analysis + History tab
 - **Phase 4**: Vibe Jump — semantic navigation + Jump tab
 
 Each phase delivers a complete pipeline: data generation → harness
-validation → VS Code visualization.
+validation → web viewer visualization.
+
+### Also In Scope
+
+- **Web Viewer**: Standalone browser-based code viewer with knowledge
+  cards. This IS the visualization layer (replaces previous VS Code-only scope).
+- **Cross-IDE via Skills**: Works with any agent environment that
+  supports skills — Cursor, Claude Code, Codex, etc.
+- **Playwright E2E testing**: Agent can autonomously test and tune UI.
+- **Searchable file picker**: For large projects (600+ files).
 
 ### Out of Scope
 
-- **Independent web dashboard**: Not building a standalone web page.
-  All visualization in VS Code.
-- **Real-time analysis**: All analysis is offline via `/learn`. No
+- **Real-time analysis**: All analysis is offline via `/learn-code`. No
   real-time LLM calls during reading.
-- **Multi-IDE support**: VS Code only in V1. No JetBrains, Neovim, etc.
 - **Team collaboration features**: Single-user tool in V1.
-- **Auto-trigger analysis**: User must explicitly run `/learn`.
+- **Auto-trigger analysis**: User must explicitly run `/learn-code`.
+- **Hosted cloud mode**: V2+ feature. V1 is local-only.
+- **VS Code sidebar extension**: Deferred. Web viewer is the primary
+  visualization. Sidebar can be added later as optional enhancement.
 
 ### Future Considerations (V2+)
 
+- **Hosted mode**: Upload `.vibe-reading/` → shareable URL for team use
 - Dual-direction anchor lines (animated connections between code and cards)
-- Incremental `/learn` (only re-analyze changed files)
+- Incremental `/learn-code` (only re-analyze changed files)
 - Custom card types (user-defined information extractors)
-- Multi-IDE support via LSP protocol
-- Auto-update on git commit (like UA's `--auto-update`)
+- VS Code sidebar extension (optional, for users who prefer in-editor)
+- Syntax highlighting in viewer (Shiki or highlight.js)
+- Auto-update on git commit
 
 ## 8. Non-Functional Requirements
 
