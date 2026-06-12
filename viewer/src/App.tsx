@@ -25,6 +25,41 @@ interface FileInfo {
   count: number;
 }
 
+function useResizable(initialWidth: number, min: number, max: number) {
+  const [width, setWidth] = useState(initialWidth);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startW = useRef(0);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startW.current = width;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = ev.clientX - startX.current;
+      setWidth(Math.max(min, Math.min(max, startW.current + delta)));
+    };
+
+    const onUp = () => {
+      dragging.current = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [width, min, max]);
+
+  return { width, onMouseDown };
+}
+
 export function App() {
   const [activeTab, setActiveTab] = useState<TabId>("concept");
   const [entities, setEntities] = useState<DataEntity[]>([]);
@@ -40,6 +75,9 @@ export function App() {
   const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  const treeResize = useResizable(220, 120, 400);
+  const sidebarResize = useResizable(340, 240, 600);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
     .map(([key, data]) => ({
@@ -206,12 +244,13 @@ export function App() {
       <style>{treeStyles}</style>
 
       {/* File tree panel */}
-      <div className="vr-tree-panel">
+      <div className="vr-tree-panel" style={{ width: treeResize.width }}>
         <FileTree files={allFiles} currentFile={currentFile} onSelectFile={selectFile} />
       </div>
+      <div className="vr-resize-handle" onMouseDown={treeResize.onMouseDown} />
 
       {/* Sidebar — knowledge cards */}
-      <div className="vr-sidebar">
+      <div className="vr-sidebar" style={{ width: sidebarResize.width }}>
         {!currentFile && (
           <div className="vr-empty">
             <div className="vr-empty-icon">&#x1F4D6;</div>
@@ -256,6 +295,7 @@ export function App() {
           </>
         )}
       </div>
+      <div className="vr-resize-handle" onMouseDown={sidebarResize.onMouseDown} />
 
       {/* Main area — Monaco editor */}
       <div className="vr-main">
@@ -348,10 +388,23 @@ const layoutStyles = `
     color: #ccc;
   }
 
+  .vr-resize-handle {
+    width: 4px;
+    cursor: col-resize;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 5;
+    transition: background 0.15s;
+  }
+
+  .vr-resize-handle:hover,
+  .vr-resize-handle:active {
+    background: #007acc;
+  }
+
   .vr-sidebar {
-    width: 340px;
-    min-width: 280px;
-    max-width: 420px;
+    flex-shrink: 0;
     border-right: 1px solid #3c3c3c;
     display: flex;
     flex-direction: column;
@@ -823,15 +876,11 @@ const sidebarStyles = `
 
 const treeStyles = `
   .vr-tree-panel {
-    width: 220px;
-    min-width: 160px;
-    max-width: 300px;
-    border-right: 1px solid #3c3c3c;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: #252526;
-    flex-shrink: 0;
   }
 
   .vr-tree {
