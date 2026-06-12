@@ -46,6 +46,7 @@
       font-size: 12px;
       color: var(--vscode-foreground);
       box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      width: 360px;
     }
     .preview-controls label {
       font-size: 10px;
@@ -70,6 +71,60 @@
     }
     .preview-controls button:hover {
       background: #333;
+    }
+    .file-search {
+      margin: 4px 0;
+      padding: 5px 8px;
+      background: #1e1e1e;
+      color: #ccc;
+      border: 1px solid #555;
+      border-radius: 4px;
+      display: block;
+      width: 100%;
+      font-size: 12px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .file-search:focus {
+      outline: 1px solid var(--vscode-focusBorder);
+      border-color: var(--vscode-focusBorder);
+    }
+    .file-search::placeholder {
+      color: #666;
+    }
+    .file-list-wrap {
+      max-height: 240px;
+      overflow-y: auto;
+      margin: 4px 0;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #1e1e1e;
+    }
+    .file-list-wrap::-webkit-scrollbar {
+      width: 6px;
+    }
+    .file-list-wrap::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 3px;
+    }
+    .file-item {
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #bbb;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .file-item:hover { background: #333; }
+    .file-item.active { background: rgba(0,122,204,0.2); color: #fff; }
+    .file-item-count {
+      flex-shrink: 0;
+      color: #666;
+      font-size: 10px;
     }
     .preview-main {
       flex: 1;
@@ -135,9 +190,12 @@
   </div>
   <div class="preview-controls">
     <label>File:</label>
-    <select id="file-select"></select>
-    <button id="reload-btn">Reload Data</button>
-    <div id="status" style="margin-top:8px; color:#888;">Ready</div>
+    <input type="text" class="file-search" id="file-search" placeholder="Search files... (e.g. agent, provider)" autocomplete="off" />
+    <div class="file-list-wrap" id="file-list"></div>
+    <div style="display:flex; gap:6px; margin-top:4px;">
+      <button id="reload-btn" style="flex:1;">Reload</button>
+      <div id="status" style="flex:2; font-size:11px; color:#888; display:flex; align-items:center;">Ready</div>
+    </div>
   </div>
 
   <script>
@@ -170,9 +228,16 @@
   <script>
     const ANALYSIS_DATA = PREVIEW_DATA;
 
-    const select = document.getElementById('file-select');
+    const searchInput = document.getElementById('file-search');
+    const fileList = document.getElementById('file-list');
     const codePreview = document.getElementById('code-preview');
     const status = document.getElementById('status');
+
+    const allFiles = Object.entries(ANALYSIS_DATA)
+      .map(([key, data]) => ({ key, file: data.file, count: data.entities.length }))
+      .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
+
+    let activeKey = null;
 
     function sendFileData(fileData) {
       const event = new MessageEvent('message', {
@@ -251,39 +316,83 @@
       }
     }
 
-    function loadPreviewData() {
-      select.innerHTML = '';
-      for (const [name, data] of Object.entries(ANALYSIS_DATA)) {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = `${data.file} (${data.entities.length})`;
-        select.appendChild(opt);
+    function selectFile(key) {
+      activeKey = key;
+      const data = ANALYSIS_DATA[key];
+      if (!data) return;
+      sendFileData(data);
+      loadSourceFile(data.file);
+      status.textContent = `${data.entities.length} entities`;
+      renderFileList(searchInput.value);
+    }
+
+    function renderFileList(query) {
+      const q = query.toLowerCase().trim();
+      const filtered = q
+        ? allFiles.filter(f => f.file.toLowerCase().includes(q))
+        : allFiles;
+
+      const visible = filtered.slice(0, 80);
+      const remaining = filtered.length - visible.length;
+
+      fileList.innerHTML = '';
+      for (const f of visible) {
+        const div = document.createElement('div');
+        div.className = 'file-item' + (f.key === activeKey ? ' active' : '');
+        const pathSpan = document.createElement('span');
+        pathSpan.textContent = f.file;
+        pathSpan.style.overflow = 'hidden';
+        pathSpan.style.textOverflow = 'ellipsis';
+        const countSpan = document.createElement('span');
+        countSpan.className = 'file-item-count';
+        countSpan.textContent = f.count > 0 ? String(f.count) : '';
+        div.appendChild(pathSpan);
+        div.appendChild(countSpan);
+        div.addEventListener('click', () => selectFile(f.key));
+        fileList.appendChild(div);
       }
-
-      select.addEventListener('change', () => {
-        const data = ANALYSIS_DATA[select.value];
-        if (data) {
-          sendFileData(data);
-          loadSourceFile(data.file);
-          status.textContent = `${data.file} · ${data.entities.length} entities`;
-        }
-      });
-
-      document.getElementById('reload-btn').addEventListener('click', () => {
-        location.reload();
-      });
-
-      if (select.options.length > 0) {
-        const first = ANALYSIS_DATA[select.options[0].value];
-        if (first) {
-          sendFileData(first);
-          loadSourceFile(first.file);
-          status.textContent = `${first.file} · ${first.entities.length} entities`;
-        }
+      if (remaining > 0) {
+        const more = document.createElement('div');
+        more.className = 'file-item';
+        more.style.color = '#666';
+        more.style.fontStyle = 'italic';
+        more.textContent = `... ${remaining} more (type to filter)`;
+        fileList.appendChild(more);
       }
     }
 
-    loadPreviewData();
+    searchInput.addEventListener('input', () => renderFileList(searchInput.value));
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const q = searchInput.value.toLowerCase().trim();
+        const filtered = q
+          ? allFiles.filter(f => f.file.toLowerCase().includes(q))
+          : allFiles;
+        const visible = filtered.slice(0, 80);
+        const idx = visible.findIndex(f => f.key === activeKey);
+        const next = e.key === 'ArrowDown'
+          ? Math.min(idx + 1, visible.length - 1)
+          : Math.max(idx - 1, 0);
+        if (visible[next]) selectFile(visible[next].key);
+      } else if (e.key === 'Escape') {
+        searchInput.blur();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    });
+
+    document.getElementById('reload-btn').addEventListener('click', () => location.reload());
+
+    renderFileList('');
+    if (allFiles.length > 0) {
+      selectFile(allFiles[0].key);
+    }
   </script>
 </body>
 </html>

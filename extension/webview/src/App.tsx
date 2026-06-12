@@ -84,8 +84,8 @@ export function App() {
         <>
           <div className="vr-file-header">
             <span className="vr-file-icon">&#x1F4C4;</span>
-            <span className="vr-file-name">{currentFile.split("/").pop()}</span>
-            <span className="vr-file-count">{entities.length} entities</span>
+            <span className="vr-file-path" title={currentFile}>{currentFile}</span>
+            <span className="vr-file-count">{entities.length}</span>
           </div>
           <nav className="vr-tabs">
             {TABS.map((tab) => {
@@ -168,15 +168,28 @@ const styles = `
     opacity: 0.7;
   }
 
-  .vr-file-name {
+  .vr-file-path {
     color: var(--vscode-foreground);
     font-weight: 500;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
+    min-width: 0;
+    flex: 1;
   }
 
   .vr-file-count {
-    margin-left: auto;
-    font-size: 11px;
-    opacity: 0.6;
+    flex-shrink: 0;
+    font-size: 10px;
+    opacity: 0.5;
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
   }
 
   .vr-tabs {
