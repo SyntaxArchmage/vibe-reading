@@ -1,6 +1,8 @@
 /**
- * Auto-generate concept enrichments from source code + JSDoc comments.
- * Usage: npx tsx auto-enrich.ts <project-root> [--prefix packages__agent__|packages__ai__]
+ * Auto-generate concept enrichments from source code structure.
+ * Produces Tier 1 descriptions using heuristics — no LLM required.
+ *
+ * Usage: npx tsx auto-enrich.ts <project-root>
  */
 import * as fs from "fs";
 import * as path from "path";
@@ -8,36 +10,33 @@ import type { FileAnalysis } from "./types.js";
 
 interface Enrichment {
   name: string;
+  start_line: number;
   summary: string;
   description: string;
 }
 
 function truncate(s: string, max: number): string {
   const t = s.replace(/\s+/g, " ").trim();
-  if (t.length <= max) return t;
-  return t.slice(0, max - 3) + "...";
+  return t.length <= max ? t : t.slice(0, max - 3) + "...";
 }
 
+// Extract JSDoc (/** ... */) or line comments (// ...) above a definition
 function extractJSDoc(lines: string[], startLine: number): string | undefined {
-  let i = startLine - 2; // 0-indexed, line before entity
+  let i = startLine - 2;
   const docLines: string[] = [];
   while (i >= 0) {
     const line = lines[i].trim();
-    if (line === "") {
-      i--;
-      continue;
-    }
+    if (line === "") { i--; continue; }
     if (line.endsWith("*/")) {
-      // collect backwards to /**
       let j = i;
       while (j >= 0) {
         docLines.unshift(lines[j]);
-        if (lines[j].trim().startsWith("/**")) break;
+        if (lines[j].trim().startsWith("/**") || lines[j].trim().startsWith("/*")) break;
         j--;
       }
       break;
     }
-    if (line.startsWith("//")) {
+    if (line.startsWith("//") || line.startsWith("#")) {
       docLines.unshift(lines[i]);
       i--;
       continue;
@@ -47,14 +46,36 @@ function extractJSDoc(lines: string[], startLine: number): string | undefined {
   if (docLines.length === 0) return undefined;
   return docLines
     .map((l) =>
-      l
-        .replace(/^\s*\/\*\*?\s?/, "")
-        .replace(/\s*\*\/\s*$/, "")
-        .replace(/^\s*\*\s?/, "")
-        .replace(/^\s*\/\s?/, "")
+      l.replace(/^\s*\/\*\*?\s?/, "").replace(/\s*\*\/\s*$/, "")
+        .replace(/^\s*\*\s?/, "").replace(/^\s*\/\s?/, "")
+        .replace(/^\s*#\s?/, "")
     )
-    .join("\n")
-    .trim();
+    .join("\n").trim();
+}
+
+// Extract Python docstrings (triple-quoted strings after def/class)
+function extractPyDocstring(lines: string[], startLine: number, endLine: number): string | undefined {
+  for (let i = startLine; i < Math.min(startLine + 3, endLine); i++) {
+    const line = lines[i]?.trim();
+    if (!line) continue;
+    if (line.startsWith('"""') || line.startsWith("'''")) {
+      const quote = line.slice(0, 3);
+      if (line.endsWith(quote) && line.length > 6) {
+        return line.slice(3, -3).trim();
+      }
+      const docLines: string[] = [line.slice(3)];
+      for (let j = i + 1; j < endLine; j++) {
+        const dl = lines[j]?.trimEnd();
+        if (dl.trim().endsWith(quote)) {
+          docLines.push(dl.trim().slice(0, -3));
+          break;
+        }
+        docLines.push(dl);
+      }
+      return docLines.join("\n").trim();
+    }
+  }
+  return undefined;
 }
 
 function firstSentence(text: string): string {
@@ -63,94 +84,127 @@ function firstSentence(text: string): string {
   return match ? match[1] : cleaned;
 }
 
-function actionSummary(name: string, kind: string, jsdoc?: string, sourceLine?: string): string {
-  if (jsdoc) {
-    const first = firstSentence(jsdoc);
-    const lower = first.toLowerCase();
-    // Already action-oriented
-    if (
-      /^(load|create|parse|format|build|run|execute|stream|convert|validate|emit|handle|process|register|resolve|substitute|escape|truncate|summarize|compress|store|read|write|delete|clear|enqueue|drain|subscribe|abort|reset|continue|prompt|steer|follow)/i.test(
-        first
-      )
-    ) {
-      return truncate(first.replace(/\.$/, ""), 80);
+function inferModuleRole(filePath: string): string | undefined {
+  const p = filePath.toLowerCase();
+  if (p.includes("test/") || p.includes("tests/") || p.includes("_test.")) return "test module";
+  if (p.includes("engine/") || p.includes("core/")) return "core engine";
+  if (p.includes("layer")) return "layer module";
+  if (/\/models?\//.test(p) || p.endsWith("/models.py") || p.endsWith("/model.py")) return "model definition";
+  if (p.includes("util") || p.includes("helper")) return "utility module";
+  if (p.includes("schema")) return "data schema";
+  if (p.includes("api/") || p.includes("route")) return "API layer";
+  if (p.includes("config")) return "configuration";
+  return undefined;
+}
+
+function extractSignatureInfo(sourceLines: string[]): { params: string[]; returnType?: string; isAsync: boolean } {
+  const sig = sourceLines[0]?.trim() || "";
+  const isAsync = sig.includes("async ") || sig.includes("Promise");
+
+  const params: string[] = [];
+  const paramMatch = sig.match(/\(([^)]*)\)/);
+  if (paramMatch) {
+    const raw = paramMatch[1];
+    for (const p of raw.split(",")) {
+      const name = p.trim().split(/[=:]/)[0].trim().replace(/^self$/, "").replace(/^cls$/, "");
+      if (name && name !== "self" && name !== "cls" && name !== "*" && !name.startsWith("**"))
+        params.push(name);
     }
-    if (lower.startsWith("the ")) {
-      return truncate(first.replace(/^the /i, "").replace(/\.$/, ""), 80);
-    }
-    return truncate(first.replace(/\.$/, ""), 80);
   }
 
-  const verbs: Record<string, string> = {
-    function: "Run",
-    class: "Define",
-    interface: "Describe",
-    type: "Type for",
-  };
-  const verb = verbs[kind] ?? "Define";
-  const readable = name
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/_/g, " ")
-    .toLowerCase();
-  if (kind === "type" || kind === "interface") {
-    return truncate(`${readable} contract`, 80);
+  let returnType: string | undefined;
+  const retMatch = sig.match(/\)\s*(?:->|:)\s*(\S+)/);
+  if (retMatch) returnType = retMatch[1].replace(/[{:]$/, "");
+
+  return { params, returnType, isAsync };
+}
+
+function buildSummary(name: string, kind: string, doc?: string, sourceLines: string[] = []): string {
+  if (doc) {
+    const first = firstSentence(doc);
+    if (first.length >= 10 && first.length <= 80) return truncate(first.replace(/\.$/, ""), 80);
+    if (first.length > 80) return truncate(first, 80);
   }
-  if (sourceLine?.includes("export const ")) {
-    return truncate(`Constant: ${readable}`, 80);
+
+  const { params, returnType } = extractSignatureInfo(sourceLines);
+  const readable = name.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+
+  if (kind === "class") {
+    if (params.length > 0) return truncate(`${name} initialized with ${params.join(", ")}`, 80);
+    return truncate(`${name} class`, 80);
   }
-  return truncate(`${verb} ${readable}`, 80);
+  if (kind === "interface" || kind === "type") {
+    return truncate(`${readable} type contract`, 80);
+  }
+  if (name === "__init__") {
+    if (params.length > 0) return truncate(`Initialize with ${params.join(", ")}`, 80);
+    return "Instance constructor";
+  }
+  if (kind === "function") {
+    const verb = name.startsWith("get") || name.startsWith("_get") ? "Get" :
+                 name.startsWith("set") || name.startsWith("_set") ? "Set" :
+                 name.startsWith("is_") || name.startsWith("has_") || name.startsWith("can_") ? "Check" :
+                 name.startsWith("create") || name.startsWith("make") || name.startsWith("build") ? "Create" :
+                 name.startsWith("update") ? "Update" :
+                 name.startsWith("delete") || name.startsWith("remove") ? "Remove" :
+                 name.startsWith("parse") ? "Parse" :
+                 name.startsWith("format") ? "Format" :
+                 name.startsWith("load") ? "Load" :
+                 name.startsWith("save") || name.startsWith("write") ? "Save" :
+                 name.startsWith("run") || name.startsWith("exec") || name.startsWith("start") ? "Execute" :
+                 name.startsWith("stop") || name.startsWith("close") || name.startsWith("exit") ? "Shut down" :
+                 name.startsWith("init") ? "Initialize" :
+                 name === "forward" ? "Forward pass through" :
+                 name === "__repr__" || name === "__str__" ? "String representation of" :
+                 name === "__len__" ? "Length of" :
+                 name === "__iter__" ? "Iterate over" :
+                 null;
+    if (verb) {
+      if (params.length > 0 && params.length <= 3)
+        return truncate(`${verb} ${readable} (${params.join(", ")})`, 80);
+      return truncate(`${verb} ${readable}`, 80);
+    }
+    if (params.length > 0 && params.length <= 3)
+      return truncate(`${readable} (${params.join(", ")})`, 80);
+    return truncate(readable, 80);
+  }
+  return truncate(`${kind}: ${readable}`, 80);
 }
 
 function buildDescription(
-  name: string,
-  kind: string,
-  jsdoc?: string,
-  sourceLines: string[] = [],
-  filePath: string
+  name: string, kind: string, bodyLines: number,
+  doc?: string, sourceLines: string[] = [], filePath: string = ""
 ): string {
   const parts: string[] = [];
 
-  if (jsdoc) {
-    const sentences = jsdoc
-      .split(/(?<=[.!?])\s+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+  if (doc) {
+    const sentences = doc.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
     parts.push(...sentences.slice(0, 3));
   }
 
-  const rel = filePath.replace(/^packages\/(agent|ai)\//, "");
-  if (rel.includes("harness/")) {
-    parts.push("Part of the agent harness layer for session management, compaction, and runtime orchestration.");
-  } else if (rel.includes("providers/")) {
-    parts.push("Provider adapter in the pi-ai multi-provider streaming stack.");
-  } else if (rel.includes("utils/oauth")) {
-    parts.push("OAuth helper used by provider authentication flows.");
-  } else if (rel.includes("test/")) {
-    parts.push("Test coverage validating behavior and regressions for the surrounding module.");
-  } else if (rel.startsWith("packages/agent/src/")) {
-    parts.push("Core agent runtime component used by Agent and the low-level agent loop.");
-  } else if (rel.startsWith("packages/ai/src/")) {
-    parts.push("Shared pi-ai library surface for models, streaming, and provider integration.");
+  const moduleRole = inferModuleRole(filePath);
+  if (moduleRole) {
+    const dirName = path.dirname(filePath);
+    parts.push(`Defined in ${dirName}/ (${moduleRole}).`);
   }
+
+  const { params, returnType, isAsync } = extractSignatureInfo(sourceLines);
 
   if (kind === "class") {
-    parts.push("Encapsulates related state and methods for this subsystem.");
+    parts.push(`Class spanning ${bodyLines} lines.`);
   } else if (kind === "interface" || kind === "type") {
-    parts.push("Shapes data passed between layers; extend via declaration merging where supported.");
-  }
-
-  const sig = sourceLines[0]?.trim();
-  if (sig && sig.length < 120 && !parts.some((p) => p.includes(sig))) {
-    if (sig.includes("async ") || sig.includes("Promise")) {
-      parts.push("Async API; callers should await completion and handle errors.");
-    }
+    parts.push(`Type contract defining the shape for ${name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()}.`);
+  } else if (kind === "function") {
+    if (params.length > 0) parts.push(`Parameters: ${params.join(", ")}.`);
+    if (returnType) parts.push(`Returns ${returnType}.`);
+    if (isAsync) parts.push("Async operation.");
   }
 
   const unique = [...new Set(parts)];
   const joined = unique.join(" ");
   if (joined.length > 20) return joined;
 
-  return `${kind} "${name}" in ${rel}. Implements ${name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} for the Pi agent toolkit.`;
+  return `${kind} "${name}" in ${filePath}.`;
 }
 
 function enrichFile(projectRoot: string, jsonPath: string): { matched: number; total: number } {
@@ -159,47 +213,36 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
   const srcPath = path.join(projectRoot, relPath);
 
   if (!fs.existsSync(srcPath)) {
-    console.warn(`[skip] source missing: ${relPath}`);
     return { matched: 0, total: analysis.entities.length };
   }
 
+  const ext = path.extname(relPath).toLowerCase();
+  const isPython = ext === ".py";
   const lines = fs.readFileSync(srcPath, "utf-8").split("\n");
-  const enrichments: Enrichment[] = [];
-  const seen = new Set<string>();
 
   const isUnenriched = (summary: string | undefined) =>
-    !summary || /^(type|interface|function|class):/.test(summary);
+    !summary || /^(type|interface|function|class|enum|struct|module|decorated|trait|impl):/.test(summary);
 
+  let matched = 0;
   for (const entity of analysis.entities) {
     const name = entity.detail.name as string | undefined;
-    if (!name || seen.has(name)) continue;
+    if (!name) continue;
     if (!isUnenriched(entity.summary)) continue;
-    seen.add(name);
 
     const start = entity.anchor.start_line;
     const end = entity.anchor.end_line;
     const sourceSlice = lines.slice(start - 1, end);
-    const jsdoc = extractJSDoc(lines, start);
     const kind = (entity.detail.kind as string) ?? "concept";
+    const bodyLines = (entity.detail.body_lines as number) ?? (end - start + 1);
 
-    enrichments.push({
-      name,
-      summary: actionSummary(name, kind, jsdoc, sourceSlice[0]),
-      description: buildDescription(name, kind, jsdoc, sourceSlice, relPath),
-    });
-  }
+    const doc = isPython
+      ? extractPyDocstring(lines, start - 1, end) ?? extractJSDoc(lines, start)
+      : extractJSDoc(lines, start);
 
-  const enrichMap = new Map(enrichments.map((e) => [e.name, e]));
-  let matched = 0;
-  for (const entity of analysis.entities) {
-    const name = entity.detail.name as string | undefined;
-    if (!name || !isUnenriched(entity.summary)) continue;
-    const enrichment = enrichMap.get(name);
-    if (enrichment) {
-      entity.summary = enrichment.summary;
-      (entity.detail as Record<string, unknown>).description = enrichment.description;
-      matched++;
-    }
+    entity.summary = buildSummary(name, kind, doc, sourceSlice);
+    (entity.detail as Record<string, unknown>).description =
+      buildDescription(name, kind, bodyLines, doc, sourceSlice, relPath);
+    matched++;
   }
 
   fs.writeFileSync(jsonPath, JSON.stringify(analysis, null, 2));
@@ -207,26 +250,19 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
 }
 
 function main() {
-  const args = process.argv.slice(2);
-  const projectRoot = args[0];
+  const projectRoot = process.argv[2];
   if (!projectRoot) {
-    console.error("Usage: npx tsx auto-enrich.ts <project-root> [--prefix PREFIX]");
+    console.error("Usage: npx tsx auto-enrich.ts <project-root>");
     process.exit(1);
   }
 
-  const prefixArg = args.find((a) => a.startsWith("--prefix="));
-  const prefix = prefixArg?.slice("--prefix=".length) ?? "";
-
   const filesDir = path.join(projectRoot, ".vibe-reading", "files");
-  const files = fs
-    .readdirSync(filesDir)
-    .filter(
-      (f) =>
-        f.endsWith(".json") &&
-        (f.startsWith("packages__agent__") || f.startsWith("packages__ai__")) &&
-        (prefix === "" || f.startsWith(prefix))
-    )
-    .sort();
+  if (!fs.existsSync(filesDir)) {
+    console.error(`[auto-enrich] No .vibe-reading/files/ found. Run analyze.ts first.`);
+    process.exit(1);
+  }
+
+  const files = fs.readdirSync(filesDir).filter((f) => f.endsWith(".json")).sort();
 
   let totalFiles = 0;
   let totalMatched = 0;
@@ -241,10 +277,14 @@ function main() {
     totalFiles++;
     totalMatched += matched;
     totalEntities += total;
-    console.log(`[auto-enrich] ${analysis.file}: ${matched}/${total}`);
+    if (matched > 0) {
+      console.log(`  [ok] ${analysis.file}: ${matched}/${total} enriched`);
+    }
   }
 
-  console.log(`\n[auto-enrich] Done: ${totalFiles} files, ${totalMatched}/${totalEntities} entities enriched`);
+  console.log(
+    `\n[auto-enrich] Done: ${totalFiles} files, ${totalMatched}/${totalEntities} entities enriched`
+  );
 }
 
 main();

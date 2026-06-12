@@ -2,7 +2,7 @@
 
 AI-assisted code reading tool. Source code first, knowledge cards in a sidebar.
 
-Analyze a codebase with Tree-sitter, enrich with LLM-generated explanations, then browse code with concept cards that explain what each function, class, and interface does.
+Analyze a codebase with Tree-sitter, auto-generate descriptions from code structure, optionally deep-enrich with an LLM agent, then browse code with concept cards that explain what each function, class, and interface does.
 
 ## Install
 
@@ -41,11 +41,19 @@ This symlinks skills to `~/.cursor/skills/` so edits are immediately visible to 
 npx tsx cli/analyze.ts /path/to/your/project
 ```
 
-### 2. Enrich with Agent
+### 2. Auto-Enrich (Instant)
 
-Use the `/learn-code` Cursor skill on your target project. The agent reads each source file and writes concept explanations.
+```bash
+npx tsx cli/auto-enrich.ts /path/to/your/project
+```
 
-### 3. View
+Generates descriptions from function signatures, parameters, return types, docstrings, and file context. Runs in seconds, no LLM needed.
+
+### 3. Deep-Enrich with Agent (Optional)
+
+Use the `/learn-code` Cursor skill on your target project. The agent reads source files and writes richer explanations for important entities. Auto-enrich covers the baseline; agent enrichment adds depth.
+
+### 4. View
 
 ```bash
 cd viewer && PORT=3460 npx tsx server.ts /path/to/your/project
@@ -53,7 +61,7 @@ cd viewer && PORT=3460 npx tsx server.ts /path/to/your/project
 
 Open http://localhost:3460 to browse code with knowledge cards.
 
-### 4. Verify
+### 5. Verify
 
 ```bash
 npx tsx cli/harness.ts /path/to/your/project
@@ -62,7 +70,7 @@ npx tsx cli/harness.ts /path/to/your/project
 ## Testing
 
 ```bash
-# CLI tests (48 assertions)
+# CLI tests (57 assertions)
 npx tsx test/test.ts
 
 # E2E tests (19 Playwright tests)
@@ -70,9 +78,10 @@ playwright install chromium
 PORT=3461 npx tsx viewer/server.ts test/fixture &
 python3 test/e2e/test_viewer.py
 
-# Larger test data (nano-vllm, 21 files)
+# Larger test data (nano-vllm, 21 files, 135 entities)
 bash scripts/setup-test-data.sh
 npx tsx cli/analyze.ts test/data/nano-vllm
+npx tsx cli/auto-enrich.ts test/data/nano-vllm
 npx tsx cli/harness.ts test/data/nano-vllm
 ```
 

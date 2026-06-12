@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ConceptTab } from "./tabs/ConceptTab";
 import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
@@ -36,6 +36,8 @@ export function App() {
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(true);
+  const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
+  const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
@@ -89,6 +91,60 @@ export function App() {
     });
   }, []);
 
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onHoverLine = useCallback(
+    (line: number | null) => {
+      if (clearTimerRef.current) { clearTimeout(clearTimerRef.current); clearTimerRef.current = null; }
+
+      if (line == null) {
+        clearTimerRef.current = setTimeout(() => setHoveredEntityIdx(null), 150);
+        return;
+      }
+
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = setTimeout(() => {
+        let bestIdx = -1;
+        let bestSpan = Infinity;
+        for (let i = 0; i < entities.length; i++) {
+          const e = entities[i];
+          const end = e.anchor.end_line || e.anchor.start_line;
+          if (e.anchor.start_line <= line && line <= end) {
+            const span = end - e.anchor.start_line;
+            if (span < bestSpan) {
+              bestSpan = span;
+              bestIdx = i;
+            }
+          }
+        }
+        setHoveredEntityIdx(bestIdx >= 0 ? bestIdx : null);
+      }, 80);
+    },
+    [entities]
+  );
+
+  const hoveredEntity = useMemo(
+    () => (hoveredEntityIdx != null ? entities[hoveredEntityIdx] : null),
+    [entities, hoveredEntityIdx]
+  );
+
+  const onCardHover = useCallback((entity: DataEntity | null) => {
+    setCardHoveredEntity(entity);
+  }, []);
+
+  const hoverSource = cardHoveredEntity ?? hoveredEntity;
+  const hoverRange = useMemo(
+    () =>
+      hoverSource
+        ? {
+            startLine: hoverSource.anchor.start_line,
+            endLine: hoverSource.anchor.end_line || hoverSource.anchor.start_line,
+          }
+        : null,
+    [hoverSource]
+  );
+
   useEffect(() => {
     if (allFiles.length > 0 && !currentFile) {
       selectFile(allFiles[0].key);
@@ -131,13 +187,13 @@ export function App() {
   const tabContent = () => {
     switch (activeTab) {
       case "concept":
-        return <ConceptTab entities={filtered} onCardClick={onCardClick} />;
+        return <ConceptTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
       case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} />;
+        return <FlowTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
       case "history":
-        return <HistoryTab entities={filtered} onCardClick={onCardClick} />;
+        return <HistoryTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
       case "jump":
-        return <JumpTab entities={filtered} onCardClick={onCardClick} />;
+        return <JumpTab entities={filtered} onCardClick={onCardClick} hoveredEntity={hoveredEntity} onCardHover={onCardHover} />;
     }
   };
 
@@ -208,6 +264,8 @@ export function App() {
               code={sourceCode}
               language={sourceLanguage}
               highlightRange={highlightRange}
+              hoverRange={hoverRange}
+              onHoverLine={onHoverLine}
             />
           ) : (
             <div className="vr-editor-placeholder">
@@ -349,6 +407,11 @@ const layoutStyles = `
     width: 3px !important;
     margin-left: 3px;
     border-radius: 1px;
+  }
+
+  .vr-monaco-hover-range {
+    background: rgba(0, 122, 204, 0.06) !important;
+    border-left: 2px solid rgba(0, 122, 204, 0.3);
   }
 
   /* File picker */
@@ -580,12 +643,18 @@ const sidebarStyles = `
     margin-bottom: 6px;
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.25s ease, box-shadow 0.3s ease, background 0.3s ease;
   }
 
   .vr-card:hover {
     border-color: #007acc;
     box-shadow: 0 0 0 1px rgba(0,122,204,0.15);
+  }
+
+  .vr-card--highlighted {
+    border-color: #007acc;
+    box-shadow: 0 0 12px rgba(0,122,204,0.3), 0 0 0 1px rgba(0,122,204,0.4);
+    background: #1a2332;
   }
 
   .vr-card-header {

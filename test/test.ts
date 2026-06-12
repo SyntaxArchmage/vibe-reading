@@ -243,6 +243,46 @@ const afterWrong = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
 const enqueueWrong = afterWrong.entities.find((e: any) => e.detail.name === "enqueue");
 assert(enqueueWrong?.summary !== "Wrong line", `Wrong start_line does not match (got "${enqueueWrong?.summary}")`);
 
+// === Test 12: Auto-enrich integration (analyze → auto-enrich → harness) ===
+console.log("\nTest 12: Auto-enrich pipeline integration");
+
+// Re-analyze to get skeleton data
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+
+// Verify entities are unenriched (placeholder summaries)
+const preEnrich = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const preEntity = preEnrich.entities.find((e: any) => e.detail.name === "Scheduler");
+assert(
+  preEntity?.summary === "class: Scheduler",
+  `Pre-enrich summary is placeholder (got "${preEntity?.summary}")`
+);
+
+// Run auto-enrich
+const autoEnrichOut = run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+assert(autoEnrichOut.includes("entities enriched"), "Auto-enrich completes successfully");
+
+// Verify enrichment happened
+const postEnrich = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const postEntity = postEnrich.entities.find((e: any) => e.detail.name === "Scheduler");
+assert(
+  postEntity?.summary !== "class: Scheduler",
+  `Auto-enrich updated summary (got "${postEntity?.summary}")`
+);
+assert(
+  postEntity?.detail?.description && !postEntity.detail.description.startsWith('class "Scheduler" spanning'),
+  `Auto-enrich updated description`
+);
+
+// Harness should still pass
+const harnessAfterAutoEnrich = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
+assert(harnessAfterAutoEnrich.includes("✓"), "Harness passes after auto-enrich");
+
+// Auto-enrich is idempotent: running again should not change enriched entities
+const preIdempotent = fs.readFileSync(schedulerJsonPath, "utf-8");
+run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+const postIdempotent = fs.readFileSync(schedulerJsonPath, "utf-8");
+assert(preIdempotent === postIdempotent, "Auto-enrich is idempotent (no changes on re-run)");
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);

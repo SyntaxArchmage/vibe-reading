@@ -12,7 +12,7 @@ cd vibe-reading
 # 1. Dev-install: links skills + installs deps
 bash scripts/dev-install.sh
 
-# 2. Run CLI tests (48 assertions)
+# 2. Run CLI tests (57 assertions)
 npx tsx test/test.ts
 
 # 3. Build viewer
@@ -48,10 +48,9 @@ After dev-install, subagents see skill changes immediately (no reinstall).
 # Fetch test data (clones nano-vllm if missing)
 bash scripts/setup-test-data.sh
 
-# Analyze it
+# Full pipeline: analyze → auto-enrich → verify
 npx tsx cli/analyze.ts test/data/nano-vllm
-
-# Verify
+npx tsx cli/auto-enrich.ts test/data/nano-vllm
 npx tsx cli/harness.ts test/data/nano-vllm
 ```
 
@@ -64,12 +63,12 @@ npx tsx cli/harness.ts test/data/nano-vllm
 - `cli/enrich.ts` — agent writes enriched concept data
 - `cli/harness.ts` — coverage verification tool
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 42 automated tests in `test/test.ts`
+- 57 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
 - Agent enrichment pipeline (agent IS the LLM)
-- `cli/auto-enrich.ts` — batch enrichment from JSDoc
+- `cli/auto-enrich.ts` — Tier 1 auto-enrichment (heuristic, no LLM)
 - Polished Card component with kind badges, expand/collapse
 - Demo: Pi agent project (663 files, 1465 entities enriched)
 
@@ -136,7 +135,7 @@ vibe-reading/
 │   ├── dev-install.sh          # Symlink skills + install deps
 │   └── setup-test-data.sh      # Clone nano-vllm test data
 ├── test/
-│   ├── test.ts                 # 48 CLI pipeline tests
+│   ├── test.ts                 # 57 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 19 Playwright E2E tests
 │   ├── e2e/screenshots/        # Visual regression baselines
 │   ├── fixture/                # Deterministic test fixture (3 files)
@@ -218,7 +217,6 @@ Each file JSON:
 
 ## What To Do Next
 
-1. **Enrich remaining Pi data** — coding-agent (404 files), tui (59)
-2. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-3. **Visual regression baseline screenshots** — diff against captured baselines
-4. **Consider**: file tree component, multi-tab support
+1. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
+2. **Visual regression baseline screenshots** — diff against captured baselines
+3. **Consider**: file tree component, multi-tab support

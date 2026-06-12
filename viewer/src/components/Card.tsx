@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 
 interface CardProps {
   entity: DataEntity;
   onClick: (entity: DataEntity) => void;
+  isHighlighted?: boolean;
+  onHover?: (entity: DataEntity | null) => void;
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -22,28 +24,40 @@ function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
-export function Card({ entity, onClick }: CardProps) {
-  const [expanded, setExpanded] = useState(false);
+export function Card({ entity, onClick, isHighlighted, onHover }: CardProps) {
+  const [manualExpanded, setManualExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const kind = (entity.detail.kind as string) || "";
   const name = (entity.detail.name as string) || "";
   const lines = entity.anchor.end_line - entity.anchor.start_line + 1;
   const loc = `L${entity.anchor.start_line}–${entity.anchor.end_line}`;
   const badgeColor = KIND_COLORS[kind] || "#b5cea8";
 
+  const expanded = manualExpanded || !!isHighlighted;
+
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isHighlighted]);
+
   return (
     <motion.div
-      className="vr-card"
+      ref={cardRef}
+      className={`vr-card${isHighlighted ? " vr-card--highlighted" : ""}`}
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.2 }}
+      onMouseEnter={() => onHover?.(entity)}
+      onMouseLeave={() => onHover?.(null)}
     >
       <div
         className="vr-card-header"
         onClick={() => {
           onClick(entity);
-          setExpanded(!expanded);
+          setManualExpanded(!manualExpanded);
         }}
       >
         <div className="vr-card-left">
@@ -71,7 +85,7 @@ export function Card({ entity, onClick }: CardProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           >
             {typeof entity.detail.description === "string" ? (
               <p className="vr-card-desc">{entity.detail.description}</p>

@@ -10,6 +10,8 @@ interface MonacoEditorProps {
   code: string;
   language: string;
   highlightRange?: { startLine: number; endLine: number } | null;
+  hoverRange?: { startLine: number; endLine: number } | null;
+  onHoverLine?: (line: number | null) => void;
 }
 
 function detectLanguage(filePath: string): string {
@@ -54,10 +56,11 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, hoverRange, onHoverLine }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
+  const hoverDecorationsRef = useRef<string[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -108,6 +111,32 @@ export function MonacoEditor({ code, language, highlightRange }: MonacoEditorPro
   }, [ready, code, language]);
 
   useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !ready || !onHoverLine) return;
+
+    let lastLine: number | null = null;
+    const disposable = editor.onMouseMove((e: any) => {
+      const line = e.target?.position?.lineNumber ?? null;
+      if (line !== lastLine) {
+        lastLine = line;
+        onHoverLine(line);
+      }
+    });
+
+    const leaveDisposable = editor.onMouseLeave(() => {
+      if (lastLine !== null) {
+        lastLine = null;
+        onHoverLine(null);
+      }
+    });
+
+    return () => {
+      disposable.dispose();
+      leaveDisposable.dispose();
+    };
+  }, [ready, onHoverLine]);
+
+  useEffect(() => {
     return () => {
       editorRef.current?.dispose();
       editorRef.current = null;
@@ -137,6 +166,31 @@ export function MonacoEditor({ code, language, highlightRange }: MonacoEditorPro
       editor.revealLineInCenter(startLine);
     }
   }, [highlightRange, ready]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !ready) return;
+
+    if (hoverDecorationsRef.current.length > 0) {
+      hoverDecorationsRef.current = editor.deltaDecorations(hoverDecorationsRef.current, []);
+    }
+
+    if (hoverRange && hoverRange.startLine > 0) {
+      hoverDecorationsRef.current = editor.deltaDecorations([], [
+        {
+          range: new window.monaco.Range(hoverRange.startLine, 1, hoverRange.endLine, 1),
+          options: {
+            isWholeLine: true,
+            className: "vr-monaco-hover-range",
+            overviewRuler: {
+              color: "rgba(0,122,204,0.4)",
+              position: window.monaco.editor.OverviewRulerLane.Right,
+            },
+          },
+        },
+      ]);
+    }
+  }, [hoverRange, ready]);
 
   return (
     <div
