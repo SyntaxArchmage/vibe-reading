@@ -9,3 +9,5 @@ extension/webview/dist/
 viewer/out/
 cli/dist/
 *.vsix
+test/data/*/
+!test/data/SOURCES.md

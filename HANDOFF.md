@@ -9,29 +9,50 @@ Machines: 10.0.16.52 (original) → current machine (codes1gn)
 git clone git@github.com:SyntaxArchmage/vibe-reading.git
 cd vibe-reading
 
-# 1. Install CLI dependencies
-cd cli && npm install && cd ..
+# 1. Dev-install: links skills + installs deps
+bash scripts/dev-install.sh
 
-# 2. Install viewer dependencies
-cd viewer && npm install && cd ..
-
-# 3. Run CLI tests (42 assertions)
+# 2. Run CLI tests (48 assertions)
 npx tsx test/test.ts
 
-# 4. Build viewer
+# 3. Build viewer
 cd viewer && node build.mjs && cd ..
 
-# 5. Analyze test fixture
+# 4. Analyze test fixture
 npx tsx cli/analyze.ts test/fixture
 
-# 6. Start viewer
+# 5. Start viewer
 PORT=3460 npx tsx viewer/server.ts test/fixture
 # Open http://localhost:3460
 
-# 7. (Optional) Run E2E tests
+# 6. (Optional) Run E2E tests
 playwright install chromium
 PORT=3461 npx tsx viewer/server.ts test/fixture &
 python3 test/e2e/test_viewer.py
+```
+
+### Dev Install
+
+`scripts/dev-install.sh` symlinks skills to `~/.cursor/skills/`:
+- `learn-code` → `~/.cursor/skills/learn-code`
+- `teach-me` → `~/.cursor/skills/teach-me`
+
+After dev-install, subagents see skill changes immediately (no reinstall).
+
+### Test Data
+
+- `test/fixture` — lightweight deterministic data (3 files, committed)
+- `test/data/nano-vllm` — real-world Python project (21 files, 1450 lines, gitignored)
+
+```bash
+# Fetch test data (clones nano-vllm if missing)
+bash scripts/setup-test-data.sh
+
+# Analyze it
+npx tsx cli/analyze.ts test/data/nano-vllm
+
+# Verify
+npx tsx cli/harness.ts test/data/nano-vllm
 ```
 
 ## What Was Built
@@ -59,8 +80,8 @@ python3 test/e2e/test_viewer.py
 - [x] Full React layout: sidebar + Monaco + floating file picker
 - [x] Card click → Monaco decoration highlighting
 - [x] Playwright E2E test script (18 tests)
-- [ ] Playwright browser install (blocked by network)
-- [ ] Schema validation in harness
+- [x] Playwright browser install + 19/19 E2E tests passing
+- [x] Schema validation in harness
 - [ ] Visual regression baseline screenshots
 
 ## Architecture Decisions (2026-06-12)
@@ -111,10 +132,15 @@ vibe-reading/
 │   ├── src/                    # Extension entry + sidebar provider
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
+├── scripts/
+│   ├── dev-install.sh          # Symlink skills + install deps
+│   └── setup-test-data.sh      # Clone nano-vllm test data
 ├── test/
-│   ├── test.ts                 # 42 CLI pipeline tests
-│   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
-│   └── fixture/                # Test fixture (3 source files)
+│   ├── test.ts                 # 48 CLI pipeline tests
+│   ├── e2e/test_viewer.py      # 19 Playwright E2E tests
+│   ├── e2e/screenshots/        # Visual regression baselines
+│   ├── fixture/                # Deterministic test fixture (3 files)
+│   └── data/                   # Larger test projects (gitignored)
 ├── prd/
 │   ├── prd.md                  # Product requirements
 │   ├── devplan.md              # Development plan (6 phases)
@@ -186,20 +212,13 @@ Each file JSON:
    External CDN downloads (npm, Playwright browsers) frequently fail
    with ECONNRESET. Git push to GitHub works but is slow (~10-45s).
 
-2. **Playwright browser not installed**: E2E tests written but can't
-   run. Need `playwright install chromium` on a machine with good
-   network.
-
-3. **extension/ has duplicated code**: The old `extension/webview/`
+2. **extension/ has duplicated code**: The old `extension/webview/`
    still exists alongside the new `viewer/`. Can be cleaned up when
    we confirm extension is no longer needed.
 
 ## What To Do Next
 
-1. **Install Playwright Chromium** — run E2E tests, capture baseline
-   screenshots, iterate on UI
-2. **Schema validation harness** — enforce data contract between CLI
-   output and viewer consumption
-3. **Enrich remaining Pi data** — coding-agent (404 files), tui (59)
-4. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-5. **Consider**: file tree component, multi-tab support
+1. **Enrich remaining Pi data** — coding-agent (404 files), tui (59)
+2. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
+3. **Visual regression baseline screenshots** — diff against captured baselines
+4. **Consider**: file tree component, multi-tab support

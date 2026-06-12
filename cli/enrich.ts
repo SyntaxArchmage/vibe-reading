@@ -19,6 +19,7 @@ interface Enrichment {
   name: string;
   summary: string;
   description: string;
+  start_line?: number;
 }
 
 function main() {
@@ -50,17 +51,43 @@ function main() {
     process.exit(1);
   }
 
-  const enrichMap = new Map<string, Enrichment>();
+  // Precise enrichments (with start_line) keyed by "name:line"
+  const preciseMap = new Map<string, Enrichment>();
+  // Name-only enrichments as fallback, stored as arrays for duplicates
+  const nameMap = new Map<string, Enrichment[]>();
   for (const e of enrichments) {
-    enrichMap.set(e.name, e);
+    if (e.start_line != null) {
+      preciseMap.set(`${e.name}:${e.start_line}`, e);
+    } else {
+      const arr = nameMap.get(e.name) || [];
+      arr.push(e);
+      nameMap.set(e.name, arr);
+    }
   }
+
+  // Track which name-only enrichments have been consumed
+  const nameConsumed = new Map<string, number>();
 
   let matched = 0;
   for (const entity of analysis.entities) {
     const name = entity.detail.name as string | undefined;
     if (!name) continue;
 
-    const enrichment = enrichMap.get(name);
+    const line = entity.anchor.start_line;
+    const preciseKey = `${name}:${line}`;
+
+    // Try precise match first (name + start_line)
+    let enrichment = preciseMap.get(preciseKey);
+    if (!enrichment) {
+      // Fall back to name-only, consuming entries in order
+      const candidates = nameMap.get(name);
+      if (candidates && candidates.length > 0) {
+        const idx = nameConsumed.get(name) || 0;
+        enrichment = candidates[Math.min(idx, candidates.length - 1)];
+        nameConsumed.set(name, idx + 1);
+      }
+    }
+
     if (enrichment) {
       entity.summary = enrichment.summary;
       (entity.detail as Record<string, unknown>).description = enrichment.description;

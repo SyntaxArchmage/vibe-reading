@@ -136,6 +136,113 @@ assert(taskEntity?.detail?.description === "Defines the unit of work.", `Enriche
 const otherEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
 assert(otherEntity?.summary.includes("Scheduler"), `Non-enriched entity keeps name (got "${otherEntity?.summary}")`);
 
+// === Test 10: Harness rejects invalid schemas ===
+console.log("\nTest 10: Harness schema validation (negative cases)");
+
+function harnessExitCode(fixtureDir: string): number {
+  try {
+    run(`npx tsx harness.ts ${fixtureDir}`);
+    return 0;
+  } catch (e: any) {
+    return e.status ?? 1;
+  }
+}
+
+// Re-analyze to get clean data
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+
+const schedulerJsonPath = path.join(VIBE_DIR, "files", "src__scheduler.ts.json");
+const originalScheduler = fs.readFileSync(schedulerJsonPath, "utf-8");
+
+// 10a: Missing entity type
+const badType = JSON.parse(originalScheduler);
+badType.entities[0].type = "bogus";
+fs.writeFileSync(schedulerJsonPath, JSON.stringify(badType));
+const harnessOutBadType = (() => {
+  try { return run(`npx tsx harness.ts ${FIXTURE_DIR}`); } catch (e: any) { return e.stdout || ""; }
+})();
+assert(harnessOutBadType.includes("schema") || harnessOutBadType.includes("Schema"), "Harness detects invalid entity type");
+
+// 10b: Missing anchor field
+const badAnchor = JSON.parse(originalScheduler);
+delete badAnchor.entities[0].anchor.start_line;
+fs.writeFileSync(schedulerJsonPath, JSON.stringify(badAnchor));
+const harnessOutBadAnchor = (() => {
+  try { return run(`npx tsx harness.ts ${FIXTURE_DIR}`); } catch (e: any) { return e.stdout || ""; }
+})();
+assert(harnessOutBadAnchor.includes("start_line"), "Harness detects missing start_line");
+
+// 10c: Negative start_line
+const badLine = JSON.parse(originalScheduler);
+badLine.entities[0].anchor.start_line = 0;
+fs.writeFileSync(schedulerJsonPath, JSON.stringify(badLine));
+const harnessOutBadLine = (() => {
+  try { return run(`npx tsx harness.ts ${FIXTURE_DIR}`); } catch (e: any) { return e.stdout || ""; }
+})();
+assert(harnessOutBadLine.includes("start_line") && harnessOutBadLine.includes(">= 1"), "Harness detects start_line < 1");
+
+// 10d: end_line < start_line
+const badRange = JSON.parse(originalScheduler);
+badRange.entities[0].anchor.start_line = 10;
+badRange.entities[0].anchor.end_line = 5;
+fs.writeFileSync(schedulerJsonPath, JSON.stringify(badRange));
+const harnessOutBadRange = (() => {
+  try { return run(`npx tsx harness.ts ${FIXTURE_DIR}`); } catch (e: any) { return e.stdout || ""; }
+})();
+assert(harnessOutBadRange.includes("end_line") && harnessOutBadRange.includes("start_line"), "Harness detects end_line < start_line");
+
+// 10e: Entities not an array
+const badEntities = JSON.parse(originalScheduler);
+badEntities.entities = "not_an_array";
+fs.writeFileSync(schedulerJsonPath, JSON.stringify(badEntities));
+const harnessOutBadEntities = (() => {
+  try { return run(`npx tsx harness.ts ${FIXTURE_DIR}`); } catch (e: any) { return e.stdout || ""; }
+})();
+assert(harnessOutBadEntities.includes("array"), "Harness detects entities not an array");
+
+// Restore valid data
+fs.writeFileSync(schedulerJsonPath, originalScheduler);
+assert(harnessExitCode(FIXTURE_DIR) === 0, "Harness passes after restoring valid data");
+
+// === Test 11: Enrich with start_line disambiguation ===
+console.log("\nTest 11: Enrich with start_line disambiguation");
+
+// Re-analyze to get fresh data
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+
+// First, enrich without start_line (name-only, old behavior)
+const enrichNameOnly = JSON.stringify([
+  { name: "enqueue", summary: "Enqueue (name-only)", description: "Name-only match." },
+]);
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${enrichNameOnly}'`);
+const afterNameOnly = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const enqueueEntity = afterNameOnly.entities.find((e: any) => e.detail.name === "enqueue");
+assert(enqueueEntity?.summary === "Enqueue (name-only)", `Name-only enrich works (got "${enqueueEntity?.summary}")`);
+
+// Re-analyze to reset
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+
+// Now enrich with start_line (precise match)
+const schedulerFresh = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const enqueueLine = schedulerFresh.entities.find((e: any) => e.detail.name === "enqueue")?.anchor.start_line;
+const enrichPrecise = JSON.stringify([
+  { name: "enqueue", start_line: enqueueLine, summary: "Enqueue (precise)", description: "Precise match." },
+]);
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${enrichPrecise}'`);
+const afterPrecise = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const enqueuePrecise = afterPrecise.entities.find((e: any) => e.detail.name === "enqueue");
+assert(enqueuePrecise?.summary === "Enqueue (precise)", `start_line enrich works (got "${enqueuePrecise?.summary}")`);
+
+// Non-matching start_line should NOT enrich
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+const enrichWrongLine = JSON.stringify([
+  { name: "enqueue", start_line: 999, summary: "Wrong line", description: "Should not match." },
+]);
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${enrichWrongLine}'`);
+const afterWrong = JSON.parse(fs.readFileSync(schedulerJsonPath, "utf-8"));
+const enqueueWrong = afterWrong.entities.find((e: any) => e.detail.name === "enqueue");
+assert(enqueueWrong?.summary !== "Wrong line", `Wrong start_line does not match (got "${enqueueWrong?.summary}")`);
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);

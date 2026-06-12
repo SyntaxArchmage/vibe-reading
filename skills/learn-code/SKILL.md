@@ -45,16 +45,20 @@ The enrichments JSON format:
 [
   {
     "name": "Scheduler",
+    "start_line": 7,
     "summary": "Priority task scheduler with sequential execution",
     "description": "A simple priority-based task scheduler. Maintains an internally sorted queue where higher-priority tasks run first. Uses Priority Queue + sequential consumer pattern."
   },
   {
     "name": "enqueue",
+    "start_line": 10,
     "summary": "Insert task and re-sort by priority (descending)",
     "description": "Adds a task to the queue and immediately re-sorts. Note: sorting after every insert is O(n log n) — for high-throughput, a heap would be better."
   }
 ]
 ```
+
+**Important**: Include `start_line` to disambiguate when a file has multiple entities with the same name (e.g., multiple `forward` methods or `__init__` in different classes). The `start_line` comes from the entity's `anchor.start_line` in the JSON file. Without `start_line`, all entities sharing a name get the same enrichment.
 
 #### Writing Good Concept Cards
 
