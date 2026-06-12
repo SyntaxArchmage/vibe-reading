@@ -329,10 +329,15 @@ export function App() {
       {/* Main area — Monaco editor */}
       <div className="vr-main">
         {currentFile && (
-          <div className="vr-tab-bar">
-            <div className="vr-tab-item vr-tab-item--active">
-              {currentFile.split("/").pop()}
-            </div>
+          <div className="vr-breadcrumb-bar">
+            {currentFile.split("/").map((segment, i, arr) => (
+              <span key={i} className="vr-breadcrumb-segment">
+                {i > 0 && <span className="vr-breadcrumb-sep">&#x276F;</span>}
+                <span className={`vr-breadcrumb-label${i === arr.length - 1 ? " vr-breadcrumb-label--active" : ""}`}>
+                  {segment}
+                </span>
+              </span>
+            ))}
           </div>
         )}
         <div className="vr-editor-wrap">
@@ -448,31 +453,38 @@ const layoutStyles = `
     overflow: hidden;
   }
 
-  .vr-tab-bar {
-    display: flex;
-    background: #252526;
-    border-bottom: 1px solid #3c3c3c;
-    height: 35px;
-    align-items: stretch;
-    flex-shrink: 0;
-  }
-
-  .vr-tab-item {
-    padding: 0 16px;
-    font-size: 12px;
-    color: #888;
+  .vr-breadcrumb-bar {
     display: flex;
     align-items: center;
-    cursor: pointer;
-    border-right: 1px solid #3c3c3c;
+    background: #252526;
+    border-bottom: 1px solid #3c3c3c;
+    height: 28px;
+    padding: 0 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .vr-breadcrumb-segment {
+    display: flex;
+    align-items: center;
     white-space: nowrap;
   }
 
-  .vr-tab-item--active {
-    color: #fff;
-    background: #1e1e1e;
-    border-bottom: 1px solid #1e1e1e;
-    margin-bottom: -1px;
+  .vr-breadcrumb-sep {
+    color: #555;
+    font-size: 9px;
+    margin: 0 6px;
+  }
+
+  .vr-breadcrumb-label {
+    font-size: 12px;
+    color: #888;
+    cursor: default;
+  }
+
+  .vr-breadcrumb-label--active {
+    color: #ccc;
+    font-weight: 500;
   }
 
   .vr-editor-wrap {
