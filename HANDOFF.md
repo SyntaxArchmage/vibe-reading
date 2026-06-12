@@ -11,7 +11,7 @@ Machines: 10.0.16.52 (original) → current machine (codes1gn)
 | Phase 1: Concept Push | Done | AST extraction + agent enrichment + polished Card UI + source viewer |
 | Testing | Done | 42 automated assertions + enrich test |
 | Self-analysis | Done | /learn ran on vibe-reading itself — 21 files, 76 entities, 100% |
-| Pi demo | Blocked | GitHub unreachable from this machine — need network fix |
+| Pi demo | Done | earendil-works/pi — 663 files, 1465 entities enriched (agent+ai) |
 | Phase 2: Macro Flow | Not started | Call chain visualization |
 
 ## Architecture: /learn Pipeline
@@ -92,11 +92,16 @@ Features:
 
 See `prd/decisions.md` for full log (12 decisions).
 
-## Blocked: Pi Demo
+## Pi Demo
 
-Attempted to clone `github.com/earendil-works/pi` (61K stars, TypeScript
-agent toolkit). Both HTTPS and SSH to GitHub are timing out from this
-machine. Need network fix before running /learn on Pi.
+Downloaded `earendil-works/pi` (61K stars TypeScript agent toolkit) via
+tarball. Ran full pipeline:
+- AST extraction: 663 files, 5511 entities, 100% coverage
+- Enrichment: 1465 entities across agent + ai packages (156 files)
+- Preview: `http://localhost:3460` with 663 files loaded
+
+Remaining unenriched: coding-agent (404 files) and tui (59 files) packages
+still have placeholder summaries. Can be enriched on demand.
 
 ## How to Run
 
@@ -120,6 +125,6 @@ cd extension && npm run preview -- /path/to/project
 
 ## What To Do Next
 
-1. **Fix network** — clone earendil-works/pi and run /learn on it
+1. **Enrich remaining Pi packages** — coding-agent (404 files) and tui (59 files)
 2. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
 3. **Consider**: syntax highlighting in preview source panel (Shiki or highlight.js)
