@@ -494,6 +494,22 @@ export function App() {
                 <span style={{ color: "#9cdcfe" }}>{allEntities.filter(e => e.type === "history").length} history</span>
                 <span style={{ color: "#c586c0" }}>{allEntities.filter(e => e.type === "jump").length} jump</span>
               </div>
+              {(() => {
+                const concepts = allEntities.filter(e => e.type === "concept");
+                const enriched = concepts.filter(e => {
+                  const desc = e.detail.description as string | undefined;
+                  return desc && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(desc);
+                });
+                const pct = concepts.length > 0 ? Math.round((enriched.length / concepts.length) * 100) : 0;
+                return concepts.length > 0 ? (
+                  <div style={{ marginTop: 8, fontSize: 10, color: "#666" }}>
+                    Enrichment: {enriched.length}/{concepts.length} concepts ({pct}%)
+                    <div style={{ marginTop: 3, height: 3, background: "#333", borderRadius: 2, overflow: "hidden" }}>
+                      <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "#4ec9b0" : "#dcdcaa", borderRadius: 2 }} />
+                    </div>
+                  </div>
+                ) : null;
+              })()}
               {allFiles.length > 0 && (
                 <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
                   <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
