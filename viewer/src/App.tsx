@@ -48,8 +48,8 @@ export function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
-  const allEntities = Object.entries(PREVIEW_DATA).flatMap(([, data]) =>
-    (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string }))
+  const allEntities = Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
+    (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
   );
 
   const entitySearchResults = entitySearch.trim()
@@ -322,7 +322,10 @@ export function App() {
                 key={`es-${i}`}
                 className="vr-entity-search-item"
                 onClick={() => {
-                  selectFile((e as any)._file);
+                  selectFile((e as any)._key);
+                  if (e.type === "concept" || e.type === "flow" || e.type === "history" || e.type === "jump") {
+                    setActiveTab(e.type as TabId);
+                  }
                   setTimeout(() => {
                     setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line });
                   }, 100);
