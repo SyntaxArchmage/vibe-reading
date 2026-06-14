@@ -37,6 +37,8 @@ export function Card({ entity, onClick, highlight, usages, onFileSelect, bookmar
   const desc = entity.detail.description as string | undefined;
   const isEnriched = desc && !desc.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/);
   const summaryIsPlaceholder = entity.summary.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated): /);
+  const params = entity.detail.params as string[] | undefined;
+  const returnType = entity.detail.return_type as string | undefined;
 
   return (
     <motion.div
@@ -94,6 +96,11 @@ export function Card({ entity, onClick, highlight, usages, onFileSelect, bookmar
               <p className="vr-card-desc">{entity.detail.description}</p>
             ) : (
               <pre className="vr-card-raw">{JSON.stringify(entity.detail, null, 2)}</pre>
+            )}
+            {params && params.length > 0 && (
+              <div style={{ fontSize: 11, color: "#9cdcfe", marginTop: 4, fontFamily: "monospace" }}>
+                ({params.join(", ")}){returnType ? ` → ${returnType}` : ""}
+              </div>
             )}
             <div className="vr-card-chips">
               {kind && <span className="vr-card-chip">{kindLabel(kind)}</span>}
