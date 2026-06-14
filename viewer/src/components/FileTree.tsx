@@ -159,6 +159,7 @@ function DirNode({
 
 export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   const [filter, setFilter] = useState("");
+  const [collapseKey, setCollapseKey] = useState(0);
   const filtered = useMemo(() => {
     if (!filter.trim()) return files;
     const q = filter.toLowerCase();
@@ -171,7 +172,14 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
     <div className="vr-tree">
       <div className="vr-tree-header">
         EXPLORER
-        <span className="vr-tree-header-count">{filtered.length} files</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span className="vr-tree-header-count">{filtered.length} files</span>
+          <button
+            className="vr-tree-collapse-btn"
+            onClick={() => setCollapseKey(k => k + 1)}
+            title="Collapse all folders"
+          >&#x25B4;</button>
+        </div>
       </div>
       <div className="vr-tree-filter">
         <input
@@ -182,7 +190,7 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
           className="vr-tree-filter-input"
         />
       </div>
-      <div className="vr-tree-list">
+      <div className="vr-tree-list" key={collapseKey}>
         <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} />
       </div>
     </div>
@@ -216,6 +224,18 @@ export const fileTreeStyles = `
     opacity: 0.7;
     letter-spacing: 0;
   }
+
+  .vr-tree-collapse-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #888;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 3px;
+    line-height: 14px;
+  }
+  .vr-tree-collapse-btn:hover { color: #d4d4d4; border-color: #888; }
 
   .vr-tree-filter {
     padding: 4px 8px;
