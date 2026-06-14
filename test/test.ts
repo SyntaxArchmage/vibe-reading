@@ -440,6 +440,43 @@ console.log("\nTest 23: Call graph details");
   assert(utilsCg.calls.length > 0, "utils.js has calls in call graph");
 }
 
+// === Test 24: Entity anchor correctness ===
+console.log("\nTest 24: Entity anchor consistency");
+{
+  cleanOutput();
+  run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  const allFiles = fs.readdirSync(path.join(VIBE_DIR, "files")).filter((f: string) => f.endsWith(".json"));
+  let totalEntities = 0;
+  let badAnchors = 0;
+  for (const f of allFiles) {
+    const data = JSON.parse(fs.readFileSync(path.join(VIBE_DIR, "files", f), "utf-8"));
+    for (const e of data.entities) {
+      totalEntities++;
+      if (e.anchor.start_line > e.anchor.end_line) badAnchors++;
+      if (e.anchor.start_line < 1) badAnchors++;
+    }
+  }
+  assert(totalEntities > 0, `Total entities across all files > 0 (got ${totalEntities})`);
+  assert(badAnchors === 0, `No invalid anchors (got ${badAnchors})`);
+}
+
+// === Test 25: Manifest consistency ===
+console.log("\nTest 25: Manifest consistency");
+{
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(VIBE_DIR, "manifest.json"), "utf-8")
+  );
+  const jsonCount = fs.readdirSync(path.join(VIBE_DIR, "files")).filter((f: string) => f.endsWith(".json")).length;
+  assert(
+    manifest.analyzed_files === jsonCount,
+    `Manifest analyzed_files matches JSON count (${manifest.analyzed_files} vs ${jsonCount})`
+  );
+  assert(
+    typeof manifest.analyzed_at === "string" && !isNaN(Date.parse(manifest.analyzed_at)),
+    "Manifest has valid analyzed_at timestamp"
+  );
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
