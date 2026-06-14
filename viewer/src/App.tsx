@@ -65,12 +65,22 @@ export function App() {
     ), []);
 
   const entitySearchResults = entitySearch.trim()
-    ? allEntities.filter(e => {
-        const q = entitySearch.toLowerCase();
-        const name = ((e.detail.name as string) || "").toLowerCase();
-        const summary = e.summary.toLowerCase();
-        return name.includes(q) || summary.includes(q);
-      }).slice(0, 50)
+    ? (() => {
+        let q = entitySearch.toLowerCase().trim();
+        let typeFilter: string | null = null;
+        const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
+        if (typeMatch) {
+          typeFilter = typeMatch[1];
+          q = q.slice(typeMatch[0].length);
+        }
+        return allEntities.filter(e => {
+          if (typeFilter && !e.type.startsWith(typeFilter)) return false;
+          if (!q) return true;
+          const name = ((e.detail.name as string) || "").toLowerCase();
+          const summary = e.summary.toLowerCase();
+          return name.includes(q) || summary.includes(q);
+        }).slice(0, 50);
+      })()
     : [];
 
   const allFiles: FileInfo[] = useMemo(() =>
@@ -336,7 +346,7 @@ export function App() {
             <input
               ref={entitySearchRef}
               type="text"
-              placeholder="Search entities... (Esc to close)"
+              placeholder="Search... (t:concept, t:flow, Esc to close)"
               value={entitySearch}
               onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
               onKeyDown={(e) => {
