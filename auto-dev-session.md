@@ -1,5 +1,38 @@
 # Auto-Dev Session Log
 
+### Auto-Dev Session 2026-06-14 22:12 (in progress)
+- **Duration**: 90 minutes
+- **Tests**: 328 assertions (up from 245 → +83 new)
+- **Defects found**: 4
+  - 3 TypeScript strict errors in viewer (null→undefined, unknown→ReactNode)
+  - 1 stale entitySearchOpen closure in keyboard handler
+- **Defects fixed**: 4
+- **Features implemented** (25+ items):
+  - Outline tab with nested entity tree and cursor tracking (Alt+5)
+  - Viewport indicator on entity density minimap
+  - Cross-file usages in expanded concept cards
+  - Bi-directional jump tab ("imported by" section)
+  - Entity hover tooltips in Monaco editor
+  - Entity bookmarks (star toggle, localStorage persisted)
+  - Go-to-symbol dialog (Ctrl+Shift+O)
+  - File complexity score badge (cx) in file header
+  - File summary line in concept tab
+  - File tree sort by name/entities/commits
+  - File picker prioritizes open tabs
+  - Enhanced status bar info
+  - Flow tab importer names
+  - Live reload via SSE (/api/events)
+  - Auto-enrich: parameter and return type extraction
+  - `complexity.ts` — ranked complexity report
+  - `diff.ts` — snapshot-based comparison
+  - `search.ts` — cross-file entity search
+  - `summary.ts` — tab-separated file overview
+  - `export-dot --clusters` — directory grouping
+  - Stats: dependency graph analysis
+  - Enhanced /api/health
+  - Bookmarks in empty state
+- **Commits**: 25+ commits
+
 ### Auto-Dev Session 2026-06-14 18:12 (completed)
 - **Duration**: 90 minutes
 - **Tests**: 245 assertions (up from 148 → 97 new)
