@@ -175,11 +175,11 @@ frequency, recent PRs, design decisions.
 ### Completed (Added in later cycles)
 
 - [x] On-demand git blame via /api/blame endpoint with per-line annotations
+- [x] File tree heat dots (commit frequency color-coded indicators)
 
 ### Deferred
 
 - [ ] PR description extraction (GitHub API)
-- [ ] Heat map overlay visualization
 - [ ] Playwright E2E tests
 
 ### Files
