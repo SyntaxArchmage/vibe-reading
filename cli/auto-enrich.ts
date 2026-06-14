@@ -161,6 +161,22 @@ function buildDescription(
     }
   }
 
+  if (name.startsWith("_") && kind !== "class") {
+    parts.push("Internal implementation detail; not part of the public API.");
+  }
+
+  if (name === "__init__" || name === "constructor") {
+    parts.push("Initializes instance state and validates constructor arguments.");
+  }
+
+  const body = sourceLines.join("\n");
+  if (body.includes("throw ") || body.includes("raise ")) {
+    parts.push("May throw on invalid inputs; callers should handle errors.");
+  }
+  if (body.includes("@property") || (sig && sig.includes("get "))) {
+    parts.push("Computed property; accessed like a field but may trigger logic.");
+  }
+
   const unique = [...new Set(parts)];
   const joined = unique.join(" ");
   if (joined.length > 20) return joined;
