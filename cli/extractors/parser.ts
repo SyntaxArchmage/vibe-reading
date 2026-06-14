@@ -15,29 +15,13 @@ const NODE_MODULES = path.join(
   "node_modules"
 );
 
+// Only languages with ABI-compatible WASM (dedicated npm packages, not tree-sitter-wasms)
 const EXT_TO_WASM: Record<string, string> = {
   ".ts": "tree-sitter-typescript/tree-sitter-typescript.wasm",
   ".tsx": "tree-sitter-typescript/tree-sitter-tsx.wasm",
   ".js": "tree-sitter-javascript/tree-sitter-javascript.wasm",
   ".jsx": "tree-sitter-javascript/tree-sitter-javascript.wasm",
   ".py": "tree-sitter-python/tree-sitter-python.wasm",
-  ".go": "tree-sitter-wasms/out/tree-sitter-go.wasm",
-  ".rs": "tree-sitter-wasms/out/tree-sitter-rust.wasm",
-  ".java": "tree-sitter-wasms/out/tree-sitter-java.wasm",
-  ".c": "tree-sitter-wasms/out/tree-sitter-c.wasm",
-  ".h": "tree-sitter-wasms/out/tree-sitter-c.wasm",
-  ".cpp": "tree-sitter-wasms/out/tree-sitter-cpp.wasm",
-  ".hpp": "tree-sitter-wasms/out/tree-sitter-cpp.wasm",
-  ".rb": "tree-sitter-wasms/out/tree-sitter-ruby.wasm",
-  ".php": "tree-sitter-wasms/out/tree-sitter-php.wasm",
-  ".kt": "tree-sitter-wasms/out/tree-sitter-kotlin.wasm",
-  ".swift": "tree-sitter-wasms/out/tree-sitter-swift.wasm",
-  ".cs": "tree-sitter-wasms/out/tree-sitter-c_sharp.wasm",
-  ".scala": "tree-sitter-wasms/out/tree-sitter-scala.wasm",
-  ".lua": "tree-sitter-wasms/out/tree-sitter-lua.wasm",
-  ".zig": "tree-sitter-wasms/out/tree-sitter-zig.wasm",
-  ".dart": "tree-sitter-wasms/out/tree-sitter-dart.wasm",
-  ".vue": "tree-sitter-wasms/out/tree-sitter-vue.wasm",
 };
 
 async function ensureInit() {
