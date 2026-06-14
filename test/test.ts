@@ -894,7 +894,24 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(analyzeOut.includes(".py("), "Analyze includes .py extension");
 }
 
-// --- Test 55: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 55: Viewer build has density bar and concept grouping ---
+{
+  console.log("\n--- Test 55: Viewer build density/grouping ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  assert(bundle.includes("vr-concept-group-header"), "Viewer has concept group headers");
+  assert(bundle.includes("vr-card-highlight"), "Viewer has card highlight class");
+  assert(bundle.includes("Entity density"), "Viewer has density bar title");
+}
+
+// --- Test 56: Stats includes average entities ---
+{
+  console.log("\n--- Test 56: Stats shows avg entities ---");
+  const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
+  assert(statsOut.includes("Average:"), "Stats shows average entities per file");
+  assert(statsOut.includes("By extension"), "Stats shows extension breakdown");
+}
+
+// --- Test 57: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
