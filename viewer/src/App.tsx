@@ -448,6 +448,22 @@ export function App() {
                 <span style={{ color: "#9cdcfe" }}>{allEntities.filter(e => e.type === "history").length} history</span>
                 <span style={{ color: "#c586c0" }}>{allEntities.filter(e => e.type === "jump").length} jump</span>
               </div>
+              {allFiles.length > 0 && (
+                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
+                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
+                    Most complex files
+                  </div>
+                  {allFiles.slice(0, 5).map(f => (
+                    <div
+                      key={f.key}
+                      style={{ fontSize: 11, color: "#9cdcfe", padding: "2px 0", cursor: "pointer" }}
+                      onClick={() => selectFile(f.key)}
+                    >
+                      {f.file} <span style={{ color: "#666" }}>({f.count})</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
