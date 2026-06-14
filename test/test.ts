@@ -1121,7 +1121,37 @@ console.log("\nTest 27: Multiple entity types per file");
   if (fs.existsSync(snapshotPath)) fs.unlinkSync(snapshotPath);
 }
 
-// --- Test 76: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 76: Viewer bundle includes all keyboard shortcuts ---
+{
+  console.log("\n--- Test 76: Viewer keyboard shortcuts ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  assert(bundle.includes("Go to line"), "Viewer has goto line dialog");
+  assert(bundle.includes("Go to symbol"), "Viewer has goto symbol dialog");
+  assert(bundle.includes("help"), "Viewer has help overlay");
+}
+
+// --- Test 77: Stats output format ---
+{
+  console.log("\n--- Test 77: Stats output completeness ---");
+  const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
+  assert(statsOut.includes("Project:"), "Stats shows project name");
+  assert(statsOut.includes("Entities:"), "Stats shows entity count");
+  assert(statsOut.includes("Enrichment:"), "Stats shows enrichment status");
+  assert(statsOut.includes("Top files"), "Stats shows top files");
+}
+
+// --- Test 78: Harness validates enriched data ---
+{
+  console.log("\n--- Test 78: Harness on enriched data ---");
+  cleanOutput();
+  run("npx tsx analyze.ts ../test/fixture");
+  run("npx tsx auto-enrich.ts ../test/fixture");
+  const harnessOut = run("npx tsx harness.ts ../test/fixture");
+  assert(harnessOut.includes("100.0%"), "Full coverage after enrichment");
+  assert(harnessOut.includes("Schema valid"), "Schema valid after enrichment");
+}
+
+// --- Test 79: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
