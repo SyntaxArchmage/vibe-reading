@@ -741,7 +741,16 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!mdSingle.includes("## src/scheduler.ts"), "single file excludes other files");
 }
 
-// --- Test 44: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 44: export-dot produces valid DOT ---
+{
+  console.log("\n--- Test 44: export-dot tool ---");
+  const dotOut = run(`npx tsx export-dot.ts ${FIXTURE_DIR}`);
+  assert(dotOut.includes("digraph CallGraph"), "DOT output has digraph header");
+  assert(dotOut.includes("scheduler"), "DOT output has scheduler node");
+  assert(dotOut.includes("->"), "DOT output has edges");
+}
+
+// --- Test 45: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
