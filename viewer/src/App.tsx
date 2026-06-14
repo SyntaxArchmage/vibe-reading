@@ -35,6 +35,7 @@ interface FileInfo {
   file: string;
   count: number;
   commits: number;
+  complexity: number;
 }
 
 export function App() {
@@ -122,11 +123,25 @@ export function App() {
         const hist = (data.entities as DataEntity[]).find(
           e => e.type === "history" && (e.detail.kind === "file_history")
         );
+        const ents = data.entities as DataEntity[];
+        const flows = ents.filter(e => e.type === "flow");
+        const imports = flows.filter(e => e.detail.kind === "imports");
+        const importCount = imports.reduce((sum, e) =>
+          sum + ((e.detail.names as string[])?.length || 0), 0);
+        const concepts = ents.filter(e => e.type === "concept");
+        const maxDepth = concepts.reduce((max, e) => {
+          const lines = e.anchor.end_line - e.anchor.start_line;
+          return Math.max(max, lines);
+        }, 0);
+        const complexity = Math.round(
+          concepts.length * 2 + importCount * 1.5 + Math.sqrt(maxDepth) * 3
+        );
         return {
           key,
           file: data.file,
           count: data.entities.length,
           commits: (hist?.detail.total_commits as number) || 0,
+          complexity,
         };
       })
       .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)),
@@ -573,6 +588,16 @@ export function App() {
                 const hist = entities.find(e => e.type === "history" && e.detail.kind === "file_history");
                 const commits = hist?.detail.total_commits as number | undefined;
                 return commits ? <span className="vr-file-commits" title={`${commits} commits`}>{commits}c</span> : null;
+              })()}
+              {(() => {
+                const fi = allFiles.find(f => f.key === currentFile);
+                return fi && fi.complexity > 0 ? (
+                  <span title={`complexity score: ${fi.complexity}`} style={{
+                    fontSize: 10, padding: "0 4px", borderRadius: 3, marginLeft: 2,
+                    background: fi.complexity > 50 ? "#4a2020" : fi.complexity > 25 ? "#3a3a20" : "#1a2a1a",
+                    color: fi.complexity > 50 ? "#f44747" : fi.complexity > 25 ? "#dcdcaa" : "#4ec9b0",
+                  }}>{fi.complexity}cx</span>
+                ) : null;
               })()}
             </div>
             <nav className="vr-tabs">
