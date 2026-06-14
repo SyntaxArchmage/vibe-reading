@@ -157,9 +157,27 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     );
   }
 
+  const allCollapsed = collapsed.size === groups.length;
+
   return (
     <div>
-      {summaryLine}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 8px" }}>
+        {summaryLine}
+        <button
+          style={{ fontSize: 9, color: "#888", background: "none", border: "1px solid #444", borderRadius: 3,
+                   cursor: "pointer", padding: "1px 4px" }}
+          onClick={() => {
+            if (allCollapsed) {
+              setCollapsed(new Set());
+            } else {
+              setCollapsed(new Set(groups.map(([k]) => k)));
+            }
+          }}
+          title={allCollapsed ? "Expand all" : "Collapse all"}
+        >
+          {allCollapsed ? "▼" : "▲"}
+        </button>
+      </div>
       {densityBar}
       {groups.map(([kind, items]) => (
         <div key={kind}>
