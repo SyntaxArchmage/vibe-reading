@@ -575,6 +575,16 @@ export function App() {
               onClick={navigateForward}
               title="Go Forward (Alt+→)"
             >&#x2192;</button>
+            {openFiles.length > 1 && (
+              <button
+                className="vr-nav-btn"
+                onClick={() => {
+                  setOpenFiles(currentFile ? [currentFile] : []);
+                }}
+                title="Close other tabs"
+                style={{ fontSize: 10 }}
+              >&#x2716;</button>
+            )}
             {openFiles.map((file) => {
               const fk = allFiles.find((f) => f.file === file)?.key;
               return (
