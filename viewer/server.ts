@@ -44,7 +44,16 @@ function buildHtml(data: Record<string, unknown>, callGraph: unknown): string {
     path.join(VIEWER_DIR, "index.html"),
     "utf-8"
   );
-  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};const CALL_GRAPH = ${JSON.stringify(callGraph)};</script>`;
+  const liveReload = `<script>
+if (typeof EventSource !== 'undefined') {
+  const es = new EventSource('/api/events');
+  es.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'reload') location.reload();
+  };
+}
+</script>`;
+  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};const CALL_GRAPH = ${JSON.stringify(callGraph)};</script>${liveReload}`;
   return template
     .replace("out/viewer.js", "/viewer.js")
     .replace("<div id=\"root\"></div>", `<div id="root"></div>\n  ${dataScript}`);
@@ -59,6 +68,8 @@ let analysisData = loadAnalysisData();
 let callGraph = loadCallGraph();
 let html = buildHtml(analysisData, callGraph);
 
+const sseClients = new Set<http.ServerResponse>();
+
 const vibeFilesDir = path.join(vibeDir, "files");
 if (fs.existsSync(vibeFilesDir)) {
   let reloadTimer: ReturnType<typeof setTimeout> | null = null;
@@ -68,7 +79,12 @@ if (fs.existsSync(vibeFilesDir)) {
       analysisData = loadAnalysisData();
       callGraph = loadCallGraph();
       html = buildHtml(analysisData, callGraph);
-      console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);
+      const count = Object.keys(analysisData).length;
+      console.log(`[vibe-reading] Reloaded ${count} analysis files`);
+      for (const client of sseClients) {
+        try { client.write(`data: ${JSON.stringify({ type: "reload", files: count })}\n\n`); }
+        catch { sseClients.delete(client); }
+      }
     }, 300);
   });
 }
@@ -79,6 +95,18 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
+
+  if (url.pathname === "/api/events") {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    });
+    res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+    sseClients.add(res);
+    req.on("close", () => sseClients.delete(res));
+    return;
+  }
 
   if (url.pathname === "/api/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
