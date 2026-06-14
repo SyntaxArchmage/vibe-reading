@@ -3,12 +3,21 @@ import { AnimatePresence } from "motion/react";
 import { Card } from "../components/Card";
 import type { DataEntity } from "../shared-types";
 
+interface CallGraphFile {
+  file: string;
+  imports: Array<{ source: string; names: string[] }>;
+  exports: string[];
+}
+
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
   highlightEntity?: DataEntity | null;
   totalLines?: number;
   visibleRange?: { start: number; end: number } | null;
+  callGraph?: { files: CallGraphFile[] } | null;
+  currentFile?: string | null;
+  onFileSelect?: (file: string) => void;
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
@@ -56,10 +65,30 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   );
 }
 
-export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange }: Props) {
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
+
+  const usagesMap = useMemo(() => {
+    const m = new Map<string, Array<{ file: string; names: string[] }>>();
+    if (!callGraph?.files || !currentFile) return m;
+    const curEntry = callGraph.files.find(f => currentFile.includes(f.file));
+    if (!curEntry) return m;
+    const exported = new Set(curEntry.exports);
+    for (const f of callGraph.files) {
+      if (f.file === curEntry.file) continue;
+      for (const imp of f.imports) {
+        for (const name of imp.names) {
+          if (exported.has(name)) {
+            if (!m.has(name)) m.set(name, []);
+            m.get(name)!.push({ file: f.file, names: imp.names });
+          }
+        }
+      }
+    }
+    return m;
+  }, [callGraph, currentFile]);
 
   const groups = useMemo(() => {
     const m = new Map<string, DataEntity[]>();
@@ -95,7 +124,9 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
         <AnimatePresence mode="popLayout">
           {entities.map((e, i) => (
             <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
-                  highlight={highlightEntity === e} />
+                  highlight={highlightEntity === e}
+                  usages={usagesMap.get(e.detail.name as string)}
+                  onFileSelect={onFileSelect} />
           ))}
         </AnimatePresence>
       </div>
@@ -117,7 +148,9 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
             <AnimatePresence mode="popLayout">
               {items.map((e, i) => (
                 <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
-                      highlight={highlightEntity === e} />
+                      highlight={highlightEntity === e}
+                      usages={usagesMap.get(e.detail.name as string)}
+                      onFileSelect={onFileSelect} />
               ))}
             </AnimatePresence>
           )}

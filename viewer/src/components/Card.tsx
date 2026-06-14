@@ -6,6 +6,8 @@ interface CardProps {
   entity: DataEntity;
   onClick: (entity: DataEntity) => void;
   highlight?: boolean;
+  usages?: Array<{ file: string; names: string[] }>;
+  onFileSelect?: (file: string) => void;
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -23,7 +25,7 @@ function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
-export function Card({ entity, onClick, highlight }: CardProps) {
+export function Card({ entity, onClick, highlight, usages, onFileSelect }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const kind = (entity.detail.kind as string) || "";
   const name = (entity.detail.name as string) || "";
@@ -98,6 +100,19 @@ export function Card({ entity, onClick, highlight }: CardProps) {
                 >📋</span>
               )}
             </div>
+            {usages && usages.length > 0 && (
+              <div style={{ marginTop: 6, fontSize: 11 }}>
+                <div style={{ color: "#888", marginBottom: 2 }}>Used by {usages.length} file{usages.length > 1 ? "s" : ""}:</div>
+                {usages.map((u, i) => (
+                  <div key={i}
+                    style={{ color: "#9cdcfe", cursor: "pointer", padding: "1px 0" }}
+                    onClick={(e) => { e.stopPropagation(); onFileSelect?.(u.file); }}
+                  >
+                    {u.file.split("/").pop()}
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

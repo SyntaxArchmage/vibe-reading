@@ -385,7 +385,12 @@ export function App() {
       case "concept":
         return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity}
                            totalLines={sourceCode ? sourceCode.split("\n").length : 0}
-                           visibleRange={visibleRange} />;
+                           visibleRange={visibleRange}
+                           callGraph={CALL_GRAPH} currentFile={currentFile}
+                           onFileSelect={(file) => {
+                             const fk = allFiles.find(f => f.file === file)?.key;
+                             if (fk) selectFile(fk);
+                           }} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
           const fk = allFiles.find(f => f.file === file)?.key;
