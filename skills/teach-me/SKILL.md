@@ -48,19 +48,37 @@ xdg-open http://localhost:3460
 
 ## What the User Sees
 
-- **Activity bar** (far left): Toggle file explorer and search
+- **Activity bar** (far left): Toggle file explorer and entity search
 - **File tree** (left sidebar): Collapsible directory tree, auto-expands to current file
+- **Entity search** (left panel): Search entities across all files by name/summary
 - **Tab bar** (top): Multi-file tabs, click to switch, X to close
-- **Source code** (center): Monaco editor with syntax highlighting
+- **Source code** (center): Monaco editor with syntax highlighting and entity gutter markers
 - **Cards sidebar** (right): Four tabs — Concept, Flow, History, Jump
+- **Flow diagram**: Visual imports → file → exports chain at top of Flow tab
+- **Git blame**: On-demand per-line blame in History tab
 - **Command palette** (Ctrl+P): Searchable overlay to quickly open any file
+- **Card filter/sort**: Filter by name and sort by line/name/kind
 - **Click card** → corresponding code lines highlighted in the editor
 - **Click jump card** → navigates to target file
-- **Expand card** → description paragraph + metadata chips
+- **Expand card** → description paragraph + metadata chips + enrichment indicator
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+P | Open command palette (file search) |
+| Ctrl+B | Toggle file explorer |
+| Ctrl+Shift+F | Toggle entity search |
+| Alt+1-4 | Switch tabs (Concept/Flow/History/Jump) |
+| Alt+← | Navigate back |
+| Alt+→ | Navigate forward |
+| Escape | Close overlays |
 
 ## Notes
 
 - The server loads all `.vibe-reading/files/*.json` and serves them inline
+- Server auto-reloads when analysis files change (re-run `/learn-code` while viewing)
 - Source files are served from the project root via `/api/source` endpoint
+- Git blame data fetched on-demand via `/api/blame` endpoint
 - Close the browser tab and Ctrl+C the server when done
 - The server is read-only — it never modifies any files
