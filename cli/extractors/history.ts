@@ -31,7 +31,7 @@ function getFileLog(projectRoot: string, filePath: string, maxCommits = 20): Com
 function getChangeFrequency(projectRoot: string, filePath: string): number {
   try {
     const output = execSync(
-      `git log --oneline -- "${filePath}" | wc -l`,
+      `git rev-list --count HEAD -- "${filePath}"`,
       { cwd: projectRoot, encoding: "utf-8", timeout: 5000 }
     );
     return parseInt(output.trim()) || 0;
@@ -43,7 +43,7 @@ function getChangeFrequency(projectRoot: string, filePath: string): number {
 function getFirstCommitDate(projectRoot: string, filePath: string): string | null {
   try {
     const output = execSync(
-      `git log --format="%aI" --diff-filter=A -- "${filePath}" | tail -1`,
+      `git log --format="%aI" --diff-filter=A --reverse -1 -- "${filePath}"`,
       { cwd: projectRoot, encoding: "utf-8", timeout: 5000 }
     );
     return output.trim() || null;
