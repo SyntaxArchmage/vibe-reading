@@ -806,7 +806,16 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
-// --- Test 48: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 48: export-md with nonexistent file returns header only ---
+{
+  console.log("\n--- Test 48: export-md nonexistent file ---");
+  const mdOut = run(`npx tsx export-md.ts ${FIXTURE_DIR} --file src/nonexistent.ts`);
+  assert(mdOut.includes("# fixture"), "Header present even with no matching file");
+  assert(!mdOut.includes("## src/nonexistent.ts"), "Nonexistent file not in output");
+  assert(!mdOut.includes("### Concept"), "No concept section for nonexistent file");
+}
+
+// --- Test 49: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
