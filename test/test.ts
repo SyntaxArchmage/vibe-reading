@@ -136,8 +136,30 @@ assert(taskEntity?.detail?.description === "Defines the unit of work.", `Enriche
 const otherEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
 assert(otherEntity?.summary.includes("Scheduler"), `Non-enriched entity keeps name (got "${otherEntity?.summary}")`);
 
-// === Test 10: Schema validation rejects malformed data ===
-console.log("\nTest 10: Schema validation rejects malformed data");
+// === Test 10: Flow entity extraction ===
+console.log("\nTest 10: Flow entity extraction");
+const schedulerFlow = schedulerData.entities.filter((e: { type: string }) => e.type === "flow");
+assert(schedulerFlow.length >= 2, `At least 2 flow entities in scheduler.ts (got ${schedulerFlow.length})`);
+const enqueueFlow = schedulerFlow.find((e: { summary: string }) => e.summary.includes("enqueue calls"));
+assert(!!enqueueFlow, "Found enqueue call flow");
+const runFlow = schedulerFlow.find((e: { summary: string }) => e.summary.includes("run calls"));
+assert(!!runFlow, "Found run call flow");
+
+const utilsFlow = jsEntities.filter((e: { type: string }) => e.type === "flow");
+assert(utilsFlow.length >= 2, `At least 2 flow entities in utils.js (got ${utilsFlow.length})`);
+const debounceFlow = utilsFlow.find((e: { summary: string }) => e.summary.includes("debounce calls"));
+assert(!!debounceFlow, "Found debounce call flow (setTimeout, clearTimeout)");
+
+// Re-read to get flow entities from the fresh analysis
+const utilsDataFull = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__utils.js.json"), "utf-8")
+);
+const utilsFlowFull = utilsDataFull.entities.filter((e: { type: string }) => e.type === "flow");
+const deepCloneFlow = utilsFlowFull.find((e: { summary: string }) => e.summary.includes("deepClone"));
+assert(!!deepCloneFlow, "Found deepClone call flow (JSON.parse, JSON.stringify)");
+
+// === Test 12: Schema validation rejects malformed data ===
+console.log("\nTest 12: Schema validation rejects malformed data");
 
 // Create a malformed JSON file
 const malformedDir = path.join(FIXTURE_DIR, ".vibe-reading-malformed");
@@ -184,8 +206,8 @@ fs.renameSync(origVibeDir, malformedDir);
 fs.renameSync(tempVibeDir, origVibeDir);
 fs.rmSync(malformedDir, { recursive: true });
 
-// === Test 11: Schema validation passes valid data ===
-console.log("\nTest 11: Schema validation passes valid data");
+// === Test 13: Schema validation passes valid data ===
+console.log("\nTest 13: Schema validation passes valid data");
 const harnessValidOut = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
 assert(harnessValidOut.includes("Schema valid"), "Harness reports schema valid for good data");
 

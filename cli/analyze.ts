@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { glob } from "glob";
 import { extractConcepts } from "./extractors/concept.js";
+import { extractFlow } from "./extractors/flow.js";
 import type { DataEntity, FileAnalysis, Manifest, ManifestEntry } from "./types.js";
 
 const VIBE_DIR = ".vibe-reading";
@@ -101,9 +102,9 @@ async function analyzeFile(
   const content = fs.readFileSync(absPath, "utf-8");
 
   const concepts = await extractConcepts(relativePath, content);
+  const flowData = await extractFlow(relativePath, content);
 
-  // Future phases will add flow, history, jump extractors here
-  const entities: DataEntity[] = [...concepts];
+  const entities: DataEntity[] = [...concepts, ...flowData.entities];
 
   return {
     file: relativePath,

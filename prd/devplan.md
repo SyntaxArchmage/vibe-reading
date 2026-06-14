@@ -65,7 +65,7 @@ architecture concepts for every entity in the current file.
 
 ---
 
-## Phase 1.5: Viewer Foundation (NEXT)
+## Phase 1.5: Viewer Foundation (IN PROGRESS)
 
 **Goal**: Upgrade the preview prototype into a proper standalone web
 viewer with Monaco editor, file tree, and Playwright E2E testing.
@@ -76,31 +76,29 @@ viewer with Monaco editor, file tree, and Playwright E2E testing.
       standalone React app with its own build
 - [x] `/teach-me` skill: starts viewer server + opens browser
 - [x] Viewer reads `.vibe-reading/` data and serves source files
-- [ ] Integrate `@monaco-editor/react` for syntax highlighting, line
-      numbers, minimap, code folding, and decorations (replaces current
-      plain `<pre>` code display)
-- [ ] Monaco decorations: click card → highlight corresponding code
-      range via `editor.createDecorationsCollection()`
-- [ ] File tree component (React): renders project structure from
-      `.vibe-reading/` manifest, click to open file in Monaco
-- [ ] Tab bar component (React): multiple open files with tab switching
-- [ ] Playwright E2E test suite:
-  - Launch headless browser → open viewer
-  - Verify file list renders with correct count
-  - Click card → verify code line highlighting (Monaco decoration)
-  - Expand card → verify description renders
-  - Screenshot comparison for visual regression
-- [ ] Schema validation in harness (not just coverage — field types,
-      required fields, value constraints)
-- [ ] Clean up extension/ (remove duplicated webview code)
+- [x] Integrate Monaco editor (CDN) for syntax highlighting, line
+      numbers, minimap, code folding, and decorations
+- [x] Monaco decorations: click card → highlight corresponding code
+      range via `deltaDecorations()`
+- [x] File tree component (React): collapsible directory tree from
+      `.vibe-reading/` data, click to open file in Monaco
+- [x] Tab bar component (React): multiple open files with close buttons
+- [x] Schema validation in harness (types, anchors, required fields,
+      value constraints — rejects malformed JSON)
+- [x] Clean up extension/ (removed duplicated webview code)
+- [x] Activity bar with explorer toggle and search shortcut
+- [x] Command palette file picker (Ctrl+P, centered, overlay backdrop)
+- [ ] Playwright E2E test suite (18 tests written, browser install
+      blocked by network — tests ready to run when available)
+- [ ] Visual regression baseline screenshots
 
 ### Verify
 
-- [ ] `/teach-me` opens browser, Monaco shows syntax-highlighted code
-- [ ] Click card → Monaco highlights the code range
-- [ ] File tree allows navigation between files
+- [x] `/teach-me` opens browser, Monaco shows syntax-highlighted code
+- [x] Click card → Monaco highlights the code range
+- [x] File tree allows navigation between files
 - [ ] Playwright tests pass headless (agent can run autonomously)
-- [ ] Harness rejects malformed JSON (schema validation)
+- [x] Harness rejects malformed JSON (schema validation — test 10/11)
 
 ### Files
 
@@ -245,7 +243,7 @@ Phase 3
 |-------|------|--------|------|
 | 0 | Foundation | ✅ Done | Schema + /learn-code + harness + CLI |
 | 1 | Concept Push | ✅ Done | Concept cards in web viewer |
-| 1.5 | Viewer Foundation | Next | Standalone viewer + Playwright + /teach-me |
+| 1.5 | Viewer Foundation | In Progress | Standalone viewer + Playwright + /teach-me |
 | 2 | Macro Flow | Pending | Call chain visualization |
 | 3 | Evolve Map | Pending | Git evolution timeline |
 | 4 | Vibe Jump | Pending | Semantic navigation suggestions |
