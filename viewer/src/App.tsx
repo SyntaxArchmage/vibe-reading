@@ -58,6 +58,9 @@ export function App() {
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
+  const [gotoLineOpen, setGotoLineOpen] = useState(false);
+  const [gotoLineValue, setGotoLineValue] = useState("");
+  const gotoLineRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -243,6 +246,7 @@ export function App() {
         setPickerOpen(false);
         setEntitySearchOpen(false);
         setHelpOpen(false);
+        setGotoLineOpen(false);
       }
       if (e.key === "?" && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
         setHelpOpen(v => !v);
@@ -250,6 +254,12 @@ export function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === "b") {
         e.preventDefault();
         setTreeOpen((v) => !v);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "g") {
+        e.preventDefault();
+        setGotoLineOpen(true);
+        setGotoLineValue("");
+        setTimeout(() => gotoLineRef.current?.focus(), 0);
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
         e.preventDefault();
@@ -676,6 +686,32 @@ export function App() {
         </>
       )}
 
+      {gotoLineOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setGotoLineOpen(false)} />
+        <div className="vr-picker" style={{ maxHeight: 60 }}>
+          <input
+            ref={gotoLineRef}
+            type="text"
+            className="vr-picker-input"
+            placeholder="Go to line..."
+            value={gotoLineValue}
+            onChange={e => setGotoLineValue(e.target.value.replace(/[^0-9]/g, ""))}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                const line = parseInt(gotoLineValue);
+                if (line > 0) {
+                  setHighlightRange({ startLine: line, endLine: line });
+                  setGotoLineOpen(false);
+                }
+              }
+              if (e.key === "Escape") setGotoLineOpen(false);
+            }}
+          />
+        </div>
+        </>
+      )}
+
       {helpOpen && (
         <>
         <div className="vr-picker-overlay" onClick={() => setHelpOpen(false)} />
@@ -685,6 +721,7 @@ export function App() {
             <kbd>Ctrl+P</kbd><span>File picker</span>
             <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
             <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
+            <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
             <kbd>Alt+1-4</kbd><span>Switch tab</span>
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
