@@ -589,6 +589,22 @@ export function App() {
                   </div>
                 ) : null;
               })()}
+              {bookmarks.size > 0 && (
+                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
+                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
+                    ★ Bookmarks ({bookmarks.size})
+                  </div>
+                  {[...bookmarks].slice(0, 8).map(bk => {
+                    const [file, name] = bk.split(":");
+                    return (
+                      <div key={bk} style={{ fontSize: 11, color: "#dcdcaa", padding: "2px 0", cursor: "pointer" }}
+                           onClick={() => { const fk = allFiles.find(f => f.key === file)?.key; if (fk) selectFile(fk); }}>
+                        {name} <span style={{ color: "#666" }}>{file?.split("__").pop()?.replace(".json", "")}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {allFiles.length > 0 && (
                 <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
                   <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
