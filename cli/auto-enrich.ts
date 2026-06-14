@@ -28,7 +28,6 @@ function extractJSDoc(lines: string[], startLine: number): string | undefined {
       continue;
     }
     if (line.endsWith("*/")) {
-      // collect backwards to /**
       let j = i;
       while (j >= 0) {
         docLines.unshift(lines[j]);
@@ -55,6 +54,32 @@ function extractJSDoc(lines: string[], startLine: number): string | undefined {
     )
     .join("\n")
     .trim();
+}
+
+function extractPyDocstring(lines: string[], startLine: number): string | undefined {
+  const bodyStart = startLine; // 0-indexed: first line of body
+  if (bodyStart >= lines.length) return undefined;
+
+  const firstBodyLine = lines[bodyStart]?.trim();
+  if (!firstBodyLine) return undefined;
+
+  if (firstBodyLine.startsWith('"""') || firstBodyLine.startsWith("'''")) {
+    const quote = firstBodyLine.slice(0, 3);
+    if (firstBodyLine.endsWith(quote) && firstBodyLine.length > 6) {
+      return firstBodyLine.slice(3, -3).trim();
+    }
+    const docLines: string[] = [firstBodyLine.slice(3)];
+    for (let j = bodyStart + 1; j < lines.length; j++) {
+      const l = lines[j].trim();
+      if (l.endsWith(quote)) {
+        docLines.push(l.slice(0, -3));
+        break;
+      }
+      docLines.push(l);
+    }
+    return docLines.join("\n").trim();
+  }
+  return undefined;
 }
 
 function firstSentence(text: string): string {
@@ -170,7 +195,10 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
     const start = entity.anchor.start_line;
     const end = entity.anchor.end_line;
     const sourceSlice = lines.slice(start - 1, end);
-    const jsdoc = extractJSDoc(lines, start);
+    const isPython = relPath.endsWith(".py");
+    const jsdoc = isPython
+      ? extractPyDocstring(lines, start)
+      : extractJSDoc(lines, start);
     const kind = (entity.detail.kind as string) ?? "concept";
 
     enrichments.push({

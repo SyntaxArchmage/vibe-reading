@@ -399,6 +399,22 @@ const emptyData2 = JSON.parse(
 const emptyConcepts = emptyData2.entities.filter((e: { type: string }) => e.type === "concept");
 assert(emptyConcepts.length === 0, "Empty file has zero concept entities");
 
+// === Test 21: Python docstring auto-enrich ===
+console.log("\nTest 21: Python docstring auto-enrich");
+cleanOutput();
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+const pyAfterEnrich = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__engine.py.json"), "utf-8")
+);
+const createEngineEntity = pyAfterEnrich.entities.find(
+  (e: { detail: { name: string } }) => e.detail.name === "create_engine"
+);
+assert(
+  createEngineEntity && !createEngineEntity.summary.startsWith("function:"),
+  `Python docstring enriched create_engine (got "${createEngineEntity?.summary}")`
+);
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);

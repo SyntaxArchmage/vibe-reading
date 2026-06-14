@@ -34,5 +34,6 @@ class Engine:
 
 
 def create_engine(batch_size: int = 32) -> Engine:
+    """Create and configure a new Engine instance with the given batch size."""
     config = Config(batch_size=batch_size)
     return Engine(config)
