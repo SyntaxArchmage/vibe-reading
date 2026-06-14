@@ -5,6 +5,7 @@ import type { DataEntity } from "../shared-types";
 interface CardProps {
   entity: DataEntity;
   onClick: (entity: DataEntity) => void;
+  highlight?: boolean;
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -22,7 +23,7 @@ function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
-export function Card({ entity, onClick }: CardProps) {
+export function Card({ entity, onClick, highlight }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const kind = (entity.detail.kind as string) || "";
   const name = (entity.detail.name as string) || "";
@@ -35,7 +36,7 @@ export function Card({ entity, onClick }: CardProps) {
 
   return (
     <motion.div
-      className="vr-card"
+      className={`vr-card${highlight ? " vr-card-highlight" : ""}`}
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}

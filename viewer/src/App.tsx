@@ -373,7 +373,7 @@ export function App() {
   const tabContent = () => {
     switch (activeTab) {
       case "concept":
-        return <ConceptTab entities={filtered} onCardClick={onCardClick} />;
+        return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
           const fk = allFiles.find(f => f.file === file)?.key;
@@ -1427,6 +1427,11 @@ const sidebarStyles = `
   .vr-card:hover {
     border-color: #007acc;
     box-shadow: 0 0 0 1px rgba(0,122,204,0.15);
+  }
+
+  .vr-card-highlight {
+    border-color: #007acc;
+    background: #1a2a3a;
   }
 
   .vr-card-header {
