@@ -950,7 +950,20 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(bundle.includes("Outline"), "Viewer has Outline tab label");
 }
 
-// --- Test 60: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 60: Complexity report ---
+{
+  console.log("\n--- Test 60: Complexity report ---");
+  const cxOut = run(`npx tsx complexity.ts ${FIXTURE_DIR}`);
+  assert(cxOut.includes("File Complexity Report"), "Complexity report has header");
+  assert(cxOut.includes("Score"), "Complexity report shows score column");
+  assert(cxOut.includes("Average:"), "Complexity report shows average");
+  assert(cxOut.includes("engine.py"), "Complexity report lists engine.py");
+  const topOut = run(`npx tsx complexity.ts ${FIXTURE_DIR} --top=2`);
+  const lines = topOut.split("\n").filter(l => l.includes("src/"));
+  assert(lines.length === 2, `--top=2 shows 2 files (got ${lines.length})`);
+}
+
+// --- Test 61: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
