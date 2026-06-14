@@ -1253,6 +1253,21 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(viewer.includes("Filter ") || viewer.includes("filter"), "Viewer has outline filter");
 }
 
+// --- Test: search --kind filter ---
+{
+  console.log("\n--- Test: search --kind ---");
+  const kindOut = run(`npx tsx search.ts ${FIXTURE_DIR} "" --kind=class`);
+  assert(kindOut.includes("class"), "Kind filter returns class results");
+  assert(!kindOut.includes("concept/function"), "Kind filter excludes functions");
+}
+
+// --- Test: search --regex mode ---
+{
+  console.log("\n--- Test: search --regex ---");
+  const regexOut = run(`npx tsx search.ts ${FIXTURE_DIR} "eng.*" --regex`);
+  assert(regexOut.includes("Engine") || regexOut.includes("engine"), "Regex search matches Engine");
+}
+
 // --- Test: stats dependency graph section ---
 {
   console.log("\n--- Test: stats dependency graph ---");

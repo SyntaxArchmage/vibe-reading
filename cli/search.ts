@@ -11,12 +11,19 @@ function main() {
   const projectRoot = args[0] || process.cwd();
   const query = args[1]?.toLowerCase() || "";
   const typeFlag = args.find(a => a.startsWith("--type="))?.slice(7) || null;
+  const kindFlag = args.find(a => a.startsWith("--kind="))?.slice(7)?.toLowerCase() || null;
   const limitFlag = args.find(a => a.startsWith("--limit="));
   const limit = limitFlag ? parseInt(limitFlag.slice(8)) : 20;
+  const useRegex = args.includes("--regex");
 
-  if (!query && !typeFlag) {
-    console.error("Usage: npx tsx search.ts <project-root> <query> [--type=concept] [--limit=20]");
+  if (!query && !typeFlag && !kindFlag) {
+    console.error("Usage: npx tsx search.ts <project-root> <query> [--type=concept] [--kind=function] [--limit=20] [--regex]");
     process.exit(1);
+  }
+
+  let regex: RegExp | null = null;
+  if (useRegex && query) {
+    try { regex = new RegExp(query, "i"); } catch { console.error(`Invalid regex: ${query}`); process.exit(1); }
   }
 
   const filesDir = path.join(projectRoot, ".vibe-reading", "files");
@@ -34,9 +41,14 @@ function main() {
       );
       for (const e of analysis.entities) {
         if (typeFlag && e.type !== typeFlag) continue;
+        if (kindFlag && String(e.detail?.kind || "").toLowerCase() !== kindFlag) continue;
         const name = String(e.detail?.name || "").toLowerCase();
         const summary = (e.summary || "").toLowerCase();
-        if (query && !name.includes(query) && !summary.includes(query)) continue;
+        if (regex) {
+          if (!regex.test(name) && !regex.test(summary)) continue;
+        } else if (query && !name.includes(query) && !summary.includes(query)) {
+          continue;
+        }
         results.push({
           file: analysis.file,
           name: String(e.detail?.name || e.summary),
