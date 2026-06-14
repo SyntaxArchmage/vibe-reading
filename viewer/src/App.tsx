@@ -598,7 +598,18 @@ export function App() {
         <span>
           {currentFile ?? "No file selected"}
           {breadcrumbEntity && (
-            <span className="vr-breadcrumb">
+            <span
+              className="vr-breadcrumb"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                setActiveTab("concept");
+                setHighlightRange({
+                  startLine: breadcrumbEntity.anchor.start_line,
+                  endLine: breadcrumbEntity.anchor.end_line,
+                });
+              }}
+              title="Click to show in Concept tab"
+            >
               {" > "}{(breadcrumbEntity.detail.kind as string) ?? ""}
               {" "}<strong>{breadcrumbEntity.detail.name as string}</strong>
             </span>
