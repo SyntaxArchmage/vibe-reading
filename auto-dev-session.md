@@ -1,13 +1,13 @@
 # Auto-Dev Session Log
 
-### Auto-Dev Session 2026-06-14 18:12 (current)
-- **Duration**: 90 minutes (in progress)
-- **Tests**: 225 assertions (up from 148 → 77 new)
+### Auto-Dev Session 2026-06-14 18:12 (completed)
+- **Duration**: 90 minutes
+- **Tests**: 242 assertions (up from 148 → 94 new)
 - **Defects found**: 1
   - All tree-sitter-wasms language parsers had ABI mismatch (silent failures)
 - **Defects fixed**: 1
   - Removed broken tree-sitter-wasms entries + dead concept extractor code
-- **Features implemented** (25 items):
+- **Features implemented** (32 items):
   - Keyboard shortcuts help overlay (? to toggle)
   - Ctrl+G goto line dialog
   - Commit count badge in file header
@@ -20,9 +20,11 @@
   - Blame view shows source code alongside annotations
   - `/api/stats` endpoint for project-level statistics
   - `/api/search` endpoint for programmatic entity search
+  - `/api/export` endpoint for complete data download
   - `export-md.ts` — Markdown analysis export
   - `export-dot.ts` — Graphviz DOT call graph export
   - Top 5 most complex files in empty state sidebar
+  - Enrichment progress bar in empty state
   - Folder entity counts in file tree
   - Fuzzy file matching in command palette
   - Relative date formatting in HistoryTab
@@ -32,8 +34,13 @@
   - Stats tool: average entities/file, extension breakdown
   - Analyze reports entity counts by file extension
   - Status bar simplification with ? help hint
-  - HANDOFF.md updated with all features
-- **Commits**: 32 commits
+  - Flow tab import/export ratio summary
+  - Concept tab groups entities by kind (collapsible)
+  - Entity density minimap bar in concept tab
+  - Card highlight follows cursor position
+  - Commit frequency sparkline in history tab
+  - `[` / `]` keyboard shortcuts for prev/next file
+- **Commits**: 40 commits (78d6e82 → b4f7456)
 
 ### Auto-Dev Session 2026-06-14 16:12 (completed)
 - **Duration**: 90 minutes

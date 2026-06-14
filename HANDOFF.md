@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (130 assertions)
+# 3. Run CLI tests (242 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -45,7 +45,7 @@ python3 test/e2e/test_viewer.py
 - `cli/stats.ts` — project stats (avg entities/file, extension breakdown)
 - `cli/export-md.ts` — export analysis as Markdown summary
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 187 automated tests in `test/test.ts`
+- 242 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -112,9 +112,21 @@ python3 test/e2e/test_viewer.py
 - Commit count badge in file header
 - Keyboard shortcuts help overlay (? key)
 - `/api/stats` endpoint for project-level statistics
+- `/api/export` endpoint for complete data download
 - `export-md.ts` tool for Markdown summaries
+- `export-dot.ts` tool for Graphviz DOT call graph export
 - Analyze reports entity counts by file extension
 - Blame view shows source code alongside annotations
+- Enrichment progress bar in empty state sidebar
+- Flow tab import/export ratio summary
+- Concept tab groups entities by kind (collapsible sections)
+- Entity density minimap bar in concept tab
+- Card highlight follows cursor position
+- Commit frequency sparkline in history tab
+- `[` / `]` keyboard shortcuts for prev/next file navigation
+- Persist last viewed file and active tab (localStorage)
+- Close other tabs button
+- Copy entity name button in card
 - Fix: export extractor no longer over-collects internal identifiers
 - Fix: entity search closes on selection, safe end_line fallback
 - Fix: summaryIsPlaceholder regex covers all entity kinds
@@ -173,7 +185,7 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 187 CLI pipeline tests
+│   ├── test.ts                 # 242 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
 │   └── fixture/                # Test fixture (5 source files)
 ├── prd/
