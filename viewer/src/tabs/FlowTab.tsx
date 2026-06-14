@@ -246,9 +246,22 @@ export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileS
   const exports = entities.filter((e) => e.detail.kind === "exports");
   const ordered = [...imports, ...calls, ...exports];
 
+  const localDeps = imports.flatMap(e => (e.detail.local_deps as string[]) || []);
+  const externalDeps = imports.flatMap(e => (e.detail.external_deps as string[]) || []);
+  const exportNames = exports.flatMap(e => (e.detail.names as string[]) || []);
+  const totalImports = localDeps.length + externalDeps.length;
+
   return (
     <div>
       <FlowDiagram imports={imports} calls={calls} exports={exports} />
+      {(totalImports > 0 || exportNames.length > 0) && (
+        <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "0 0 6px" }}>
+          {totalImports} imports ({localDeps.length} local) · {exportNames.length} exports
+          {totalImports > 0 && exportNames.length > 0 && (
+            <span> · ratio {(exportNames.length / totalImports).toFixed(1)}</span>
+          )}
+        </div>
+      )}
       {currentFile && callGraph && <CrossFileInfo currentFile={currentFile} callGraph={callGraph} onFileSelect={onFileSelect} />}
       <AnimatePresence mode="popLayout">
         {ordered.map((e, i) => (
