@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (77 assertions)
+# 3. Run CLI tests (94 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -44,7 +44,7 @@ python3 test/e2e/test_viewer.py
 - `cli/harness.ts` — coverage verification + schema validation
 - `cli/stats.ts` — quick project stats overview
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 77 automated tests in `test/test.ts`
+- 94 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -145,7 +145,7 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 77 CLI pipeline tests
+│   ├── test.ts                 # 94 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
 │   └── fixture/                # Test fixture (4 source files)
 ├── prd/

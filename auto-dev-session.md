@@ -1,29 +1,43 @@
 # Auto-Dev Session Log
 
-### Auto-Dev Session 2026-06-14 16:12
-- **Duration**: 43 minutes (ongoing)
-- **Defects found**: 2 (P0: 0, P1: 0, P2: 0, P3: 0, P4: 2)
-- **Defects fixed**: 2
-  - P4: ~200 lines of duplicated Tree-sitter boilerplate across 3 extractors → shared parser.ts
-  - P4: isGitRepo called per-file without caching → cached
-- **Tests added**: 7 (61 → 68 assertions)
-  - Jump entity extraction (type, target_file, kind)
-  - File analysis analyzed_at timestamp validation
-  - Empty file edge case for concept entities
-  - Enrich --from-file option
+### Auto-Dev Session 2026-06-14 16:12 (continued)
+- **Duration**: 76 minutes
+- **Defects found**: 4 (P0: 0, P1: 0, P2: 0, P3: 1, P4: 3)
+- **Defects fixed**: 4
+  - P3: Entity search used file path instead of key for selectFile (navigated wrong)
+  - P4: Shadowed `filesDir` variable in server.ts
+  - P4: History extractor used shell pipe `| wc -l` and `| tail -1` instead of git-native flags
+  - P4: Auto-enrich `isUnenriched` check missed enum/method/struct/module/decorated kinds
+- **Tests added**: 24 (70 → 94 assertions)
+  - Stats tool output format
+  - Enrichment detection (placeholder vs real descriptions)
+  - Re-analyze behavior
+  - Python flow extraction
+  - TypeScript export flow entities
+  - Python decorated class extraction
+  - Empty file concept entities
+  - Python docstring auto-enrich
+  - Harness enrichment tracking
+  - Call graph details
+  - Entity anchor consistency validation
+  - Manifest consistency
 - **Features implemented**:
-  - Shared parser module (cli/extractors/parser.ts)
-  - FileTree auto-expand to current file
-  - Status bar with keyboard shortcut hints
-  - Ctrl+B toggle file explorer
-  - Navigation history with back/forward (Alt+←/→)
-  - Card filter input in sidebar
-  - Card sort controls (line number / name / kind)
-  - Harness enrichment tracking (enriched/total concepts)
-  - Enrich --from-file option for large enrichments
-  - Analyze summary with total entity count
-  - Updated HANDOFF.md and devplan.md
-  - Updated skill docs (learn-code, teach-me)
-- **Commits**: 12 commits (d21b9e2 → cd10f77)
-- **PRD progress**: All 4 feature phases complete, Phase 1.5 mostly done (Playwright blocked)
-- **Next priority**: Visual inspection via browser, deeper testing, performance optimization
+  - `.cursor/rules/vibe-reading.mdc` — project rules for AI sessions
+  - `cli/stats.ts` — quick project stats overview
+  - Server auto-reload when analysis files change
+  - Card enrichment indicator ("enriched" chip)
+  - On-demand git blame via /api/blame endpoint
+  - Git blame view in HistoryTab with per-line author/date/sha
+  - Visual flow diagram in FlowTab header (imports → file → exports)
+  - Global entity search panel (Ctrl+Shift+F)
+  - Entity gutter markers in Monaco editor (color-coded by type)
+  - Alt+1-4 tab switching keyboard shortcuts
+  - Python docstring support in auto-enrich
+  - Smarter auto-enrich heuristics (private methods, constructors, properties)
+  - Cross-file "Imported by" section in FlowTab
+  - Call graph data exposed in viewer (CALL_GRAPH global)
+  - File/entity count in empty state
+  - Updated HANDOFF.md, devplan.md, teach-me, learn-code skills
+- **Commits**: 21 commits (f8c607d → bac1a2f)
+- **PRD progress**: Flow diagram and git blame deferred items completed
+- **Next priority**: LSP integration, heat map overlay, PR description extraction, Playwright E2E
