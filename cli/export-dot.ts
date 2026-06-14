@@ -1,6 +1,6 @@
 /**
  * Export call graph as DOT (Graphviz) format.
- * Usage: npx tsx export-dot.ts <project-root> > graph.dot
+ * Usage: npx tsx export-dot.ts <project-root> [--focus <file>] > graph.dot
  *        dot -Tpng graph.dot -o graph.png
  */
 import * as fs from "fs";
@@ -13,7 +13,13 @@ interface CallGraphFile {
 }
 
 function main() {
-  const projectRoot = process.argv[2] || process.cwd();
+  const args = process.argv.slice(2);
+  const focusIdx = args.indexOf("--focus");
+  const focusFile = focusIdx >= 0 ? args[focusIdx + 1] : null;
+  const positional = focusIdx >= 0
+    ? args.filter((_, i) => i !== focusIdx && i !== focusIdx + 1)
+    : args;
+  const projectRoot = positional[0] || process.cwd();
   const cgPath = path.join(projectRoot, ".vibe-reading", "global", "call-graph.json");
 
   if (!fs.existsSync(cgPath)) {
@@ -32,11 +38,29 @@ function main() {
 
   const nodeId = (file: string) => file.replace(/[^a-zA-Z0-9]/g, "_");
 
+  const isFocused = (file: string) => focusFile && file.includes(focusFile);
+  const isRelevant = (file: string) => {
+    if (!focusFile) return true;
+    if (isFocused(file)) return true;
+    const focusEntry = cg.files.find(f => isFocused(f.file));
+    if (!focusEntry) return false;
+    for (const imp of focusEntry.imports) {
+      const resolved = cg.files.find(t => t.file.endsWith(imp.source.replace(/^\.\//, "")));
+      if (resolved && resolved.file === file) return true;
+    }
+    return cg.files.some(f => f.file === file && f.imports.some(imp => {
+      const resolved = cg.files.find(t => isFocused(t.file));
+      return resolved && (imp.source.replace(/^\.\//, "") === resolved.file || resolved.file.endsWith(imp.source.replace(/^\.\//, "")));
+    }));
+  };
+
   for (const f of cg.files) {
+    if (!isRelevant(f.file)) continue;
     const id = nodeId(f.file);
     const label = f.file.split("/").pop() || f.file;
     const exportCount = f.exports.length;
-    lines.push(`  ${id} [label="${label}\\n(${exportCount} exports)"];`);
+    const highlight = isFocused(f.file) ? ', fillcolor="#1a3a5a", color="#007acc"' : "";
+    lines.push(`  ${id} [label="${label}\\n(${exportCount} exports)"${highlight}];`);
   }
 
   for (const f of cg.files) {
