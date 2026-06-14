@@ -61,6 +61,7 @@ export function App() {
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
+  const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
   const [gotoLineOpen, setGotoLineOpen] = useState(false);
   const [gotoLineValue, setGotoLineValue] = useState("");
   const gotoLineRef = useRef<HTMLInputElement>(null);
@@ -383,7 +384,8 @@ export function App() {
     switch (activeTab) {
       case "concept":
         return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity}
-                           totalLines={sourceCode ? sourceCode.split("\n").length : 0} />;
+                           totalLines={sourceCode ? sourceCode.split("\n").length : 0}
+                           visibleRange={visibleRange} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
           const fk = allFiles.find(f => f.file === file)?.key;
@@ -667,6 +669,7 @@ export function App() {
                 type: e.type,
               }))}
               onCursorLine={setCursorLine}
+              onVisibleRange={useCallback((s: number, e: number) => setVisibleRange({ start: s, end: e }), [])}
             />
           ) : (
             <div className="vr-editor-placeholder">

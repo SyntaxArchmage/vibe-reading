@@ -8,6 +8,7 @@ interface Props {
   onCardClick: (entity: DataEntity) => void;
   highlightEntity?: DataEntity | null;
   totalLines?: number;
+  visibleRange?: { start: number; end: number } | null;
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
@@ -22,16 +23,24 @@ const KIND_COLORS: Record<string, string> = {
   enum: "#b5cea8",
 };
 
-function DensityBar({ entities, totalLines, onCardClick }: {
+function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   entities: DataEntity[];
   totalLines: number;
   onCardClick: (e: DataEntity) => void;
+  visibleRange?: { start: number; end: number } | null;
 }) {
   if (totalLines <= 0) return null;
   return (
     <div style={{ height: 18, background: "#181818", margin: "0 8px 6px", borderRadius: 3,
                   position: "relative", overflow: "hidden", cursor: "pointer" }}
          title="Entity density — click a segment to jump">
+      {visibleRange && (
+        <div style={{ position: "absolute", top: 0, bottom: 0,
+                      left: `${(visibleRange.start / totalLines) * 100}%`,
+                      width: `${((visibleRange.end - visibleRange.start) / totalLines) * 100}%`,
+                      background: "rgba(255,255,255,0.06)", borderLeft: "1px solid #555", borderRight: "1px solid #555",
+                      pointerEvents: "none" }} />
+      )}
       {entities.map((e, i) => {
         const left = (e.anchor.start_line / totalLines) * 100;
         const width = Math.max(((e.anchor.end_line - e.anchor.start_line + 1) / totalLines) * 100, 0.5);
@@ -47,7 +56,7 @@ function DensityBar({ entities, totalLines, onCardClick }: {
   );
 }
 
-export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines }: Props) {
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
@@ -76,7 +85,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines 
   };
 
   const densityBar = totalLines && totalLines > 0
-    ? <DensityBar entities={entities} totalLines={totalLines} onCardClick={onCardClick} />
+    ? <DensityBar entities={entities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
     : null;
 
   if (groups.length <= 1) {
