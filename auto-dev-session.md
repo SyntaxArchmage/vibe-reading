@@ -1,7 +1,7 @@
 # Auto-Dev Session Log
 
 ### Auto-Dev Session 2026-06-14 16:12 (continued)
-- **Duration**: 81 minutes
+- **Duration**: 90 minutes
 - **Defects found**: 7 (P0: 0, P1: 0, P2: 1, P3: 1, P4: 5)
 - **Defects fixed**: 7
   - P2: Required parameter after optional in buildDescription (lint error)
@@ -11,7 +11,7 @@
   - P4: Auto-enrich `isUnenriched` check missed enum/method/struct/module/decorated kinds
   - P4: Blame view kept stale data when switching files (missing key prop)
   - P4: allEntities and allFiles recomputed on every render (memoized)
-- **Tests added**: 31 (70 → 101 assertions)
+- **Tests added**: 35 (70 → 105 assertions)
   - Stats tool output format
   - Enrichment detection (placeholder vs real descriptions)
   - Re-analyze behavior
@@ -41,6 +41,6 @@
   - Call graph data exposed in viewer (CALL_GRAPH global)
   - File/entity count in empty state
   - Updated HANDOFF.md, devplan.md, teach-me, learn-code skills
-- **Commits**: 26 commits (f8c607d → fa8c9ac)
+- **Commits**: 32 commits (f8c607d → 78d6e82)
 - **PRD progress**: Flow diagram and git blame deferred items completed
 - **Next priority**: LSP integration, heat map overlay, PR description extraction, Playwright E2E
