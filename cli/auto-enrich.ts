@@ -150,6 +150,16 @@ function actionSummary(name: string, kind: string, jsdoc?: string, sourceLine?: 
   return truncate(`${verb} ${readable}`, 80);
 }
 
+function extractParams(sig: string): string[] {
+  const m = sig.match(/\(([^)]*)\)/);
+  if (!m) return [];
+  return m[1]
+    .split(",")
+    .map(p => p.trim())
+    .filter(p => p && p !== "self" && p !== "cls")
+    .map(p => p.split(/[=:]/)[0].trim());
+}
+
 function buildDescription(
   name: string,
   kind: string,
@@ -193,10 +203,26 @@ function buildDescription(
     parts.push("Initializes instance state and validates constructor arguments.");
   }
 
+  const funcSig = sourceLines[0]?.trim() || "";
+  if ((kind === "function" || kind === "method") && funcSig) {
+    const params = extractParams(funcSig);
+    if (params.length > 0) {
+      parts.push(`Parameters: ${params.join(", ")}.`);
+    }
+    const retMatch = funcSig.match(/\)\s*:\s*(\w+[\w<>\[\]|]*)/);
+    if (retMatch) {
+      parts.push(`Returns ${retMatch[1]}.`);
+    } else if (funcSig.includes("-> ")) {
+      const pyRet = funcSig.match(/->\s*(\w+)/);
+      if (pyRet) parts.push(`Returns ${pyRet[1]}.`);
+    }
+  }
+
   const body = sourceLines.join("\n");
   if (body.includes("throw ") || body.includes("raise ")) {
     parts.push("May throw on invalid inputs; callers should handle errors.");
   }
+
   if (body.includes("@property") || (sig && sig.includes("get "))) {
     parts.push("Computed property; accessed like a field but may trigger logic.");
   }
