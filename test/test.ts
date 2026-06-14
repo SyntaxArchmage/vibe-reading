@@ -727,7 +727,21 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(kinds.has("exports"), "Flow entities include exports");
 }
 
-// --- Test 43: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 43: export-md produces valid markdown ---
+{
+  console.log("\n--- Test 43: export-md tool ---");
+  const mdOut = run(`npx tsx export-md.ts ${FIXTURE_DIR}`);
+  assert(mdOut.includes("# fixture"), "export-md has project title");
+  assert(mdOut.includes("## src/scheduler.ts"), "export-md has scheduler section");
+  assert(mdOut.includes("### Concept"), "export-md has concept section");
+  assert(mdOut.includes("### Flow"), "export-md has flow section");
+  // Single file export
+  const mdSingle = run(`npx tsx export-md.ts ${FIXTURE_DIR} --file src/engine.py`);
+  assert(mdSingle.includes("## src/engine.py"), "single file export works");
+  assert(!mdSingle.includes("## src/scheduler.ts"), "single file excludes other files");
+}
+
+// --- Test 44: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
