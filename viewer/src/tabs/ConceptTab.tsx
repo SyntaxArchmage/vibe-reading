@@ -119,9 +119,29 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     ? <DensityBar entities={entities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
     : null;
 
+  const fileSummary = useMemo(() => {
+    const concepts = entities.filter(e => e.type === "concept");
+    const enriched = concepts.filter(e => {
+      const d = e.detail.description as string | undefined;
+      return d && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(d);
+    });
+    return { total: concepts.length, enriched: enriched.length, kinds: groups.length };
+  }, [entities, groups]);
+
+  const summaryLine = (
+    <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "4px 8px 2px" }}>
+      {fileSummary.total} concept{fileSummary.total !== 1 ? "s" : ""}
+      {fileSummary.kinds > 1 && ` in ${fileSummary.kinds} kinds`}
+      {fileSummary.enriched > 0 && fileSummary.enriched < fileSummary.total && ` · ${fileSummary.enriched} enriched`}
+      {fileSummary.enriched === fileSummary.total && fileSummary.total > 0 && " · all enriched"}
+      {totalLines ? ` · ${totalLines} lines` : ""}
+    </div>
+  );
+
   if (groups.length <= 1) {
     return (
       <div>
+        {summaryLine}
         {densityBar}
         <AnimatePresence mode="popLayout">
           {entities.map((e, i) => (
@@ -139,6 +159,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
 
   return (
     <div>
+      {summaryLine}
       {densityBar}
       {groups.map(([kind, items]) => (
         <div key={kind}>
