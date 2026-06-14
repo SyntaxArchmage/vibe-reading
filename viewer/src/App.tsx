@@ -36,7 +36,10 @@ interface FileInfo {
 }
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<TabId>("concept");
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    try { const t = localStorage.getItem("vr-active-tab"); if (t && TABS.some(tab => tab.id === t)) return t as TabId; } catch {}
+    return "concept";
+  });
   const [entities, setEntities] = useState<DataEntity[]>([]);
   const [currentFile, setCurrentFile] = useState<string | null>(null);
   const [sourceCode, setSourceCode] = useState<string>("");
@@ -203,6 +206,10 @@ export function App() {
       try { localStorage.setItem("vr-last-file", currentFile); } catch {}
     }
   }, [currentFile]);
+
+  useEffect(() => {
+    try { localStorage.setItem("vr-active-tab", activeTab); } catch {}
+  }, [activeTab]);
 
   useEffect(() => {
     try {
