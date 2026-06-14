@@ -4,6 +4,7 @@ import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
+import { FileTree, fileTreeStyles } from "./components/FileTree";
 import type { DataEntity, TabId } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
@@ -34,8 +35,10 @@ export function App() {
     startLine: number;
     endLine: number;
   } | null>(null);
+  const [openFiles, setOpenFiles] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [treeOpen, setTreeOpen] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
@@ -64,6 +67,9 @@ export function App() {
       setEntities(data.entities);
       setHighlightRange(null);
       setSourceLanguage(detectLanguage(data.file));
+      setOpenFiles((prev) =>
+        prev.includes(data.file) ? prev : [...prev, data.file]
+      );
 
       try {
         const resp = await fetch(
@@ -80,6 +86,24 @@ export function App() {
       }
     },
     []
+  );
+
+  const closeTab = useCallback(
+    (file: string) => {
+      setOpenFiles((prev) => {
+        const next = prev.filter((f) => f !== file);
+        if (file === currentFile && next.length > 0) {
+          const fileKey = allFiles.find((f) => f.file === next[next.length - 1])?.key;
+          if (fileKey) selectFile(fileKey);
+        } else if (next.length === 0) {
+          setCurrentFile(null);
+          setEntities([]);
+          setSourceCode("");
+        }
+        return next;
+      });
+    },
+    [currentFile, allFiles, selectFile]
   );
 
   const onCardClick = useCallback((entity: DataEntity) => {
@@ -145,6 +169,32 @@ export function App() {
     <div className="vr-layout">
       <style>{layoutStyles}</style>
       <style>{sidebarStyles}</style>
+      <style>{fileTreeStyles}</style>
+
+      {/* Activity bar — icon strip */}
+      <div className="vr-activity-bar">
+        <button
+          className={`vr-activity-btn ${treeOpen ? "vr-activity-btn--active" : ""}`}
+          onClick={() => setTreeOpen(!treeOpen)}
+          title="Explorer"
+        >
+          &#x1F4C1;
+        </button>
+        <button
+          className="vr-activity-btn"
+          onClick={() => { setPickerOpen(true); setTimeout(() => searchRef.current?.focus(), 0); }}
+          title="Search Files (Ctrl+P)"
+        >
+          &#x1F50D;
+        </button>
+      </div>
+
+      {/* File tree panel */}
+      {treeOpen && (
+        <div className="vr-file-panel">
+          <FileTree files={allFiles} currentFile={currentFile} onSelect={selectFile} />
+        </div>
+      )}
 
       {/* Sidebar — knowledge cards */}
       <div className="vr-sidebar">
@@ -195,11 +245,26 @@ export function App() {
 
       {/* Main area — Monaco editor */}
       <div className="vr-main">
-        {currentFile && (
+        {openFiles.length > 0 && (
           <div className="vr-tab-bar">
-            <div className="vr-tab-item vr-tab-item--active">
-              {currentFile.split("/").pop()}
-            </div>
+            {openFiles.map((file) => {
+              const fk = allFiles.find((f) => f.file === file)?.key;
+              return (
+                <div
+                  key={file}
+                  className={`vr-tab-item ${file === currentFile ? "vr-tab-item--active" : ""}`}
+                  onClick={() => fk && selectFile(fk)}
+                >
+                  <span className="vr-tab-item-label">{file.split("/").pop()}</span>
+                  <span
+                    className="vr-tab-item-close"
+                    onClick={(e) => { e.stopPropagation(); closeTab(file); }}
+                  >
+                    &#x2715;
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
         <div className="vr-editor-wrap">
@@ -282,6 +347,47 @@ const layoutStyles = `
     color: #ccc;
   }
 
+  .vr-activity-bar {
+    width: 40px;
+    background: #333;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .vr-activity-btn {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+  }
+
+  .vr-activity-btn:hover { opacity: 0.9; }
+  .vr-activity-btn--active { opacity: 1; border-left: 2px solid #007acc; }
+
+  .vr-file-panel {
+    width: 220px;
+    min-width: 160px;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
   .vr-sidebar {
     width: 340px;
     min-width: 280px;
@@ -298,6 +404,7 @@ const layoutStyles = `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
   }
 
   .vr-tab-bar {
@@ -307,17 +414,22 @@ const layoutStyles = `
     height: 35px;
     align-items: stretch;
     flex-shrink: 0;
+    overflow-x: auto;
   }
 
+  .vr-tab-bar::-webkit-scrollbar { height: 0; }
+
   .vr-tab-item {
-    padding: 0 16px;
+    padding: 0 8px 0 12px;
     font-size: 12px;
     color: #888;
     display: flex;
     align-items: center;
+    gap: 6px;
     cursor: pointer;
     border-right: 1px solid #3c3c3c;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .vr-tab-item--active {
@@ -326,6 +438,19 @@ const layoutStyles = `
     border-bottom: 1px solid #1e1e1e;
     margin-bottom: -1px;
   }
+
+  .vr-tab-item-label { pointer-events: none; }
+
+  .vr-tab-item-close {
+    font-size: 10px;
+    opacity: 0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: opacity 0.1s;
+  }
+
+  .vr-tab-item:hover .vr-tab-item-close { opacity: 0.6; }
+  .vr-tab-item-close:hover { opacity: 1 !important; background: rgba(255,255,255,0.1); }
 
   .vr-editor-wrap {
     flex: 1;

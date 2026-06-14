@@ -136,6 +136,59 @@ assert(taskEntity?.detail?.description === "Defines the unit of work.", `Enriche
 const otherEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
 assert(otherEntity?.summary.includes("Scheduler"), `Non-enriched entity keeps name (got "${otherEntity?.summary}")`);
 
+// === Test 10: Schema validation rejects malformed data ===
+console.log("\nTest 10: Schema validation rejects malformed data");
+
+// Create a malformed JSON file
+const malformedDir = path.join(FIXTURE_DIR, ".vibe-reading-malformed");
+const malformedFilesDir = path.join(malformedDir, "files");
+fs.mkdirSync(malformedFilesDir, { recursive: true });
+
+// Malformed: missing anchor, bad type
+const malformedData = {
+  file: "src/bad.ts",
+  entities: [
+    { type: "invalid_type", summary: "", detail: {} },
+    { anchor: { file: "src/bad.ts", start_line: 0, start_col: -1, end_line: 0, end_col: 0 }, type: "concept", summary: "ok", detail: {} },
+    { anchor: { file: "src/bad.ts", start_line: 5, start_col: 0, end_line: 3, end_col: 0 }, type: "concept", summary: "reversed lines", detail: {} },
+  ],
+};
+fs.writeFileSync(path.join(malformedFilesDir, "src__bad.ts.json"), JSON.stringify(malformedData));
+
+const malformedManifest = {
+  project: "test-malformed",
+  analyzed_at: new Date().toISOString(),
+  total_files: 1,
+  analyzed_files: 1,
+  coverage: 1,
+  files: [{ path: "src/bad.ts", status: "analyzed", entity_count: 3 }],
+};
+fs.writeFileSync(path.join(malformedDir, "manifest.json"), JSON.stringify(malformedManifest));
+
+// Temporarily rename dirs so harness picks up malformed data
+const origVibeDir = path.join(FIXTURE_DIR, ".vibe-reading");
+const tempVibeDir = path.join(FIXTURE_DIR, ".vibe-reading-orig");
+fs.renameSync(origVibeDir, tempVibeDir);
+fs.renameSync(malformedDir, origVibeDir);
+
+let harnessExit = 0;
+try {
+  run(`npx tsx harness.ts ${FIXTURE_DIR}`);
+} catch {
+  harnessExit = 1;
+}
+assert(harnessExit === 1, "Harness rejects malformed JSON (exit code 1)");
+
+// Restore
+fs.renameSync(origVibeDir, malformedDir);
+fs.renameSync(tempVibeDir, origVibeDir);
+fs.rmSync(malformedDir, { recursive: true });
+
+// === Test 11: Schema validation passes valid data ===
+console.log("\nTest 11: Schema validation passes valid data");
+const harnessValidOut = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
+assert(harnessValidOut.includes("Schema valid"), "Harness reports schema valid for good data");
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
