@@ -109,11 +109,15 @@ const server = http.createServer((req, res) => {
   }
 
   if (url.pathname === "/api/health") {
+    const totalEntities = Object.values(analysisData).reduce((s, d: any) => s + (d?.entities?.length || 0), 0);
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
       status: "ok",
       project: path.basename(projectRoot),
       files: Object.keys(analysisData).length,
+      entities: totalEntities,
+      uptime_ms: process.uptime() * 1000 | 0,
+      sse_clients: sseClients.size,
     }));
     return;
   }
