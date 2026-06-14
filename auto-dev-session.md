@@ -1,6 +1,26 @@
 # Auto-Dev Session Log
 
-### Auto-Dev Session 2026-06-14 16:12 (continued)
+### Auto-Dev Session 2026-06-14 18:12 (current)
+- **Duration**: 90 minutes (in progress)
+- **Tests**: 155 assertions (up from 148)
+- **Defects found**: 1
+  - All tree-sitter-wasms language parsers (Go, Rust, Java, C/C++, Ruby, etc.) had ABI mismatch
+- **Defects fixed**: 1
+  - Removed broken tree-sitter-wasms entries + dead Go/Rust concept extractor code
+- **Features implemented**:
+  - Keyboard shortcuts help overlay (? to toggle)
+  - Commit count badge in file header (NNc)
+  - Breadcrumb: status bar shows entity at cursor position
+  - Auto-enrich supports Rust `///`, Go `//`, Ruby `#` doc comments
+  - Entity search: `f:filename` filter, searches across file paths
+  - Entity search results show kind and line number
+  - Blame view shows source code alongside annotations
+  - `/api/stats` endpoint for project-level statistics
+  - Top 5 most complex files in empty state sidebar
+  - Status bar simplification with ? help hint
+- **Commits**: 15 commits (abb84c0 → c95a908)
+
+### Auto-Dev Session 2026-06-14 16:12 (completed)
 - **Duration**: 90 minutes
 - **Defects found**: 7 (P0: 0, P1: 0, P2: 1, P3: 1, P4: 5)
 - **Defects fixed**: 7
@@ -12,35 +32,6 @@
   - P4: Blame view kept stale data when switching files (missing key prop)
   - P4: allEntities and allFiles recomputed on every render (memoized)
 - **Tests added**: 35 (70 → 105 assertions)
-  - Stats tool output format
-  - Enrichment detection (placeholder vs real descriptions)
-  - Re-analyze behavior
-  - Python flow extraction
-  - TypeScript export flow entities
-  - Python decorated class extraction
-  - Empty file concept entities
-  - Python docstring auto-enrich
-  - Harness enrichment tracking
-  - Call graph details
-  - Entity anchor consistency validation
-  - Manifest consistency
-- **Features implemented**:
-  - `.cursor/rules/vibe-reading.mdc` — project rules for AI sessions
-  - `cli/stats.ts` — quick project stats overview
-  - Server auto-reload when analysis files change
-  - Card enrichment indicator ("enriched" chip)
-  - On-demand git blame via /api/blame endpoint
-  - Git blame view in HistoryTab with per-line author/date/sha
-  - Visual flow diagram in FlowTab header (imports → file → exports)
-  - Global entity search panel (Ctrl+Shift+F)
-  - Entity gutter markers in Monaco editor (color-coded by type)
-  - Alt+1-4 tab switching keyboard shortcuts
-  - Python docstring support in auto-enrich
-  - Smarter auto-enrich heuristics (private methods, constructors, properties)
-  - Cross-file "Imported by" section in FlowTab
-  - Call graph data exposed in viewer (CALL_GRAPH global)
-  - File/entity count in empty state
-  - Updated HANDOFF.md, devplan.md, teach-me, learn-code skills
+- **Features implemented**: 16 features including stats tool, blame view, flow diagram, entity search, etc.
 - **Commits**: 32 commits (f8c607d → 78d6e82)
 - **PRD progress**: Flow diagram and git blame deferred items completed
-- **Next priority**: LSP integration, heat map overlay, PR description extraction, Playwright E2E
