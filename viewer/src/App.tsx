@@ -187,6 +187,7 @@ export function App() {
       }
       if (e.key === "Escape") {
         setPickerOpen(false);
+        setEntitySearchOpen(false);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "b") {
         e.preventDefault();
