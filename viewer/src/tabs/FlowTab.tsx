@@ -183,24 +183,54 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
     })
   );
 
-  if (importers.length === 0) return null;
+  const dependencies = cgEntry.imports
+    .filter(imp => imp.source.startsWith("."))
+    .map(imp => {
+      const resolved = callGraph.files.find(f => {
+        const source = imp.source.replace(/^\.\//, "");
+        return f.file.endsWith(source) || f.file.endsWith(source + ".ts") || f.file.endsWith(source + ".js") || f.file.endsWith(source + ".tsx");
+      });
+      return { source: imp.source, names: imp.names, resolved: resolved?.file };
+    });
+
+  if (importers.length === 0 && dependencies.length === 0) return null;
 
   return (
     <div style={{ padding: "8px 10px", borderBottom: "1px solid #333", fontSize: 11 }}>
-      <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
-        Imported by ({importers.length})
-      </div>
-      {importers.slice(0, 8).map(f => (
-        <div
-          key={f.file}
-          style={{ color: "#9cdcfe", padding: "2px 0", cursor: onFileSelect ? "pointer" : "default" }}
-          onClick={() => onFileSelect?.(f.file)}
-        >
-          {f.file}
-        </div>
-      ))}
-      {importers.length > 8 && (
-        <div style={{ color: "#666" }}>+{importers.length - 8} more</div>
+      {dependencies.length > 0 && (
+        <>
+          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
+            Depends on ({dependencies.length})
+          </div>
+          {dependencies.slice(0, 6).map(dep => (
+            <div
+              key={dep.source}
+              style={{ color: dep.resolved ? "#9cdcfe" : "#666", padding: "2px 0", cursor: dep.resolved && onFileSelect ? "pointer" : "default" }}
+              onClick={() => dep.resolved && onFileSelect?.(dep.resolved)}
+            >
+              {dep.resolved || dep.source}
+              {dep.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({dep.names.join(", ")})</span>}
+            </div>
+          ))}
+          {dependencies.length > 6 && <div style={{ color: "#666" }}>+{dependencies.length - 6} more</div>}
+        </>
+      )}
+      {importers.length > 0 && (
+        <>
+          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4, marginTop: dependencies.length > 0 ? 8 : 0 }}>
+            Imported by ({importers.length})
+          </div>
+          {importers.slice(0, 8).map(f => (
+            <div
+              key={f.file}
+              style={{ color: "#9cdcfe", padding: "2px 0", cursor: onFileSelect ? "pointer" : "default" }}
+              onClick={() => onFileSelect?.(f.file)}
+            >
+              {f.file}
+            </div>
+          ))}
+          {importers.length > 8 && <div style={{ color: "#666" }}>+{importers.length - 8} more</div>}
+        </>
       )}
     </div>
   );
