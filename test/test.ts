@@ -158,6 +158,17 @@ const utilsFlowFull = utilsDataFull.entities.filter((e: { type: string }) => e.t
 const deepCloneFlow = utilsFlowFull.find((e: { summary: string }) => e.summary.includes("deepClone"));
 assert(!!deepCloneFlow, "Found deepClone call flow (JSON.parse, JSON.stringify)");
 
+// === Test 11: Call graph generation ===
+console.log("\nTest 11: Call graph generation");
+const callGraphPath = path.join(VIBE_DIR, "global", "call-graph.json");
+assert(fs.existsSync(callGraphPath), "call-graph.json exists");
+const callGraph = JSON.parse(fs.readFileSync(callGraphPath, "utf-8"));
+assert(callGraph.files.length === 3, `Call graph has 3 files (got ${callGraph.files.length})`);
+const cgScheduler = callGraph.files.find((f: { file: string }) => f.file.includes("scheduler.ts"));
+assert(!!cgScheduler, "Call graph contains scheduler.ts");
+assert(cgScheduler.exports.length > 0, "Scheduler has exports in call graph");
+assert(cgScheduler.calls.length > 0, "Scheduler has calls in call graph");
+
 // === Test 12: Schema validation rejects malformed data ===
 console.log("\nTest 12: Schema validation rejects malformed data");
 

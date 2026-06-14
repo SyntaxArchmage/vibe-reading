@@ -2,8 +2,15 @@ import * as fs from "fs";
 import * as path from "path";
 import { glob } from "glob";
 import { extractConcepts } from "./extractors/concept.js";
-import { extractFlow } from "./extractors/flow.js";
+import { extractFlow, type FlowData } from "./extractors/flow.js";
 import type { DataEntity, FileAnalysis, Manifest, ManifestEntry } from "./types.js";
+
+interface CallGraphEntry {
+  file: string;
+  imports: { source: string; names: string[] }[];
+  exports: string[];
+  calls: { callee: string; inFunction: string | null }[];
+}
 
 const VIBE_DIR = ".vibe-reading";
 const FILES_DIR = path.join(VIBE_DIR, "files");
@@ -51,11 +58,12 @@ async function main() {
   console.log(`[vibe-reading] Found ${sourceFiles.length} source files`);
 
   const manifestEntries: ManifestEntry[] = [];
+  const callGraph: CallGraphEntry[] = [];
 
   for (const file of sourceFiles) {
     const absPath = path.join(projectRoot, file);
     try {
-      const analysis = await analyzeFile(file, absPath);
+      const { analysis, flowData } = await analyzeFile(file, absPath);
       const outName = file.replace(/[/\\]/g, "__") + ".json";
       const outPath = path.join(projectRoot, FILES_DIR, outName);
       fs.writeFileSync(outPath, JSON.stringify(analysis, null, 2));
@@ -64,6 +72,13 @@ async function main() {
         path: file,
         status: "analyzed",
         entity_count: analysis.entities.length,
+      });
+
+      callGraph.push({
+        file,
+        imports: flowData.imports.map((i) => ({ source: i.source, names: i.names })),
+        exports: flowData.exports,
+        calls: flowData.calls,
       });
 
       console.log(`  [ok] ${file} → ${analysis.entities.length} entities`);
@@ -89,16 +104,25 @@ async function main() {
     JSON.stringify(manifest, null, 2)
   );
 
+  fs.writeFileSync(
+    path.join(projectRoot, GLOBAL_DIR, "call-graph.json"),
+    JSON.stringify({
+      generated_at: new Date().toISOString(),
+      files: callGraph,
+    }, null, 2)
+  );
+
   console.log(
     `\n[vibe-reading] Done. Coverage: ${(manifest.coverage * 100).toFixed(1)}% ` +
     `(${manifest.analyzed_files}/${manifest.total_files})`
   );
+  console.log(`[vibe-reading] Call graph: ${callGraph.length} files`);
 }
 
 async function analyzeFile(
   relativePath: string,
   absPath: string
-): Promise<FileAnalysis> {
+): Promise<{ analysis: FileAnalysis; flowData: FlowData }> {
   const content = fs.readFileSync(absPath, "utf-8");
 
   const concepts = await extractConcepts(relativePath, content);
@@ -107,9 +131,12 @@ async function analyzeFile(
   const entities: DataEntity[] = [...concepts, ...flowData.entities];
 
   return {
-    file: relativePath,
-    entities,
-    analyzed_at: new Date().toISOString(),
+    analysis: {
+      file: relativePath,
+      entities,
+      analyzed_at: new Date().toISOString(),
+    },
+    flowData,
   };
 }
 
