@@ -108,11 +108,16 @@ function HistoryCard({ entity, onClick }: { entity: DataEntity; onClick: (e: Dat
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const d = new Date(iso);
+    const now = Date.now();
+    const diff = now - d.getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return "today";
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    if (days < 365) return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   } catch {
     return iso;
   }
