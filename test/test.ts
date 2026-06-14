@@ -309,7 +309,7 @@ const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
 assert(statsOut.includes("Project:"), "Stats shows project name");
 assert(statsOut.includes("Concepts:"), "Stats shows concept count");
 assert(statsOut.includes("Flow:"), "Stats shows flow count");
-assert(statsOut.includes("Largest file:"), "Stats shows largest file");
+assert(statsOut.includes("Top files by entity count"), "Stats shows top files");
 
 // === Test 15: Enrichment detection ===
 console.log("\nTest 15: Enrichment detection");

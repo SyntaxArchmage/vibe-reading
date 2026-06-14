@@ -23,8 +23,7 @@ function main() {
   let totalEntities = 0;
   let enrichedConcepts = 0;
   let totalConcepts = 0;
-  let maxEntities = 0;
-  let maxFile = "";
+  const fileStats: Array<{ path: string; count: number; concepts: number }> = [];
 
   for (const entry of manifest.files) {
     if (entry.status !== "analyzed") continue;
@@ -34,23 +33,24 @@ function main() {
 
     try {
       const data: FileAnalysis = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+      let fileConcepts = 0;
       for (const e of data.entities) {
         totalEntities++;
         if (e.type in typeCounts) typeCounts[e.type]++;
         if (e.type === "concept") {
           totalConcepts++;
+          fileConcepts++;
           const desc = (e.detail as Record<string, unknown>)?.description;
           if (typeof desc === "string" && !desc.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/)) {
             enrichedConcepts++;
           }
         }
       }
-      if (data.entities.length > maxEntities) {
-        maxEntities = data.entities.length;
-        maxFile = entry.path;
-      }
+      fileStats.push({ path: entry.path, count: data.entities.length, concepts: fileConcepts });
     } catch { /* skip malformed */ }
   }
+
+  fileStats.sort((a, b) => b.count - a.count);
 
   console.log(`Project: ${manifest.project}`);
   console.log(`Analyzed: ${manifest.analyzed_at}`);
@@ -61,8 +61,11 @@ function main() {
   console.log(`  History:  ${typeCounts.history}`);
   console.log(`  Jump:     ${typeCounts.jump}`);
   console.log(`\nEnrichment: ${enrichedConcepts}/${totalConcepts} concepts (${totalConcepts > 0 ? ((enrichedConcepts / totalConcepts) * 100).toFixed(1) : "0.0"}%)`);
-  if (maxFile) {
-    console.log(`Largest file: ${maxFile} (${maxEntities} entities)`);
+  if (fileStats.length > 0) {
+    console.log(`\nTop files by entity count:`);
+    for (const f of fileStats.slice(0, 5)) {
+      console.log(`  ${f.count.toString().padStart(3)} entities  ${f.path}`);
+    }
   }
 }
 
