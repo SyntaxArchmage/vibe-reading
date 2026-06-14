@@ -1002,7 +1002,21 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
-// --- Test 65: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 65: Diff tool creates and compares snapshots ---
+{
+  console.log("\n--- Test 65: Diff tool ---");
+  const snapshotPath = path.join(FIXTURE_DIR, ".vibe-reading", "snapshot.json");
+  if (fs.existsSync(snapshotPath)) fs.unlinkSync(snapshotPath);
+  const first = run(`npx tsx diff.ts ${FIXTURE_DIR}`);
+  assert(first.includes("Snapshot saved"), "First run creates snapshot");
+  assert(fs.existsSync(snapshotPath), "Snapshot file exists");
+  const second = run(`npx tsx diff.ts ${FIXTURE_DIR}`);
+  assert(second.includes("0 changed"), "No changes on immediate rerun");
+  assert(second.includes("5 unchanged"), "All 5 files unchanged");
+  fs.unlinkSync(snapshotPath);
+}
+
+// --- Test 66: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
