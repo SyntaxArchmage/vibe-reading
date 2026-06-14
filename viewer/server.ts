@@ -158,6 +158,17 @@ const server = http.createServer((req, res) => {
       types: typeCounts,
       call_graph_files: callGraph ? (callGraph as any).files?.length ?? 0 : 0,
     }));
+  } else if (url.pathname === "/api/export") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="${path.basename(projectRoot)}-vibe-reading.json"`,
+    });
+    res.end(JSON.stringify({
+      project: path.basename(projectRoot),
+      exported_at: new Date().toISOString(),
+      files: analysisData,
+      call_graph: callGraph,
+    }));
   } else if (url.pathname === "/api/search") {
     const query = (url.searchParams.get("q") || "").toLowerCase().trim();
     const typeFilter = url.searchParams.get("type") || null;
