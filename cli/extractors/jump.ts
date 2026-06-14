@@ -70,6 +70,12 @@ function collectImportTargets(rootNode: any, ext: string): ImportTarget[] {
           for (const child of node.children) {
             if (child.type === "dotted_name" && child !== moduleNode) {
               names.push(child.text);
+            } else if (child.type === "aliased_import") {
+              const nameNode = child.children.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (c: any) => c.type === "dotted_name" || c.type === "identifier"
+              );
+              if (nameNode) names.push(nameNode.text);
             }
           }
           targets.push({ source, names, line: node.startPosition.row + 1 });
