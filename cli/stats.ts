@@ -62,9 +62,24 @@ function main() {
   console.log(`  Jump:     ${typeCounts.jump}`);
   console.log(`\nEnrichment: ${enrichedConcepts}/${totalConcepts} concepts (${totalConcepts > 0 ? ((enrichedConcepts / totalConcepts) * 100).toFixed(1) : "0.0"}%)`);
   if (fileStats.length > 0) {
+    const avg = (totalEntities / fileStats.length).toFixed(1);
+    console.log(`\nAverage: ${avg} entities/file`);
     console.log(`\nTop files by entity count:`);
     for (const f of fileStats.slice(0, 5)) {
       console.log(`  ${f.count.toString().padStart(3)} entities  ${f.path}`);
+    }
+  }
+
+  const extCounts: Record<string, number> = {};
+  for (const f of fileStats) {
+    const ext = path.extname(f.path).toLowerCase() || "(none)";
+    extCounts[ext] = (extCounts[ext] || 0) + 1;
+  }
+  const extEntries = Object.entries(extCounts).sort((a, b) => b[1] - a[1]);
+  if (extEntries.length > 0) {
+    console.log(`\nBy extension:`);
+    for (const [ext, count] of extEntries) {
+      console.log(`  ${ext}: ${count} files`);
     }
   }
 }
