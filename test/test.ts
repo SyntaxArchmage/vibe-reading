@@ -851,7 +851,30 @@ console.log("\nTest 27: Multiple entity types per file");
   );
 }
 
-// --- Test 51: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 51: Python file has expected entity types ---
+{
+  console.log("\n--- Test 51: Python entity types ---");
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__engine.py.json"), "utf-8")
+  );
+  const types = new Set(data.entities.map((e: any) => e.type));
+  assert(types.has("concept"), "Python file has concept entities");
+  assert(types.has("flow"), "Python file has flow entities");
+  assert(types.has("history"), "Python file has history entities");
+}
+
+// --- Test 52: TSX file extracts components ---
+{
+  console.log("\n--- Test 52: TSX component extraction ---");
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__Button.tsx.json"), "utf-8")
+  );
+  const concepts = data.entities.filter((e: any) => e.type === "concept");
+  const names = concepts.map((e: any) => e.detail.name);
+  assert(names.includes("Button"), "TSX extracts Button component");
+}
+
+// --- Test 53: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
