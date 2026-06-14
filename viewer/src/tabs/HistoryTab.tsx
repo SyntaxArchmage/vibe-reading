@@ -157,17 +157,19 @@ function BlameView({ file }: { file: string }) {
   return (
     <div style={{ fontSize: 11, fontFamily: "monospace", maxHeight: 400, overflowY: "auto" }}>
       <div style={{ display: "flex", gap: 8, padding: "4px 0", borderBottom: "1px solid #333", marginBottom: 4 }}>
-        <span style={{ width: 30, color: "#666" }}>Line</span>
-        <span style={{ width: 70, color: "#666" }}>SHA</span>
-        <span style={{ width: 90, color: "#666" }}>Author</span>
-        <span style={{ width: 80, color: "#666" }}>Date</span>
+        <span style={{ width: 30, color: "#666", flexShrink: 0 }}>Line</span>
+        <span style={{ width: 70, color: "#666", flexShrink: 0 }}>SHA</span>
+        <span style={{ width: 90, color: "#666", flexShrink: 0 }}>Author</span>
+        <span style={{ width: 80, color: "#666", flexShrink: 0 }}>Date</span>
+        <span style={{ color: "#666" }}>Code</span>
       </div>
       {lines!.map(l => (
         <div key={l.line} style={{ display: "flex", gap: 8, padding: "1px 0" }}>
-          <span style={{ width: 30, color: "#666", textAlign: "right" }}>{l.line}</span>
-          <span style={{ width: 70, color: "#dcdcaa" }}>{l.sha}</span>
-          <span style={{ width: 90, color: authorColors[l.author] || "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.author}</span>
-          <span style={{ width: 80, color: "#888" }}>{l.date}</span>
+          <span style={{ width: 30, color: "#666", textAlign: "right", flexShrink: 0 }}>{l.line}</span>
+          <span style={{ width: 70, color: "#dcdcaa", flexShrink: 0 }}>{l.sha}</span>
+          <span style={{ width: 90, color: authorColors[l.author] || "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flexShrink: 0 }}>{l.author}</span>
+          <span style={{ width: 80, color: "#888", flexShrink: 0 }}>{l.date}</span>
+          <span style={{ color: "#d4d4d4", whiteSpace: "pre", overflow: "hidden", textOverflow: "ellipsis" }}>{l.content}</span>
         </div>
       ))}
     </div>
