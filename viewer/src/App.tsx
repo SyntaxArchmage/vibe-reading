@@ -299,8 +299,10 @@ export function App() {
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
         e.preventDefault();
-        setEntitySearchOpen((v) => !v);
-        if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0);
+        setEntitySearchOpen((v) => {
+          if (!v) setTimeout(() => entitySearchRef.current?.focus(), 0);
+          return !v;
+        });
       }
       if (e.altKey && e.key >= "1" && e.key <= "4") {
         e.preventDefault();
