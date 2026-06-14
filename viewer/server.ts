@@ -48,9 +48,9 @@ if (!fs.existsSync(vibeDir)) {
 let analysisData = loadAnalysisData();
 let html = buildHtml(analysisData);
 
-const filesDir = path.join(vibeDir, "files");
-if (fs.existsSync(filesDir)) {
-  fs.watch(filesDir, { persistent: false }, () => {
+const vibeFilesDir = path.join(vibeDir, "files");
+if (fs.existsSync(vibeFilesDir)) {
+  fs.watch(vibeFilesDir, { persistent: false }, () => {
     analysisData = loadAnalysisData();
     html = buildHtml(analysisData);
     console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);

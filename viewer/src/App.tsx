@@ -43,7 +43,23 @@ export function App() {
   const [navIndex, setNavIndex] = useState(-1);
   const [cardFilter, setCardFilter] = useState("");
   const [cardSort, setCardSort] = useState<"line" | "name" | "kind">("line");
+  const [entitySearch, setEntitySearch] = useState("");
+  const [entitySearchOpen, setEntitySearchOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const entitySearchRef = useRef<HTMLInputElement>(null);
+
+  const allEntities = Object.entries(PREVIEW_DATA).flatMap(([, data]) =>
+    (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string }))
+  );
+
+  const entitySearchResults = entitySearch.trim()
+    ? allEntities.filter(e => {
+        const q = entitySearch.toLowerCase();
+        const name = ((e.detail.name as string) || "").toLowerCase();
+        const summary = e.summary.toLowerCase();
+        return name.includes(q) || summary.includes(q);
+      }).slice(0, 50)
+    : [];
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
     .map(([key, data]) => ({
@@ -176,6 +192,11 @@ export function App() {
         e.preventDefault();
         setTreeOpen((v) => !v);
       }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
+        e.preventDefault();
+        setEntitySearchOpen((v) => !v);
+        if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0);
+      }
       if (e.altKey && e.key === "ArrowLeft") {
         e.preventDefault();
         navigateBack();
@@ -264,9 +285,9 @@ export function App() {
           &#x1F4C1;
         </button>
         <button
-          className="vr-activity-btn"
-          onClick={() => { setPickerOpen(true); setTimeout(() => searchRef.current?.focus(), 0); }}
-          title="Search Files (Ctrl+P)"
+          className={`vr-activity-btn ${entitySearchOpen ? "vr-activity-btn--active" : ""}`}
+          onClick={() => { setEntitySearchOpen(!entitySearchOpen); if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0); }}
+          title="Search Entities"
         >
           &#x1F50D;
         </button>
@@ -276,6 +297,42 @@ export function App() {
       {treeOpen && (
         <div className="vr-file-panel">
           <FileTree files={allFiles} currentFile={currentFile} onSelect={selectFile} />
+        </div>
+      )}
+
+      {/* Entity search panel */}
+      {entitySearchOpen && (
+        <div className="vr-entity-search-panel">
+          <div className="vr-entity-search-header">
+            <input
+              ref={entitySearchRef}
+              type="text"
+              placeholder="Search entities..."
+              value={entitySearch}
+              onChange={(e) => setEntitySearch(e.target.value)}
+              className="vr-entity-search-input"
+            />
+          </div>
+          <div className="vr-entity-search-results">
+            {entitySearch.trim() && entitySearchResults.length === 0 && (
+              <div style={{ color: "#888", fontSize: 12, padding: 8 }}>No matches</div>
+            )}
+            {entitySearchResults.map((e, i) => (
+              <div
+                key={`es-${i}`}
+                className="vr-entity-search-item"
+                onClick={() => {
+                  selectFile((e as any)._file);
+                  setTimeout(() => {
+                    setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line });
+                  }, 100);
+                }}
+              >
+                <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
+                <span className="vr-entity-search-file">{(e as any)._file}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -523,6 +580,58 @@ const layoutStyles = `
     flex-direction: column;
     overflow: hidden;
     flex-shrink: 0;
+  }
+
+  .vr-entity-search-panel {
+    width: 260px;
+    min-width: 200px;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .vr-entity-search-header {
+    padding: 8px;
+    border-bottom: 1px solid #3c3c3c;
+  }
+  .vr-entity-search-input {
+    width: 100%;
+    background: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .vr-entity-search-input:focus { border-color: #007acc; }
+  .vr-entity-search-results {
+    overflow-y: auto;
+    flex: 1;
+  }
+  .vr-entity-search-item {
+    padding: 5px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border-bottom: 1px solid #2d2d2d;
+  }
+  .vr-entity-search-item:hover { background: #2a2d2e; }
+  .vr-entity-search-name {
+    font-family: monospace;
+    font-size: 12px;
+    color: #d4d4d4;
+  }
+  .vr-entity-search-file {
+    font-size: 10px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .vr-sidebar {
