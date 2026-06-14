@@ -1077,7 +1077,15 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!mdSingle.includes("## src/utils.js"), "Filtered MD excludes utils as top-level section");
 }
 
-// --- Test 72: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 72: export-dot --clusters creates subgraphs ---
+{
+  console.log("\n--- Test 72: DOT clusters ---");
+  const dotCluster = run(`npx tsx export-dot.ts ${FIXTURE_DIR} --clusters`);
+  assert(dotCluster.includes("subgraph cluster_"), "Clustered DOT has subgraphs");
+  assert(dotCluster.includes('label="src"'), "Cluster labeled with directory name");
+}
+
+// --- Test 73: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();

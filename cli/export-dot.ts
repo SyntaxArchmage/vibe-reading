@@ -16,9 +16,10 @@ function main() {
   const args = process.argv.slice(2);
   const focusIdx = args.indexOf("--focus");
   const focusFile = focusIdx >= 0 ? args[focusIdx + 1] : null;
-  const positional = focusIdx >= 0
-    ? args.filter((_, i) => i !== focusIdx && i !== focusIdx + 1)
-    : args;
+  const useClusters = args.includes("--clusters");
+  const positional = args.filter((a, i) =>
+    !a.startsWith("--") && (focusIdx < 0 || (i !== focusIdx + 1))
+  );
   const projectRoot = positional[0] || process.cwd();
   const cgPath = path.join(projectRoot, ".vibe-reading", "global", "call-graph.json");
 
@@ -54,13 +55,37 @@ function main() {
     }));
   };
 
-  for (const f of cg.files) {
-    if (!isRelevant(f.file)) continue;
-    const id = nodeId(f.file);
-    const label = f.file.split("/").pop() || f.file;
-    const exportCount = f.exports.length;
-    const highlight = isFocused(f.file) ? ', fillcolor="#1a3a5a", color="#007acc"' : "";
-    lines.push(`  ${id} [label="${label}\\n(${exportCount} exports)"${highlight}];`);
+  if (useClusters) {
+    const dirs = new Map<string, CallGraphFile[]>();
+    for (const f of cg.files) {
+      if (!isRelevant(f.file)) continue;
+      const dir = path.dirname(f.file) || ".";
+      if (!dirs.has(dir)) dirs.set(dir, []);
+      dirs.get(dir)!.push(f);
+    }
+    let ci = 0;
+    for (const [dir, dirFiles] of dirs) {
+      lines.push(`  subgraph cluster_${ci++} {`);
+      lines.push(`    label="${dir}";`);
+      lines.push(`    style=dashed; color="#555";`);
+      for (const f of dirFiles) {
+        const id = nodeId(f.file);
+        const label = f.file.split("/").pop() || f.file;
+        const exportCount = f.exports.length;
+        const highlight = isFocused(f.file) ? ', fillcolor="#1a3a5a", color="#007acc"' : "";
+        lines.push(`    ${id} [label="${label}\\n(${exportCount} exports)"${highlight}];`);
+      }
+      lines.push(`  }`);
+    }
+  } else {
+    for (const f of cg.files) {
+      if (!isRelevant(f.file)) continue;
+      const id = nodeId(f.file);
+      const label = f.file.split("/").pop() || f.file;
+      const exportCount = f.exports.length;
+      const highlight = isFocused(f.file) ? ', fillcolor="#1a3a5a", color="#007acc"' : "";
+      lines.push(`  ${id} [label="${label}\\n(${exportCount} exports)"${highlight}];`);
+    }
   }
 
   for (const f of cg.files) {
