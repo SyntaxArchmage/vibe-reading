@@ -973,7 +973,36 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(statsOut.includes("Isolated files"), "Stats shows isolated file count");
 }
 
-// --- Test 62: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 62: Complexity tool with --top flag ---
+{
+  console.log("\n--- Test 62: Complexity tool ranking ---");
+  const cxFull = run(`npx tsx complexity.ts ${FIXTURE_DIR}`);
+  const scores = cxFull.split("\n").filter(l => l.match(/^\s+\d+\s/)).map(l => parseInt(l.trim()));
+  for (let i = 1; i < scores.length; i++) {
+    assert(scores[i - 1] >= scores[i], `Scores descending: ${scores[i-1]} >= ${scores[i]}`);
+  }
+}
+
+// --- Test 63: Viewer build has hover, bookmarks, and symbol dialog ---
+{
+  console.log("\n--- Test 63: Viewer advanced features ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  assert(bundle.includes("Go to symbol"), "Viewer has go-to-symbol dialog");
+  assert(bundle.includes("vr-bookmarks"), "Viewer has bookmark storage key");
+  assert(bundle.includes("provideHover"), "Viewer has hover provider");
+}
+
+// --- Test 64: Server has all API endpoints ---
+{
+  console.log("\n--- Test 64: Server API completeness ---");
+  const serverSrc = fs.readFileSync(path.join(CLI_DIR, "../viewer/server.ts"), "utf8");
+  const endpoints = ["/api/health", "/api/source", "/api/entities", "/api/stats", "/api/search", "/api/blame", "/api/export", "/api/events"];
+  for (const ep of endpoints) {
+    assert(serverSrc.includes(ep), `Server has ${ep} endpoint`);
+  }
+}
+
+// --- Test 65: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
