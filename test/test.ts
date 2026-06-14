@@ -815,7 +815,19 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!mdOut.includes("### Concept"), "No concept section for nonexistent file");
 }
 
-// --- Test 49: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 49: Viewer build includes essential CSS/strings ---
+{
+  console.log("\n--- Test 49: Viewer build essential strings ---");
+  const viewerPath = path.join(__dirname, "..", "viewer", "out", "viewer.js");
+  const viewerSrc = fs.readFileSync(viewerPath, "utf-8");
+  assert(viewerSrc.includes("vr-layout"), "Viewer includes vr-layout CSS");
+  assert(viewerSrc.includes("vr-card"), "Viewer includes vr-card CSS");
+  assert(viewerSrc.includes("vr-sidebar"), "Viewer includes vr-sidebar CSS");
+  assert(viewerSrc.includes("vr-tree"), "Viewer includes vr-tree CSS");
+  assert(viewerSrc.includes("Vibe Reading"), "Viewer includes title");
+}
+
+// --- Test 50: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
