@@ -682,7 +682,25 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(anchorErrors === 0, `No anchor consistency errors (found ${anchorErrors})`);
 }
 
-// --- Test 40: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 40: Auto-enrich JSDoc extraction updates summary ---
+{
+  console.log("\n--- Test 40: Auto-enrich JSDoc extraction ---");
+  // Re-run analyze + auto-enrich to have enriched data
+  run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__utils.js.json"), "utf-8")
+  );
+  const enriched = data.entities.filter(
+    (e: any) => e.type === "concept" && !/^(function|class|type|interface|enum|method|decorated): /.test(e.summary)
+  );
+  assert(enriched.length > 0, `utils.js has enriched summaries (${enriched.length})`);
+  for (const e of enriched) {
+    assert(typeof e.summary === "string" && e.summary.length > 0, `Enriched entity ${e.detail.name} has summary`);
+  }
+}
+
+// --- Test 41: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
