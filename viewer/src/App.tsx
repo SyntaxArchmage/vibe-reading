@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ConceptTab } from "./tabs/ConceptTab";
 import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
@@ -57,9 +57,10 @@ export function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
-  const allEntities = Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
-    (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
-  );
+  const allEntities = useMemo(() =>
+    Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
+      (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
+    ), []);
 
   const entitySearchResults = entitySearch.trim()
     ? allEntities.filter(e => {
@@ -70,13 +71,15 @@ export function App() {
       }).slice(0, 50)
     : [];
 
-  const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
-    .map(([key, data]) => ({
-      key,
-      file: data.file,
-      count: data.entities.length,
-    }))
-    .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
+  const allFiles: FileInfo[] = useMemo(() =>
+    Object.entries(PREVIEW_DATA)
+      .map(([key, data]) => ({
+        key,
+        file: data.file,
+        count: data.entities.length,
+      }))
+      .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)),
+  []);
 
   const filteredFiles = searchQuery.trim()
     ? allFiles.filter((f) =>
