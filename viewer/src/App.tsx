@@ -528,7 +528,7 @@ export function App() {
         <span className="vr-statusbar-right">
           {currentFile && `${entities.length} entities`}
           {currentFile && ` · Ln ${highlightRange?.startLine ?? "-"}`}
-          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer{" · "}Alt+1-4: tabs{" · "}Alt+←→: navigate
+          {" · "}Ctrl+P: files{" · "}Ctrl+Shift+F: search{" · "}Alt+1-4: tabs{" · "}Alt+←→: navigate
         </span>
       </div>
 
