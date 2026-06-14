@@ -44,8 +44,17 @@ if (!fs.existsSync(vibeDir)) {
   process.exit(1);
 }
 
-const analysisData = loadAnalysisData();
-const html = buildHtml(analysisData);
+let analysisData = loadAnalysisData();
+let html = buildHtml(analysisData);
+
+const filesDir = path.join(vibeDir, "files");
+if (fs.existsSync(filesDir)) {
+  fs.watch(filesDir, { persistent: false }, () => {
+    analysisData = loadAnalysisData();
+    html = buildHtml(analysisData);
+    console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);
+  });
+}
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);

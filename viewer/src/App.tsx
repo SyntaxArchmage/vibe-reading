@@ -1056,6 +1056,10 @@ const sidebarStyles = `
     color: #8b8b8b;
     white-space: nowrap;
   }
+  .vr-card-chip--enriched {
+    background: #1a3a2a;
+    color: #4ec9b0;
+  }
 
   .vr-no-cards {
     text-align: center;

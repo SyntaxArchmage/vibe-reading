@@ -29,6 +29,9 @@ export function Card({ entity, onClick }: CardProps) {
   const lines = entity.anchor.end_line - entity.anchor.start_line + 1;
   const loc = `L${entity.anchor.start_line}–${entity.anchor.end_line}`;
   const badgeColor = KIND_COLORS[kind] || "#b5cea8";
+  const desc = entity.detail.description as string | undefined;
+  const isEnriched = desc && !desc.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/);
+  const summaryIsPlaceholder = entity.summary.match(/^(function|class|interface|type|enum|method): /);
 
   return (
     <motion.div
@@ -54,7 +57,9 @@ export function Card({ entity, onClick }: CardProps) {
           )}
           <div className="vr-card-title-group">
             {name && <span className="vr-card-name">{name}</span>}
-            <span className="vr-card-summary">{entity.summary}</span>
+            {!summaryIsPlaceholder && (
+              <span className="vr-card-summary">{entity.summary}</span>
+            )}
           </div>
         </div>
         <div className="vr-card-meta">
@@ -82,6 +87,7 @@ export function Card({ entity, onClick }: CardProps) {
               {kind && <span className="vr-card-chip">{kindLabel(kind)}</span>}
               <span className="vr-card-chip">{lines} lines</span>
               <span className="vr-card-chip">{loc}</span>
+              {isEnriched && <span className="vr-card-chip vr-card-chip--enriched">enriched</span>}
             </div>
           </motion.div>
         )}
