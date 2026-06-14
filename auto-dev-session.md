@@ -2,7 +2,7 @@
 
 ### Auto-Dev Session 2026-06-14 18:12 (completed)
 - **Duration**: 90 minutes
-- **Tests**: 242 assertions (up from 148 → 94 new)
+- **Tests**: 245 assertions (up from 148 → 97 new)
 - **Defects found**: 1
   - All tree-sitter-wasms language parsers had ABI mismatch (silent failures)
 - **Defects fixed**: 1
@@ -40,7 +40,8 @@
   - Card highlight follows cursor position
   - Commit frequency sparkline in history tab
   - `[` / `]` keyboard shortcuts for prev/next file
-- **Commits**: 40 commits (78d6e82 → b4f7456)
+  - `export-dot --focus` flag to highlight specific file
+- **Commits**: 48 commits (78d6e82 → 80027d4)
 
 ### Auto-Dev Session 2026-06-14 16:12 (completed)
 - **Duration**: 90 minutes
