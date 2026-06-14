@@ -303,6 +303,56 @@ console.log("\nTest 13: Schema validation passes valid data");
 const harnessValidOut = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
 assert(harnessValidOut.includes("Schema valid"), "Harness reports schema valid for good data");
 
+// === Test 14: Stats tool ===
+console.log("\nTest 14: Stats tool");
+const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
+assert(statsOut.includes("Project:"), "Stats shows project name");
+assert(statsOut.includes("Concepts:"), "Stats shows concept count");
+assert(statsOut.includes("Flow:"), "Stats shows flow count");
+assert(statsOut.includes("Largest file:"), "Stats shows largest file");
+
+// === Test 15: Enrichment detection ===
+console.log("\nTest 15: Enrichment detection");
+cleanOutput();
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+const preEnrichData = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const placeholderEntity = preEnrichData.entities.find(
+  (e: { detail: { name: string; description?: string } }) =>
+    e.detail.name === "enqueue" && e.detail.description?.match(/^function ".+" spanning \d+ lines\.$/)
+);
+assert(!!placeholderEntity, "Non-enriched entity has placeholder description");
+
+// Enrich one entity, then verify detection
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${JSON.stringify([
+  { name: "Scheduler", summary: "Priority task scheduler", description: "Manages async tasks by priority." },
+])}'`);
+const postEnrichData = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const enrichedEntity = postEnrichData.entities.find(
+  (e: { detail: { name: string } }) => e.detail.name === "Scheduler"
+);
+assert(
+  enrichedEntity?.detail?.description === "Manages async tasks by priority.",
+  "Enriched entity has real description"
+);
+
+// === Test 16: Re-analyze resets entities from source ===
+console.log("\nTest 16: Re-analyze resets entities");
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+const afterReanalyze = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const schedulerAfter = afterReanalyze.entities.find(
+  (e: { detail: { name: string } }) => e.detail.name === "Scheduler"
+);
+assert(
+  schedulerAfter?.detail?.description?.includes("spanning"),
+  "Re-analyze produces fresh placeholder descriptions"
+);
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
