@@ -103,10 +103,21 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
   }, [callGraph, currentFile]);
 
   const [kindFilter, setKindFilter] = useState<string | null>(null);
+  const [cardSearch, setCardSearch] = useState("");
+
+  const filteredEntities = useMemo(() => {
+    if (!cardSearch.trim()) return entities;
+    const q = cardSearch.toLowerCase();
+    return entities.filter(e => {
+      const name = ((e.detail.name as string) || "").toLowerCase();
+      const summary = (e.summary || "").toLowerCase();
+      return name.includes(q) || summary.includes(q);
+    });
+  }, [entities, cardSearch]);
 
   const allGroups = useMemo(() => {
     const m = new Map<string, DataEntity[]>();
-    for (const e of entities) {
+    for (const e of filteredEntities) {
       const kind = (e.detail.node_type as string || "other").toLowerCase();
       if (!m.has(kind)) m.set(kind, []);
       m.get(kind)!.push(e);
@@ -115,7 +126,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       const ai = KIND_ORDER.indexOf(a[0]), bi = KIND_ORDER.indexOf(b[0]);
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
-  }, [entities]);
+  }, [filteredEntities]);
 
   const groups = kindFilter
     ? allGroups.filter(([kind]) => kind === kindFilter)
@@ -131,8 +142,19 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     });
   };
 
+  const searchBox = entities.length > 3 ? (
+    <div style={{ padding: "2px 8px" }}>
+      <input
+        type="text" value={cardSearch} onChange={e => setCardSearch(e.target.value)}
+        placeholder={`Filter ${entities.length} entities...`}
+        style={{ width: "100%", boxSizing: "border-box", background: "#1e1e1e", color: "#ccc",
+                 border: "1px solid #444", borderRadius: 3, padding: "2px 6px", fontSize: 11, outline: "none" }}
+      />
+    </div>
+  ) : null;
+
   const densityBar = totalLines && totalLines > 0
-    ? <DensityBar entities={entities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
+    ? <DensityBar entities={filteredEntities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
     : null;
 
   const fileSummary = useMemo(() => {
@@ -176,9 +198,10 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     return (
       <div>
         {summaryLine}
+        {searchBox}
         {densityBar}
         <AnimatePresence mode="popLayout">
-          {entities.map((e, i) => (
+          {filteredEntities.map((e, i) => (
             <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
                   highlight={highlightEntity === e}
                   usages={usagesMap.get(e.detail.name as string)}
@@ -212,6 +235,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
           {allCollapsed ? "▼" : "▲"}
         </button>
       </div>
+      {searchBox}
       {densityBar}
       {groups.map(([kind, items]) => (
         <div key={kind}>
