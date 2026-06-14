@@ -1,14 +1,17 @@
 # Auto-Dev Session Log
 
 ### Auto-Dev Session 2026-06-14 16:12 (continued)
-- **Duration**: 76 minutes
-- **Defects found**: 4 (P0: 0, P1: 0, P2: 0, P3: 1, P4: 3)
-- **Defects fixed**: 4
+- **Duration**: 81 minutes
+- **Defects found**: 7 (P0: 0, P1: 0, P2: 1, P3: 1, P4: 5)
+- **Defects fixed**: 7
+  - P2: Required parameter after optional in buildDescription (lint error)
   - P3: Entity search used file path instead of key for selectFile (navigated wrong)
   - P4: Shadowed `filesDir` variable in server.ts
   - P4: History extractor used shell pipe `| wc -l` and `| tail -1` instead of git-native flags
   - P4: Auto-enrich `isUnenriched` check missed enum/method/struct/module/decorated kinds
-- **Tests added**: 24 (70 → 94 assertions)
+  - P4: Blame view kept stale data when switching files (missing key prop)
+  - P4: allEntities and allFiles recomputed on every render (memoized)
+- **Tests added**: 31 (70 → 101 assertions)
   - Stats tool output format
   - Enrichment detection (placeholder vs real descriptions)
   - Re-analyze behavior
@@ -38,6 +41,6 @@
   - Call graph data exposed in viewer (CALL_GRAPH global)
   - File/entity count in empty state
   - Updated HANDOFF.md, devplan.md, teach-me, learn-code skills
-- **Commits**: 21 commits (f8c607d → bac1a2f)
+- **Commits**: 26 commits (f8c607d → fa8c9ac)
 - **PRD progress**: Flow diagram and git blame deferred items completed
 - **Next priority**: LSP integration, heat map overlay, PR description extraction, Playwright E2E
