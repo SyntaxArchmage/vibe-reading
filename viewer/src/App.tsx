@@ -42,6 +42,7 @@ export function App() {
   const [navHistory, setNavHistory] = useState<string[]>([]);
   const [navIndex, setNavIndex] = useState(-1);
   const [cardFilter, setCardFilter] = useState("");
+  const [cardSort, setCardSort] = useState<"line" | "name" | "kind">("line");
   const searchRef = useRef<HTMLInputElement>(null);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
@@ -211,14 +212,28 @@ export function App() {
     }
   };
 
-  const filtered = entities.filter((e) => {
-    if (e.type !== activeTab) return false;
-    if (!cardFilter.trim()) return true;
-    const q = cardFilter.toLowerCase();
-    return e.summary.toLowerCase().includes(q) ||
-      (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
-      (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
-  });
+  const filtered = entities
+    .filter((e) => {
+      if (e.type !== activeTab) return false;
+      if (!cardFilter.trim()) return true;
+      const q = cardFilter.toLowerCase();
+      return e.summary.toLowerCase().includes(q) ||
+        (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
+        (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      if (cardSort === "name") {
+        const na = String(a.detail?.name || a.summary).toLowerCase();
+        const nb = String(b.detail?.name || b.summary).toLowerCase();
+        return na.localeCompare(nb);
+      }
+      if (cardSort === "kind") {
+        const ka = String(a.detail?.kind || "").toLowerCase();
+        const kb = String(b.detail?.kind || "").toLowerCase();
+        return ka.localeCompare(kb) || a.anchor.start_line - b.anchor.start_line;
+      }
+      return a.anchor.start_line - b.anchor.start_line;
+    });
 
   const tabContent = () => {
     switch (activeTab) {
@@ -314,6 +329,16 @@ export function App() {
                 value={cardFilter}
                 onChange={(e) => setCardFilter(e.target.value)}
               />
+              <div className="vr-sort-btns">
+                {(["line", "name", "kind"] as const).map((s) => (
+                  <button
+                    key={s}
+                    className={`vr-sort-btn ${cardSort === s ? "vr-sort-btn--active" : ""}`}
+                    onClick={() => setCardSort(s)}
+                    title={`Sort by ${s}`}
+                  >{s === "line" ? "#" : s === "name" ? "Az" : "Kd"}</button>
+                ))}
+              </div>
               {cardFilter && (
                 <span className="vr-card-filter-count">
                   {filtered.length}/{entities.filter((e) => e.type === activeTab).length}
@@ -867,6 +892,27 @@ const sidebarStyles = `
   .vr-card-filter-input:focus {
     border-color: #007acc;
   }
+
+  .vr-sort-btns {
+    display: flex;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+
+  .vr-sort-btn {
+    background: #2d2d2d;
+    border: 1px solid #3c3c3c;
+    color: #888;
+    font-size: 10px;
+    padding: 2px 5px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .vr-sort-btn:first-child { border-radius: 3px 0 0 3px; }
+  .vr-sort-btn:last-child { border-radius: 0 3px 3px 0; }
+  .vr-sort-btn--active { background: #007acc; color: #fff; border-color: #007acc; }
+  .vr-sort-btn:hover:not(.vr-sort-btn--active) { background: #3c3c3c; }
 
   .vr-card-filter-count {
     font-size: 10px;
