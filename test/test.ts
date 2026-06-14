@@ -230,6 +230,26 @@ if (emptyFile) {
   ), "Empty file has no concept entities (may have history/flow)");
 }
 
+// === Test 12.5: Auto-enrich generates descriptions from JSDoc ===
+console.log("\nTest 12.5: Auto-enrich from JSDoc");
+// Re-analyze first to reset enrichments
+cleanOutput();
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+const autoEnrichOut = run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+assert(autoEnrichOut.includes("auto-enrich"), "Auto-enrich runs without error");
+
+// Check that utils.js got enriched (it has JSDoc comments)
+const utilsAfterAutoEnrich = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__utils.js.json"), "utf-8")
+);
+const debounceEntity = utilsAfterAutoEnrich.entities.find(
+  (e: { detail: { name: string } }) => e.detail.name === "debounce"
+);
+assert(
+  debounceEntity && !debounceEntity.summary.startsWith("function:"),
+  `Auto-enrich updated debounce summary (got "${debounceEntity?.summary}")`
+);
+
 // === Test 13: Schema validation rejects malformed data ===
 console.log("\nTest 13: Schema validation rejects malformed data");
 
