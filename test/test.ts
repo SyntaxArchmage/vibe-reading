@@ -1164,7 +1164,30 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(parsed[0].file === "src/engine.py", "Top file by entities is engine.py");
 }
 
-// --- Test 80: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 80: All CLI tools print usage on missing args ---
+{
+  console.log("\n--- Test 80: CLI usage messages ---");
+  const toolsWithUsage = [
+    { tool: "export-md.ts", expect: "Usage:" },
+    { tool: "search.ts", expect: "Usage:" },
+  ];
+  for (const { tool, expect } of toolsWithUsage) {
+    try { run(`npx tsx ${tool}`); } catch (e: any) {
+      assert(e.stderr?.includes(expect) || e.stdout?.includes(expect), `${tool} shows usage on no args`);
+    }
+  }
+}
+
+// --- Test 81: Viewer build size is reasonable ---
+{
+  console.log("\n--- Test 81: Viewer build size ---");
+  const bundlePath = path.join(CLI_DIR, "../viewer/out/viewer.js");
+  const stat = fs.statSync(bundlePath);
+  assert(stat.size > 10000, `Bundle is > 10KB (got ${stat.size})`);
+  assert(stat.size < 5000000, `Bundle is < 5MB (got ${stat.size})`);
+}
+
+// --- Test 82: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
