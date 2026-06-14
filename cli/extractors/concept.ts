@@ -38,6 +38,9 @@ function getNodeName(node: any): string | null {
     ) {
       return child.text;
     }
+    if (child.type === "type_spec") {
+      return getNodeName(child);
+    }
   }
   return null;
 }
