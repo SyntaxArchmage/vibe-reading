@@ -237,6 +237,10 @@ export function App() {
         e.preventDefault();
         navigateBack();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "w") {
+        e.preventDefault();
+        if (currentFile) closeTab(currentFile);
+      }
       if (e.altKey && e.key === "ArrowRight") {
         e.preventDefault();
         navigateForward();
