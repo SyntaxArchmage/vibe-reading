@@ -802,9 +802,14 @@ export function App() {
           )}
         </span>
         <span className="vr-statusbar-right">
-          {currentFile && `${entities.length} entities`}
+          {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
           {cursorLine > 0 && ` · Ln ${cursorLine}`}
-          {" · "}?: help{" · "}Ctrl+P: files{" · "}Ctrl+Shift+F: search
+          {currentFile && (() => {
+            const fi = allFiles.find(f => f.key === currentFile);
+            return fi && fi.complexity > 0 ? ` · ${fi.complexity}cx` : "";
+          })()}
+          {sourceCode && ` · ${sourceCode.split("\n").length} lines`}
+          {currentFile && ` · ${sourceLanguage}`}
         </span>
       </div>
 
