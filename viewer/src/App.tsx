@@ -39,6 +39,8 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [treeOpen, setTreeOpen] = useState(true);
+  const [navHistory, setNavHistory] = useState<string[]>([]);
+  const [navIndex, setNavIndex] = useState(-1);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
@@ -59,9 +61,17 @@ export function App() {
   const remaining = filteredFiles.length - visibleFiles.length;
 
   const selectFile = useCallback(
-    async (key: string) => {
+    async (key: string, skipHistory = false) => {
       const data = PREVIEW_DATA[key];
       if (!data) return;
+
+      if (!skipHistory) {
+        setNavHistory((prev) => {
+          const trimmed = prev.slice(0, navIndex + 1);
+          return [...trimmed, data.file];
+        });
+        setNavIndex((prev) => prev + 1);
+      }
 
       setCurrentFile(data.file);
       setEntities(data.entities);
@@ -85,8 +95,30 @@ export function App() {
         setSourceCode(`// Failed to load source: ${data.file}`);
       }
     },
-    []
+    [navIndex]
   );
+
+  const navigateBack = useCallback(() => {
+    if (navIndex <= 0) return;
+    const newIdx = navIndex - 1;
+    const file = navHistory[newIdx];
+    const fk = allFiles.find((f) => f.file === file)?.key;
+    if (fk) {
+      setNavIndex(newIdx);
+      selectFile(fk, true);
+    }
+  }, [navIndex, navHistory, allFiles, selectFile]);
+
+  const navigateForward = useCallback(() => {
+    if (navIndex >= navHistory.length - 1) return;
+    const newIdx = navIndex + 1;
+    const file = navHistory[newIdx];
+    const fk = allFiles.find((f) => f.file === file)?.key;
+    if (fk) {
+      setNavIndex(newIdx);
+      selectFile(fk, true);
+    }
+  }, [navIndex, navHistory, allFiles, selectFile]);
 
   const closeTab = useCallback(
     (file: string) => {
@@ -141,10 +173,18 @@ export function App() {
         e.preventDefault();
         setTreeOpen((v) => !v);
       }
+      if (e.altKey && e.key === "ArrowLeft") {
+        e.preventDefault();
+        navigateBack();
+      }
+      if (e.altKey && e.key === "ArrowRight") {
+        e.preventDefault();
+        navigateForward();
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, []);
+  }, [navigateBack, navigateForward]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -266,6 +306,18 @@ export function App() {
       <div className="vr-main">
         {openFiles.length > 0 && (
           <div className="vr-tab-bar">
+            <button
+              className="vr-nav-btn"
+              disabled={navIndex <= 0}
+              onClick={navigateBack}
+              title="Go Back (Alt+←)"
+            >&#x2190;</button>
+            <button
+              className="vr-nav-btn"
+              disabled={navIndex >= navHistory.length - 1}
+              onClick={navigateForward}
+              title="Go Forward (Alt+→)"
+            >&#x2192;</button>
             {openFiles.map((file) => {
               const fk = allFiles.find((f) => f.file === file)?.key;
               return (
@@ -307,7 +359,7 @@ export function App() {
         <span className="vr-statusbar-right">
           {currentFile && `${entities.length} entities`}
           {currentFile && ` · Ln ${highlightRange?.startLine ?? "-"}`}
-          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer
+          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer{" · "}Alt+←→: navigate
         </span>
       </div>
 
@@ -484,6 +536,21 @@ const layoutStyles = `
 
   .vr-tab-item:hover .vr-tab-item-close { opacity: 0.6; }
   .vr-tab-item-close:hover { opacity: 1 !important; background: rgba(255,255,255,0.1); }
+
+  .vr-nav-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    padding: 0 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .vr-nav-btn:hover:not(:disabled) { color: #ccc; }
+  .vr-nav-btn:disabled { opacity: 0.3; cursor: default; }
 
   .vr-editor-wrap {
     flex: 1;
