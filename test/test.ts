@@ -700,7 +700,34 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
-// --- Test 41: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 41: Concept entities have expected fields ---
+{
+  console.log("\n--- Test 41: Concept entity field completeness ---");
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const concepts = data.entities.filter((e: any) => e.type === "concept");
+  for (const c of concepts) {
+    assert(typeof c.detail.kind === "string", `Concept ${c.detail.name}: has kind`);
+    assert(typeof c.detail.name === "string" && c.detail.name.length > 0, `Concept ${c.detail.name}: has name`);
+    assert(typeof c.detail.body_lines === "number" && c.detail.body_lines > 0, `Concept ${c.detail.name}: has body_lines`);
+    assert(typeof c.detail.node_type === "string", `Concept ${c.detail.name}: has node_type`);
+  }
+}
+
+// --- Test 42: Flow entities have expected kinds ---
+{
+  console.log("\n--- Test 42: Flow entity kind distribution ---");
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const flows = data.entities.filter((e: any) => e.type === "flow");
+  const kinds = new Set(flows.map((e: any) => e.detail.kind));
+  assert(kinds.has("imports"), "Flow entities include imports");
+  assert(kinds.has("exports"), "Flow entities include exports");
+}
+
+// --- Test 43: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
