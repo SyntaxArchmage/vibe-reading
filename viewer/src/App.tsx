@@ -737,11 +737,13 @@ export function App() {
             )}
             {openFiles.map((file) => {
               const fk = allFiles.find((f) => f.file === file)?.key;
+              const fi = allFiles.find((f) => f.file === file);
               return (
                 <div
                   key={file}
                   className={`vr-tab-item ${file === currentFile ? "vr-tab-item--active" : ""}`}
                   onClick={() => fk && selectFile(fk)}
+                  title={fi ? `${fi.count} entities · ${fi.complexity}cx` : file}
                 >
                   <span className="vr-tab-item-label">{file.split("/").pop()}</span>
                   <span
