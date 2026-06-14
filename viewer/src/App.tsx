@@ -41,6 +41,7 @@ export function App() {
   const [treeOpen, setTreeOpen] = useState(true);
   const [navHistory, setNavHistory] = useState<string[]>([]);
   const [navIndex, setNavIndex] = useState(-1);
+  const [cardFilter, setCardFilter] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
   const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
@@ -76,6 +77,7 @@ export function App() {
       setCurrentFile(data.file);
       setEntities(data.entities);
       setHighlightRange(null);
+      setCardFilter("");
       setSourceLanguage(detectLanguage(data.file));
       setOpenFiles((prev) =>
         prev.includes(data.file) ? prev : [...prev, data.file]
@@ -209,7 +211,14 @@ export function App() {
     }
   };
 
-  const filtered = entities.filter((e) => e.type === activeTab);
+  const filtered = entities.filter((e) => {
+    if (e.type !== activeTab) return false;
+    if (!cardFilter.trim()) return true;
+    const q = cardFilter.toLowerCase();
+    return e.summary.toLowerCase().includes(q) ||
+      (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
+      (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
+  });
 
   const tabContent = () => {
     switch (activeTab) {
@@ -297,6 +306,20 @@ export function App() {
                 );
               })}
             </nav>
+            <div className="vr-card-filter">
+              <input
+                type="text"
+                className="vr-card-filter-input"
+                placeholder="Filter cards..."
+                value={cardFilter}
+                onChange={(e) => setCardFilter(e.target.value)}
+              />
+              {cardFilter && (
+                <span className="vr-card-filter-count">
+                  {filtered.length}/{entities.filter((e) => e.type === activeTab).length}
+                </span>
+              )}
+            </div>
             <div className="vr-content">{tabContent()}</div>
           </>
         )}
@@ -819,6 +842,36 @@ const sidebarStyles = `
     min-width: 14px;
     text-align: center;
     line-height: 16px;
+  }
+
+  .vr-card-filter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+
+  .vr-card-filter-input {
+    flex: 1;
+    padding: 4px 8px;
+    background: #1e1e1e;
+    color: #ccc;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .vr-card-filter-input:focus {
+    border-color: #007acc;
+  }
+
+  .vr-card-filter-count {
+    font-size: 10px;
+    color: #666;
+    flex-shrink: 0;
   }
 
   .vr-content {
