@@ -1242,6 +1242,33 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(sortOut.includes("src/"), "Sorted summary includes file paths");
 }
 
+// --- Test: viewer hover tooltips have param support ---
+{
+  console.log("\n--- Test: viewer hover params ---");
+  const viewer = fs.readFileSync(path.join(__dirname, "../viewer/out/viewer.js"), "utf-8");
+  assert(viewer.includes("params"), "Viewer bundle supports params in hover");
+  assert(viewer.includes("returnType") || viewer.includes("return_type"), "Viewer bundle supports returnType");
+  assert(viewer.includes("AuthorBar") || viewer.includes("author"), "Viewer bundle has author distribution");
+}
+
+// --- Test: stats dependency graph section ---
+{
+  console.log("\n--- Test: stats dependency graph ---");
+  const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
+  assert(statsOut.includes("Dependency graph"), "Stats shows dependency graph section");
+  assert(statsOut.includes("Total imports"), "Stats shows import count");
+  assert(statsOut.includes("Total exports"), "Stats shows export count");
+}
+
+// --- Test: complexity tool ranking ---
+{
+  console.log("\n--- Test: complexity ranking ---");
+  const cxOut = run(`npx tsx complexity.ts ${FIXTURE_DIR}`);
+  const lines = cxOut.trim().split("\n");
+  assert(lines.length >= 2, "Complexity tool outputs header and at least one file row");
+  assert(lines[0].includes("File") || lines[0].includes("Cx"), "Complexity has header row");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
