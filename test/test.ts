@@ -1026,7 +1026,30 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(typed.includes("Found 3"), "Type filter with limit works");
 }
 
-// --- Test 67: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 67: Auto-enrich extracts parameters ---
+{
+  console.log("\n--- Test 67: Parameter extraction ---");
+  cleanOutput();
+  run("npx tsx analyze.ts ../test/fixture");
+  run("npx tsx auto-enrich.ts ../test/fixture");
+  const utilsJson = JSON.parse(fs.readFileSync(path.join(FIXTURE_DIR, ".vibe-reading/files/src__utils.js.json"), "utf8"));
+  const debounce = utilsJson.entities.find((e: any) => e.detail?.name === "debounce");
+  assert(debounce, "debounce entity exists");
+  assert(typeof debounce.detail.description === "string", "debounce has description");
+  assert(debounce.detail.description.includes("Parameters"), "debounce description includes parameter info");
+}
+
+// --- Test 68: Return type extraction ---
+{
+  console.log("\n--- Test 68: Return type extraction ---");
+  const schedJson = JSON.parse(fs.readFileSync(path.join(FIXTURE_DIR, ".vibe-reading/files/src__scheduler.ts.json"), "utf8"));
+  const withReturn = schedJson.entities.find((e: any) =>
+    e.detail?.description && typeof e.detail.description === "string" && e.detail.description.includes("Returns")
+  );
+  assert(withReturn, "At least one entity has return type info");
+}
+
+// --- Test 69: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
