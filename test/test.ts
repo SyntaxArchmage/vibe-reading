@@ -1016,7 +1016,17 @@ console.log("\nTest 27: Multiple entity types per file");
   fs.unlinkSync(snapshotPath);
 }
 
-// --- Test 66: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 66: Search tool finds entities ---
+{
+  console.log("\n--- Test 66: Search tool ---");
+  const out = run(`npx tsx search.ts ${FIXTURE_DIR} schedule`);
+  assert(out.includes("Scheduler"), "Search finds Scheduler");
+  assert(out.includes("scheduler.ts"), "Search shows file path");
+  const typed = run(`npx tsx search.ts ${FIXTURE_DIR} "" --type=concept --limit=3`);
+  assert(typed.includes("Found 3"), "Type filter with limit works");
+}
+
+// --- Test 67: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
