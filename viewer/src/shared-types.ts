@@ -7,7 +7,7 @@ export interface LoC {
 }
 
 export type EntityType = "concept" | "flow" | "history" | "jump";
-export type TabId = EntityType;
+export type TabId = EntityType | "outline";
 
 export interface DataEntity {
   anchor: LoC;

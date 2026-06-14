@@ -3,6 +3,7 @@ import { ConceptTab } from "./tabs/ConceptTab";
 import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
+import { OutlineTab } from "./tabs/OutlineTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree, fileTreeStyles } from "./components/FileTree";
 import type { DataEntity, TabId } from "./shared-types";
@@ -26,6 +27,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "flow", label: "Flow" },
   { id: "history", label: "History" },
   { id: "jump", label: "Jump" },
+  { id: "outline", label: "Outline" },
 ];
 
 interface FileInfo {
@@ -305,7 +307,7 @@ export function App() {
           return !v;
         });
       }
-      if (e.altKey && e.key >= "1" && e.key <= "4") {
+      if (e.altKey && e.key >= "1" && e.key <= "5") {
         e.preventDefault();
         const idx = parseInt(e.key) - 1;
         if (TABS[idx]) setActiveTab(TABS[idx].id);
@@ -405,6 +407,8 @@ export function App() {
                           const fk = allFiles.find(f => f.file === file)?.key;
                           if (fk) selectFile(fk);
                         }} />;
+      case "outline":
+        return <OutlineTab entities={entities} onCardClick={onCardClick} cursorLine={cursorLine} />;
     }
   };
 
@@ -809,7 +813,7 @@ export function App() {
             <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
             <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
-            <kbd>Alt+1-4</kbd><span>Switch tab</span>
+            <kbd>Alt+1-5</kbd><span>Switch tab</span>
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
             <kbd>[ / ]</kbd><span>Previous/next file</span>
             <kbd>?</kbd><span>Toggle this help</span>
