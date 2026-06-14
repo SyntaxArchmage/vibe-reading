@@ -155,6 +155,36 @@ const server = http.createServer((req, res) => {
       types: typeCounts,
       call_graph_files: callGraph ? (callGraph as any).files?.length ?? 0 : 0,
     }));
+  } else if (url.pathname === "/api/search") {
+    const query = (url.searchParams.get("q") || "").toLowerCase().trim();
+    const typeFilter = url.searchParams.get("type") || null;
+    const limit = Math.min(parseInt(url.searchParams.get("limit") || "50"), 200);
+    if (!query && !typeFilter) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "missing ?q= or ?type= param" }));
+      return;
+    }
+    const results: Array<{ file: string; name: string; type: string; kind: string; line: number; summary: string }> = [];
+    for (const [, data] of Object.entries(analysisData) as [string, any][]) {
+      for (const e of data.entities) {
+        if (typeFilter && e.type !== typeFilter) continue;
+        const name = (e.detail?.name || "").toLowerCase();
+        const summary = (e.summary || "").toLowerCase();
+        if (query && !name.includes(query) && !summary.includes(query)) continue;
+        results.push({
+          file: data.file,
+          name: e.detail?.name || e.summary,
+          type: e.type,
+          kind: e.detail?.kind || "",
+          line: e.anchor.start_line,
+          summary: e.summary,
+        });
+        if (results.length >= limit) break;
+      }
+      if (results.length >= limit) break;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ query, results, count: results.length }));
   } else if (url.pathname === "/api/blame") {
     const filePath = url.searchParams.get("file");
     if (!filePath) {
