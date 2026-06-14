@@ -1085,7 +1085,43 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(dotCluster.includes('label="src"'), "Cluster labeled with directory name");
 }
 
-// --- Test 73: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 73: Search tool with no results ---
+{
+  console.log("\n--- Test 73: Search no results ---");
+  const noResults = run(`npx tsx search.ts ${FIXTURE_DIR} zzzznonexistent`);
+  assert(noResults.includes("No results found"), "Search reports no results for nonexistent query");
+}
+
+// --- Test 74: Complexity tool matches viewer formula ---
+{
+  console.log("\n--- Test 74: Complexity formula consistency ---");
+  const cx = run(`npx tsx complexity.ts ${FIXTURE_DIR}`);
+  assert(cx.includes("Concepts"), "Complexity shows Concepts column");
+  assert(cx.includes("Imports"), "Complexity shows Imports column");
+  assert(cx.includes("MaxSpan"), "Complexity shows MaxSpan column");
+}
+
+// --- Test 75: Diff tool detects changes after modifying analysis ---
+{
+  console.log("\n--- Test 75: Diff detects changes ---");
+  const snapshotPath = path.join(FIXTURE_DIR, ".vibe-reading", "snapshot.json");
+  if (fs.existsSync(snapshotPath)) fs.unlinkSync(snapshotPath);
+  run(`npx tsx diff.ts ${FIXTURE_DIR}`);
+  // Modify an entity
+  const jsonPath = path.join(FIXTURE_DIR, ".vibe-reading/files/src__utils.js.json");
+  const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+  data.entities.push({ anchor: { file: "src/utils.js", start_line: 999, start_col: 0, end_line: 999, end_col: 0 }, type: "concept", summary: "test-entity", detail: { name: "testAdded" } });
+  fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+  const diffOut = run(`npx tsx diff.ts ${FIXTURE_DIR}`);
+  assert(diffOut.includes("Changed:"), "Diff detects entity addition");
+  assert(diffOut.includes("testAdded"), "Diff shows added entity name");
+  // Restore
+  data.entities.pop();
+  fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+  if (fs.existsSync(snapshotPath)) fs.unlinkSync(snapshotPath);
+}
+
+// --- Test 76: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
