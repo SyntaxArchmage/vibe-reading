@@ -996,6 +996,15 @@ export function App() {
           <div className="vr-help-footer">
             <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
           </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: "#888" }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Entity Types</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[["function","#4ec9b0"],["class","#dcdcaa"],["interface","#9cdcfe"],["type","#9cdcfe"],
+                ["variable","#ce9178"],["enum","#b5cea8"],["method","#4ec9b0"],["decorated","#c586c0"]].map(([k,c]) => (
+                <span key={k} style={{ color: c as string }}>{k}</span>
+              ))}
+            </div>
+          </div>
         </div>
         </>
       )}
