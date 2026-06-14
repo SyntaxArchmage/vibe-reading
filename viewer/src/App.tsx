@@ -198,6 +198,22 @@ export function App() {
     }
   }, [navIndex, navHistory, allFiles, selectFile]);
 
+  useEffect(() => {
+    if (currentFile) {
+      try { localStorage.setItem("vr-last-file", currentFile); } catch {}
+    }
+  }, [currentFile]);
+
+  useEffect(() => {
+    try {
+      const last = localStorage.getItem("vr-last-file");
+      if (last) {
+        const fk = allFiles.find(f => f.file === last)?.key;
+        if (fk) selectFile(fk);
+      }
+    } catch {}
+  }, []);
+
   const navigateForward = useCallback(() => {
     if (navIndex >= navHistory.length - 1) return;
     const newIdx = navIndex + 1;
