@@ -421,9 +421,10 @@ export function App() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span className="vr-entity-search-type">{e.type}</span>
+                  {e.detail.kind && <span style={{ fontSize: 10, color: "#888" }}>({e.detail.kind as string})</span>}
                   <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
                 </div>
-                <span className="vr-entity-search-file">{(e as any)._file}</span>
+                <span className="vr-entity-search-file">{(e as any)._file}:{e.anchor.start_line}</span>
               </div>
             ))}
           </div>
