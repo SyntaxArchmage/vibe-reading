@@ -216,17 +216,44 @@ function CommitTimeline({ commits }: { commits: Array<{ date: string }> }) {
   );
 }
 
+function AuthorBar({ commits }: { commits: Array<{ author: string }> }) {
+  if (!commits || commits.length < 2) return null;
+  const counts: Record<string, number> = {};
+  for (const c of commits) counts[c.author] = (counts[c.author] || 0) + 1;
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const total = commits.length;
+  const palette = ["#4ec9b0", "#dcdcaa", "#9cdcfe", "#ce9178", "#c586c0", "#b5cea8"];
+  return (
+    <div style={{ padding: "2px 8px", fontSize: 10 }}>
+      <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden" }}>
+        {sorted.map(([author, count], i) => (
+          <div key={author} title={`${author}: ${count} commits`}
+               style={{ width: `${(count / total) * 100}%`, background: palette[i % palette.length] }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 6, marginTop: 2, flexWrap: "wrap" }}>
+        {sorted.slice(0, 4).map(([author, count], i) => (
+          <span key={author} style={{ color: palette[i % palette.length] }}>
+            {author.split(" ")[0]} ({count})
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
   if (entities.length === 0 && !currentFile) {
     return <div className="vr-no-cards">No history cards for this file.</div>;
   }
 
   const recentChanges = entities.find(e => e.detail.kind === "recent_changes");
-  const commits = recentChanges?.detail.commits as Array<{ date: string }> | undefined;
+  const commits = recentChanges?.detail.commits as Array<{ date: string; author: string }> | undefined;
 
   return (
     <div>
       {commits && commits.length >= 2 && <CommitTimeline commits={commits} />}
+      {commits && commits.length >= 2 && <AuthorBar commits={commits} />}
       <AnimatePresence mode="popLayout">
         {entities.map((e, i) => (
           <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
