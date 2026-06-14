@@ -145,6 +145,13 @@ export function App() {
           ? Math.min(idx + 1, visibleFiles.length - 1)
           : Math.max(idx - 1, 0);
       if (visibleFiles[next]) selectFile(visibleFiles[next].key);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (visibleFiles.length > 0) {
+        const active = visibleFiles.find((f) => f.file === currentFile);
+        selectFile((active ?? visibleFiles[0]).key);
+        setPickerOpen(false);
+      }
     } else if (e.key === "Escape") {
       setPickerOpen(false);
     }
@@ -282,8 +289,10 @@ export function App() {
         </div>
       </div>
 
-      {/* File picker — floating panel */}
+      {/* File picker — command palette */}
       {pickerOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setPickerOpen(false)} />
         <div className="vr-picker">
           <div className="vr-picker-header">
             <input
@@ -312,6 +321,7 @@ export function App() {
                 }`}
                 onClick={() => {
                   selectFile(f.key);
+                  setPickerOpen(false);
                 }}
               >
                 <span className="vr-picker-path">{f.file}</span>
@@ -330,6 +340,7 @@ export function App() {
             {allFiles.length} files &middot; {filteredFiles.length} matches
           </div>
         </div>
+        </>
       )}
     </div>
   );
@@ -476,17 +487,25 @@ const layoutStyles = `
     border-radius: 1px;
   }
 
-  /* File picker */
+  /* File picker — VS Code-style command palette */
+  .vr-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 199;
+  }
+
   .vr-picker {
     position: fixed;
-    bottom: 16px;
-    right: 16px;
-    width: 380px;
-    max-height: 400px;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 520px;
+    max-height: 440px;
     background: #2d2d2d;
     border: 1px solid #555;
     border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
     z-index: 200;
     display: flex;
     flex-direction: column;
@@ -696,7 +715,12 @@ const sidebarStyles = `
     flex: 1;
     overflow-y: auto;
     padding: 6px 8px;
+    scroll-behavior: smooth;
   }
+
+  .vr-content::-webkit-scrollbar { width: 6px; }
+  .vr-content::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+  .vr-content::-webkit-scrollbar-track { background: transparent; }
 
   .vr-card {
     background: #1e1e1e;
