@@ -631,7 +631,20 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(viewerSize > 1000, `viewer.js is non-trivial (${(viewerSize / 1024).toFixed(0)} KB)`);
 }
 
-// --- Test 36: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 36: Entity type distribution per file ---
+{
+  console.log("\n--- Test 36: Entity type distribution ---");
+  const schedData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const types = new Set(schedData.entities.map((e: any) => e.type));
+  assert(types.has("concept"), "scheduler.ts has concept entities");
+  assert(types.has("flow"), "scheduler.ts has flow entities");
+  assert(types.has("history"), "scheduler.ts has history entities");
+  assert(types.size >= 3, `scheduler.ts has at least 3 entity types (got ${types.size})`);
+}
+
+// --- Test 37: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
