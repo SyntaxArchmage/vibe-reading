@@ -114,10 +114,13 @@ async function main() {
     }, null, 2)
   );
 
+  const totalEntities = manifestEntries.reduce((sum, e) => sum + e.entity_count, 0);
+
   console.log(
     `\n[vibe-reading] Done. Coverage: ${(manifest.coverage * 100).toFixed(1)}% ` +
     `(${manifest.analyzed_files}/${manifest.total_files})`
   );
+  console.log(`[vibe-reading] Total entities: ${totalEntities}`);
   console.log(`[vibe-reading] Call graph: ${callGraph.length} files`);
 }
 
