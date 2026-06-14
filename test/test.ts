@@ -1249,6 +1249,8 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(viewer.includes("params"), "Viewer bundle supports params in hover");
   assert(viewer.includes("returnType") || viewer.includes("return_type"), "Viewer bundle supports returnType");
   assert(viewer.includes("AuthorBar") || viewer.includes("author"), "Viewer bundle has author distribution");
+  assert(viewer.includes("Circular dependency"), "Viewer has circular dependency detection");
+  assert(viewer.includes("Filter ") || viewer.includes("filter"), "Viewer has outline filter");
 }
 
 // --- Test: stats dependency graph section ---
