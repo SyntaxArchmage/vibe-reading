@@ -607,7 +607,22 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(exports.detail.names.length === 3, `Python __all__ has exactly 3 names (got ${exports.detail.names.length})`);
 }
 
-// --- Test 34: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 34: Call graph has correct import/export data ---
+{
+  console.log("\n--- Test 34: Call graph data correctness ---");
+  const cgPath = path.join(VIBE_DIR, "global", "call-graph.json");
+  const cg = JSON.parse(fs.readFileSync(cgPath, "utf-8"));
+  const scheduler = cg.files.find((f: any) => f.file === "src/scheduler.ts");
+  assert(scheduler !== undefined, "Call graph has scheduler.ts");
+  assert(scheduler.exports.includes("Scheduler"), "Call graph: Scheduler exported");
+  assert(scheduler.exports.includes("DEFAULT_PRIORITY"), "Call graph: DEFAULT_PRIORITY exported");
+  const engine = cg.files.find((f: any) => f.file === "src/engine.py");
+  assert(engine !== undefined, "Call graph has engine.py");
+  assert(engine.exports.includes("Config"), "Call graph: Config in Python __all__");
+  assert(engine.imports.length >= 2, `Call graph: engine.py has imports (${engine.imports.length})`);
+}
+
+// --- Test 35: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
