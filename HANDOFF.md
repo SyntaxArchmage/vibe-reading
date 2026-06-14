@@ -1,6 +1,6 @@
 # Vibe Reading — Handoff Document
 
-Session: 2026-06-08 → 2026-06-14
+Session: 2026-06-08 → 2026-06-15
 Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
 ## Quick Start (New Machine)
@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (67 assertions)
+# 3. Run CLI tests (77 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -42,8 +42,9 @@ python3 test/e2e/test_viewer.py
 - `cli/analyze.ts` — AST extraction orchestrator (Tree-sitter WASM)
 - `cli/enrich.ts` — agent writes enriched concept data
 - `cli/harness.ts` — coverage verification + schema validation
+- `cli/stats.ts` — quick project stats overview
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 67 automated tests in `test/test.ts`
+- 77 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -68,10 +69,13 @@ python3 test/e2e/test_viewer.py
 - Flow extractor: imports, function calls, exports (Tree-sitter)
 - Global call-graph.json for cross-file relationships
 - FlowTab with categorized cards (imports/calls/exports)
+- Visual flow diagram in FlowTab header (imports → file → exports)
 
 ### Phase 3: Evolve Map ✅
 - History extractor: git log, change frequency, hot spots
 - HistoryTab with commit timeline and hot spot indicators
+- On-demand git blame via /api/blame endpoint
+- Blame view with per-line author/date/sha annotations
 
 ### Phase 4: Vibe Jump ✅
 - Jump extractor: local import resolution to target files
@@ -81,7 +85,12 @@ python3 test/e2e/test_viewer.py
 ### Code Quality
 - Shared Tree-sitter parser module (eliminated ~200 lines of duplication)
 - Server hardened: malformed JSON handling, path traversal protection
+- Server auto-reloads analysis data when files change
 - Genericized auto-enrich (removed project-specific hardcoding)
+- Global entity search panel (Ctrl+Shift+F) across all files
+- Card enrichment indicator (shows "enriched" chip)
+- Card filter and sort controls in sidebar
+- `.cursor/rules/` for AI session consistency
 
 ## Architecture Decisions (2026-06-12)
 
@@ -136,7 +145,7 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 67 CLI pipeline tests
+│   ├── test.ts                 # 77 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
 │   └── fixture/                # Test fixture (4 source files)
 ├── prd/
@@ -225,5 +234,5 @@ Each file JSON:
    screenshots, iterate on UI
 2. **LSP integration** — go-to-definition targets for jump tab
 3. **LLM enrichment** — semantic relationship inference for jumps
-4. **Visual flow diagram** — vertical call chain visualization
-5. **Git blame** — per-line last-change info for history tab
+4. **Heat map overlay** — file change frequency visualization on Monaco
+5. **PR description extraction** — GitHub API integration for history

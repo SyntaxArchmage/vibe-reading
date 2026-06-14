@@ -134,11 +134,14 @@ architectural layer.
   - Kind-colored badges and icons
 - [x] Harness: schema validates flow entities
 
+### Completed (Added in later cycles)
+
+- [x] Visual flow diagram (imports → file → exports chain in FlowTab header)
+
 ### Deferred
 
 - [ ] LSP call hierarchy (needs language server infrastructure)
 - [ ] LLM architectural layer assignment (requires agent enrichment)
-- [ ] Visual flow diagram (vertical call chain visualization)
 - [ ] Playwright E2E (blocked by system library: libxkbcommon.so.0)
 
 ### Files
@@ -169,9 +172,12 @@ frequency, recent PRs, design decisions.
   - Hot spot indicator for actively modified files
   - Kind-colored badges and date formatting
 
+### Completed (Added in later cycles)
+
+- [x] On-demand git blame via /api/blame endpoint with per-line annotations
+
 ### Deferred
 
-- [ ] Git blame: per-line last-change info
 - [ ] PR description extraction (GitHub API)
 - [ ] Heat map overlay visualization
 - [ ] Playwright E2E tests

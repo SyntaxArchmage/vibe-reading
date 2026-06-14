@@ -328,7 +328,10 @@ export function App() {
                   }, 100);
                 }}
               >
-                <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span className="vr-entity-search-type">{e.type}</span>
+                  <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
+                </div>
                 <span className="vr-entity-search-file">{(e as any)._file}</span>
               </div>
             ))}
@@ -621,10 +624,22 @@ const layoutStyles = `
     border-bottom: 1px solid #2d2d2d;
   }
   .vr-entity-search-item:hover { background: #2a2d2e; }
+  .vr-entity-search-type {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: #333;
+    color: #888;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
   .vr-entity-search-name {
     font-family: monospace;
     font-size: 12px;
     color: #d4d4d4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .vr-entity-search-file {
     font-size: 10px;
