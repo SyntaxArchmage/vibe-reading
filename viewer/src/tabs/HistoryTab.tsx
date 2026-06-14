@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
+
+interface BlameLine {
+  line: number;
+  author: string;
+  date: string;
+  sha: string;
+  content: string;
+}
 
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
+  currentFile?: string;
 }
 
 const KIND_ICONS: Record<string, string> = {
@@ -109,16 +118,87 @@ function formatDate(iso: string): string {
   }
 }
 
-export function HistoryTab({ entities, onCardClick }: Props) {
-  if (entities.length === 0) {
+function BlameView({ file }: { file: string }) {
+  const [lines, setLines] = useState<BlameLine[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchBlame = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/blame?file=${encodeURIComponent(file)}`);
+      const data = await res.json();
+      if (data.error) { setError(data.error); return; }
+      setLines(data.lines);
+    } catch (e) {
+      setError("Failed to fetch blame data");
+    } finally {
+      setLoading(false);
+    }
+  }, [file]);
+
+  if (!lines && !loading && !error) {
+    return (
+      <button onClick={fetchBlame} style={blameButtonStyle}>
+        Show Git Blame
+      </button>
+    );
+  }
+
+  if (loading) return <div style={{ color: "#888", fontSize: 12, padding: 8 }}>Loading blame...</div>;
+  if (error) return <div style={{ color: "#f44747", fontSize: 12, padding: 8 }}>{error}</div>;
+
+  const authors = [...new Set(lines!.map(l => l.author))];
+  const authorColors: Record<string, string> = {};
+  const palette = ["#4ec9b0", "#dcdcaa", "#9cdcfe", "#ce9178", "#c586c0", "#b5cea8", "#569cd6", "#d4d4d4"];
+  authors.forEach((a, i) => { authorColors[a] = palette[i % palette.length]; });
+
+  return (
+    <div style={{ fontSize: 11, fontFamily: "monospace", maxHeight: 400, overflowY: "auto" }}>
+      <div style={{ display: "flex", gap: 8, padding: "4px 0", borderBottom: "1px solid #333", marginBottom: 4 }}>
+        <span style={{ width: 30, color: "#666" }}>Line</span>
+        <span style={{ width: 70, color: "#666" }}>SHA</span>
+        <span style={{ width: 90, color: "#666" }}>Author</span>
+        <span style={{ width: 80, color: "#666" }}>Date</span>
+      </div>
+      {lines!.map(l => (
+        <div key={l.line} style={{ display: "flex", gap: 8, padding: "1px 0" }}>
+          <span style={{ width: 30, color: "#666", textAlign: "right" }}>{l.line}</span>
+          <span style={{ width: 70, color: "#dcdcaa" }}>{l.sha}</span>
+          <span style={{ width: 90, color: authorColors[l.author] || "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.author}</span>
+          <span style={{ width: 80, color: "#888" }}>{l.date}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const blameButtonStyle: React.CSSProperties = {
+  background: "#2d2d2d",
+  color: "#9cdcfe",
+  border: "1px solid #444",
+  borderRadius: 4,
+  padding: "6px 12px",
+  cursor: "pointer",
+  fontSize: 12,
+  width: "100%",
+  marginTop: 8,
+};
+
+export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
+  if (entities.length === 0 && !currentFile) {
     return <div className="vr-no-cards">No history cards for this file.</div>;
   }
 
   return (
-    <AnimatePresence mode="popLayout">
-      {entities.map((e, i) => (
-        <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
-      ))}
-    </AnimatePresence>
+    <div>
+      <AnimatePresence mode="popLayout">
+        {entities.map((e, i) => (
+          <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
+        ))}
+      </AnimatePresence>
+      {currentFile && <BlameView file={currentFile} />}
+    </div>
   );
 }

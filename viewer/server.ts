@@ -1,6 +1,7 @@
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
+import { execSync } from "child_process";
 
 const PORT = parseInt(process.env.PORT || "3457");
 const VIEWER_DIR = path.dirname(new URL(import.meta.url).pathname);
@@ -87,6 +88,51 @@ const server = http.createServer((req, res) => {
     const content = fs.readFileSync(absPath, "utf-8");
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ file: filePath, content }));
+  } else if (url.pathname === "/api/blame") {
+    const filePath = url.searchParams.get("file");
+    if (!filePath) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "missing ?file= param" }));
+      return;
+    }
+    const absPath = path.resolve(projectRoot, filePath);
+    if (!absPath.startsWith(projectRoot + path.sep) || !fs.existsSync(absPath)) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "file not found" }));
+      return;
+    }
+    try {
+      const raw = execSync(
+        `git blame --line-porcelain "${absPath}"`,
+        { cwd: projectRoot, maxBuffer: 10 * 1024 * 1024, encoding: "utf-8" }
+      );
+      const lines: Array<{ line: number; author: string; date: string; sha: string; content: string }> = [];
+      let cur: Record<string, string> = {};
+      let lineNum = 0;
+      for (const l of raw.split("\n")) {
+        if (l.startsWith("\t")) {
+          lineNum++;
+          lines.push({
+            line: lineNum,
+            author: cur["author"] || "?",
+            date: cur["author-time"] ? new Date(parseInt(cur["author-time"]) * 1000).toISOString().slice(0, 10) : "?",
+            sha: cur["sha"] || "?",
+            content: l.slice(1),
+          });
+          cur = {};
+        } else {
+          const m = l.match(/^([0-9a-f]{40}) /);
+          if (m) cur["sha"] = m[1].slice(0, 8);
+          const kv = l.match(/^(author|author-time|summary) (.+)/);
+          if (kv) cur[kv[1]] = kv[2];
+        }
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ file: filePath, lines }));
+    } catch {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "git blame failed (not a git repo?)" }));
+    }
   } else {
     res.writeHead(404);
     res.end("Not found");

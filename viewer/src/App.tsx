@@ -242,7 +242,7 @@ export function App() {
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} />;
       case "history":
-        return <HistoryTab entities={filtered} onCardClick={onCardClick} />;
+        return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} />;
       case "jump":
         return <JumpTab entities={filtered} onCardClick={onCardClick} />;
     }
