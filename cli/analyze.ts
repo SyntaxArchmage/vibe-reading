@@ -43,8 +43,15 @@ async function main() {
   const projectRoot = process.argv[2] || process.cwd();
   console.log(`[vibe-reading] Analyzing: ${projectRoot}`);
 
-  fs.mkdirSync(path.join(projectRoot, FILES_DIR), { recursive: true });
+  const filesPath = path.join(projectRoot, FILES_DIR);
+  fs.mkdirSync(filesPath, { recursive: true });
   fs.mkdirSync(path.join(projectRoot, GLOBAL_DIR), { recursive: true });
+
+  for (const old of fs.readdirSync(filesPath)) {
+    if (old.endsWith(".json")) {
+      fs.unlinkSync(path.join(filesPath, old));
+    }
+  }
 
   const files = await glob("**/*", {
     cwd: projectRoot,
