@@ -894,7 +894,19 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(analyzeOut.includes(".py("), "Analyze includes .py extension");
 }
 
-// --- Test 55: Viewer build has density bar and concept grouping ---
+// --- Test 55: export-dot --focus filters to related files ---
+{
+  console.log("\n--- Test 55: DOT focus filter ---");
+  const focused = run(`npx tsx export-dot.ts ${FIXTURE_DIR} --focus scheduler`);
+  assert(focused.includes("scheduler"), "Focused DOT includes target file");
+  assert(focused.includes("007acc"), "Focused file has highlight color");
+  const unfocusedNodeCount = (focused.match(/\[label=/g) || []).length;
+  const allDot = run(`npx tsx export-dot.ts ${FIXTURE_DIR}`);
+  const allNodeCount = (allDot.match(/\[label=/g) || []).length;
+  assert(unfocusedNodeCount < allNodeCount, `Focus reduces nodes (${unfocusedNodeCount} < ${allNodeCount})`);
+}
+
+// --- Test 56: Viewer build has density bar and concept grouping ---
 {
   console.log("\n--- Test 55: Viewer build density/grouping ---");
   const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
