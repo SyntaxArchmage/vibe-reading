@@ -115,6 +115,28 @@ const server = http.createServer((req, res) => {
     const content = fs.readFileSync(absPath, "utf-8");
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ file: filePath, content }));
+  } else if (url.pathname === "/api/entities") {
+    const filePath = url.searchParams.get("file");
+    if (filePath) {
+      const jsonName = filePath.replace(/[/\\]/g, "__") + ".json";
+      const fileData = analysisData[jsonName];
+      if (fileData) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(fileData));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "no analysis data for file" }));
+      }
+    } else {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({
+        files: Object.entries(analysisData).map(([key, data]: [string, any]) => ({
+          key,
+          file: data.file,
+          entity_count: data.entities.length,
+        })),
+      }));
+    }
   } else if (url.pathname === "/api/blame") {
     const filePath = url.searchParams.get("file");
     if (!filePath) {
