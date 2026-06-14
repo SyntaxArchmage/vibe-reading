@@ -91,6 +91,29 @@ Tell the user:
 - Coverage percentage
 - How to view: run `/teach-me` or `cd <vibe-reading-repo>/viewer && npm run dev -- <target-project-root>`
 
+### Step 2.5 (Optional): Auto-Enrich from JSDoc/Docstrings
+
+Before manual enrichment, run auto-enrich to handle entities that already
+have good documentation:
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx auto-enrich.ts <target-project-root>
+```
+
+This extracts JSDoc comments (JS/TS) and Python docstrings to generate
+summaries and descriptions automatically. Only unenriched entities are
+updated.
+
+### Quick Stats
+
+Check analysis metrics without opening the viewer:
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx stats.ts <target-project-root>
+```
+
+Shows entity counts, enrichment percentage, and largest file.
+
 ## Batch Processing
 
 For large projects, process files in batches of 3-5 to avoid context overflow. Read source files, generate enrichments, write them, then move to the next batch.

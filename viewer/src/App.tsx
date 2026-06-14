@@ -356,6 +356,9 @@ export function App() {
             <div className="vr-empty-title">Vibe Reading</div>
             <div className="vr-empty-hint">
               Select a file to see knowledge cards.
+              <div style={{ marginTop: 8, fontSize: 11, color: "#777" }}>
+                {allFiles.length} files · {allEntities.length} entities
+              </div>
             </div>
           </div>
         )}
