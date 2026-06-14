@@ -18,6 +18,7 @@ const INTERESTING_NODE_TYPES: Record<string, Set<string>> = {
     "trait_definition",
     "module_definition",
     "decorated_definition",
+    "type_declaration",
   ]),
   python: new Set([
     "function_definition",
@@ -52,6 +53,7 @@ function getNodeKind(nodeType: string): string {
   if (nodeType.includes("trait")) return "trait";
   if (nodeType.includes("module")) return "module";
   if (nodeType.includes("decorated")) return "decorated";
+  if (nodeType === "type_declaration") return "type";
   return nodeType;
 }
 
