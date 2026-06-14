@@ -399,6 +399,12 @@ export function App() {
               <div style={{ marginTop: 8, fontSize: 11, color: "#777" }}>
                 {allFiles.length} files · {allEntities.length} entities
               </div>
+              <div style={{ marginTop: 4, fontSize: 10, color: "#555", display: "flex", gap: 8, justifyContent: "center" }}>
+                <span style={{ color: "#4ec9b0" }}>{allEntities.filter(e => e.type === "concept").length} concepts</span>
+                <span style={{ color: "#dcdcaa" }}>{allEntities.filter(e => e.type === "flow").length} flow</span>
+                <span style={{ color: "#9cdcfe" }}>{allEntities.filter(e => e.type === "history").length} history</span>
+                <span style={{ color: "#c586c0" }}>{allEntities.filter(e => e.type === "jump").length} jump</span>
+              </div>
             </div>
           </div>
         )}
