@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (242 assertions)
+# 3. Run CLI tests (328 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -45,7 +45,7 @@ python3 test/e2e/test_viewer.py
 - `cli/stats.ts` — project stats (avg entities/file, extension breakdown)
 - `cli/export-md.ts` — export analysis as Markdown summary
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 242 automated tests in `test/test.ts`
+- 328 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -131,6 +131,32 @@ python3 test/e2e/test_viewer.py
 - Fix: entity search closes on selection, safe end_line fallback
 - Fix: summaryIsPlaceholder regex covers all entity kinds
 - Fix: removed broken tree-sitter-wasms language entries
+- Fix: 3 TypeScript strict errors in viewer (null→undefined, unknown→ReactNode)
+- Fix: stale entitySearchOpen closure in keyboard handler
+- Outline tab with nested entity tree and cursor tracking (Alt+5)
+- Viewport indicator on entity density minimap (synced with editor scroll)
+- Cross-file usages shown in expanded concept cards
+- Bi-directional jump tab ("imported by" section)
+- Entity hover tooltips in Monaco editor
+- Entity bookmarks with star toggle (localStorage persisted)
+- Bookmarked entities shown in sidebar empty state
+- Go-to-symbol dialog (Ctrl+Shift+O)
+- File complexity score badge (cx) in file header
+- File summary line in concept tab
+- File tree sort by name/entities/commits
+- File picker prioritizes open tabs
+- Enhanced status bar (concept count, complexity, language)
+- Imported names shown next to importers in flow tab
+- Live reload via Server-Sent Events (/api/events)
+- Enhanced /api/health with entity count, uptime, SSE clients
+- Auto-enrich extracts function parameters and return types
+- `complexity.ts` CLI tool: ranked complexity report with --top flag
+- `diff.ts` CLI tool: snapshot-based analysis comparison
+- `search.ts` CLI tool: cross-file entity search
+- `summary.ts` CLI tool: tab-separated file overview (--json, --sort)
+- `export-dot --clusters` groups files by directory into subgraphs
+- Stats tool: dependency graph analysis (imports, exports, isolated files, longest chain)
+- `export-dot --focus` flag for targeted graph visualization
 
 ## Architecture Decisions (2026-06-12)
 
