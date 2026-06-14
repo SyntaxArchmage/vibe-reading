@@ -82,6 +82,54 @@ function main() {
       console.log(`  ${ext}: ${count} files`);
     }
   }
+
+  const cgPath = path.join(vibeDir, "global", "call-graph.json");
+  if (fs.existsSync(cgPath)) {
+    try {
+      const cg = JSON.parse(fs.readFileSync(cgPath, "utf-8"));
+      const files = cg.files as Array<{ file: string; imports: Array<{ source: string }>; exports: string[] }>;
+      const totalImports = files.reduce((s, f) => s + f.imports.length, 0);
+      const totalExports = files.reduce((s, f) => s + f.exports.length, 0);
+      const isolatedFiles = files.filter(f => f.imports.length === 0 && f.exports.length === 0);
+      console.log(`\nDependency graph:`);
+      console.log(`  Total imports: ${totalImports}`);
+      console.log(`  Total exports: ${totalExports}`);
+      console.log(`  Isolated files: ${isolatedFiles.length}`);
+
+      const adj = new Map<string, string[]>();
+      for (const f of files) {
+        const deps: string[] = [];
+        for (const imp of f.imports) {
+          if (!imp.source.startsWith(".")) continue;
+          const src = imp.source.replace(/^\.\//, "");
+          const target = files.find(t =>
+            t.file.endsWith(src) || t.file.endsWith(src + ".ts") || t.file.endsWith(src + ".js") || t.file.endsWith(src + ".tsx")
+          );
+          if (target) deps.push(target.file);
+        }
+        adj.set(f.file, deps);
+      }
+
+      let longestChain = 0;
+      let longestStart = "";
+      function dfs(file: string, visited: Set<string>, depth: number) {
+        if (depth > longestChain) { longestChain = depth; longestStart = file; }
+        for (const dep of adj.get(file) || []) {
+          if (!visited.has(dep)) {
+            visited.add(dep);
+            dfs(dep, visited, depth + 1);
+            visited.delete(dep);
+          }
+        }
+      }
+      for (const f of files) {
+        dfs(f.file, new Set([f.file]), 0);
+      }
+      if (longestChain > 0) {
+        console.log(`  Longest dep chain: ${longestChain} (from ${longestStart})`);
+      }
+    } catch { /* skip */ }
+  }
 }
 
 main();

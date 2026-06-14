@@ -963,7 +963,17 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(lines.length === 2, `--top=2 shows 2 files (got ${lines.length})`);
 }
 
-// --- Test 61: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 61: Stats shows dependency graph info ---
+{
+  console.log("\n--- Test 61: Stats dependency graph ---");
+  const statsOut = run(`npx tsx stats.ts ${FIXTURE_DIR}`);
+  assert(statsOut.includes("Dependency graph"), "Stats shows dependency graph section");
+  assert(statsOut.includes("Total imports"), "Stats shows import count");
+  assert(statsOut.includes("Total exports"), "Stats shows export count");
+  assert(statsOut.includes("Isolated files"), "Stats shows isolated file count");
+}
+
+// --- Test 62: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
