@@ -57,6 +57,7 @@ export function App() {
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [cursorLine, setCursorLine] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -83,6 +84,20 @@ export function App() {
         }).slice(0, 50);
       })()
     : [];
+
+  const breadcrumbEntity = useMemo(() => {
+    if (!cursorLine) return null;
+    const concepts = entities.filter(e => e.type === "concept");
+    let best: DataEntity | null = null;
+    let bestSize = Infinity;
+    for (const e of concepts) {
+      if (cursorLine >= e.anchor.start_line && cursorLine <= e.anchor.end_line) {
+        const size = e.anchor.end_line - e.anchor.start_line;
+        if (size < bestSize) { best = e; bestSize = size; }
+      }
+    }
+    return best;
+  }, [cursorLine, entities]);
 
   const allFiles: FileInfo[] = useMemo(() =>
     Object.entries(PREVIEW_DATA)
@@ -543,6 +558,7 @@ export function App() {
                 endLine: e.anchor.end_line,
                 type: e.type,
               }))}
+              onCursorLine={setCursorLine}
             />
           ) : (
             <div className="vr-editor-placeholder">
@@ -554,10 +570,18 @@ export function App() {
 
       {/* Status bar */}
       <div className="vr-statusbar">
-        <span>{currentFile ?? "No file selected"}</span>
+        <span>
+          {currentFile ?? "No file selected"}
+          {breadcrumbEntity && (
+            <span className="vr-breadcrumb">
+              {" > "}{(breadcrumbEntity.detail.kind as string) ?? ""}
+              {" "}<strong>{breadcrumbEntity.detail.name as string}</strong>
+            </span>
+          )}
+        </span>
         <span className="vr-statusbar-right">
           {currentFile && `${entities.length} entities`}
-          {currentFile && ` · Ln ${highlightRange?.startLine ?? "-"}`}
+          {cursorLine > 0 && ` · Ln ${cursorLine}`}
           {" · "}?: help{" · "}Ctrl+P: files{" · "}Ctrl+Shift+F: search
         </span>
       </div>
@@ -886,6 +910,14 @@ const layoutStyles = `
 
   .vr-statusbar-right {
     opacity: 0.85;
+  }
+
+  .vr-breadcrumb {
+    color: #888;
+    font-size: 11px;
+  }
+  .vr-breadcrumb strong {
+    color: #dcdcaa;
   }
 
   /* File picker — VS Code-style command palette */

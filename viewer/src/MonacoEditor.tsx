@@ -17,6 +17,7 @@ interface MonacoEditorProps {
   language: string;
   highlightRange?: { startLine: number; endLine: number } | null;
   entityMarkers?: EntityMarker[];
+  onCursorLine?: (line: number) => void;
 }
 
 function detectLanguage(filePath: string): string {
@@ -61,7 +62,7 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange, entityMarkers }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
@@ -114,6 +115,15 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers }: 
       // Don't dispose on re-render, only on unmount
     };
   }, [ready, code, language]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !onCursorLine) return;
+    const disposable = editor.onDidChangeCursorPosition((e: any) => {
+      onCursorLine(e.position.lineNumber);
+    });
+    return () => disposable.dispose();
+  }, [ready, onCursorLine]);
 
   useEffect(() => {
     return () => {
