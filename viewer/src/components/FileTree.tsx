@@ -130,7 +130,10 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
 
   return (
     <div className="vr-tree">
-      <div className="vr-tree-header">EXPLORER</div>
+      <div className="vr-tree-header">
+        EXPLORER
+        <span className="vr-tree-header-count">{files.length} files</span>
+      </div>
       <div className="vr-tree-list">
         <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} />
       </div>
@@ -154,6 +157,16 @@ export const fileTreeStyles = `
     color: #888;
     border-bottom: 1px solid #3c3c3c;
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vr-tree-header-count {
+    font-weight: 400;
+    font-size: 10px;
+    opacity: 0.7;
+    letter-spacing: 0;
   }
 
   .vr-tree-list {

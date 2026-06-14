@@ -295,7 +295,11 @@ export function App() {
           <>
             <div className="vr-file-header">
               <span className="vr-file-icon">&#x1F4C4;</span>
-              <span className="vr-file-path" title={currentFile}>
+              <span
+                className="vr-file-path"
+                title={`${currentFile} (click to copy)`}
+                onClick={() => currentFile && navigator.clipboard?.writeText(currentFile)}
+              >
                 {currentFile}
               </span>
               <span className="vr-file-count">{entities.length}</span>
@@ -817,7 +821,10 @@ const sidebarStyles = `
     text-align: left;
     min-width: 0;
     flex: 1;
+    cursor: pointer;
   }
+
+  .vr-file-path:hover { color: #fff; }
 
   .vr-file-count {
     flex-shrink: 0;
