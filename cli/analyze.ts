@@ -3,6 +3,7 @@ import * as path from "path";
 import { glob } from "glob";
 import { extractConcepts } from "./extractors/concept.js";
 import { extractFlow, type FlowData } from "./extractors/flow.js";
+import { extractHistory } from "./extractors/history.js";
 import type { DataEntity, FileAnalysis, Manifest, ManifestEntry } from "./types.js";
 
 interface CallGraphEntry {
@@ -63,7 +64,7 @@ async function main() {
   for (const file of sourceFiles) {
     const absPath = path.join(projectRoot, file);
     try {
-      const { analysis, flowData } = await analyzeFile(file, absPath);
+      const { analysis, flowData } = await analyzeFile(file, absPath, projectRoot);
       const outName = file.replace(/[/\\]/g, "__") + ".json";
       const outPath = path.join(projectRoot, FILES_DIR, outName);
       fs.writeFileSync(outPath, JSON.stringify(analysis, null, 2));
@@ -121,14 +122,16 @@ async function main() {
 
 async function analyzeFile(
   relativePath: string,
-  absPath: string
+  absPath: string,
+  projectRoot: string
 ): Promise<{ analysis: FileAnalysis; flowData: FlowData }> {
   const content = fs.readFileSync(absPath, "utf-8");
 
   const concepts = await extractConcepts(relativePath, content);
   const flowData = await extractFlow(relativePath, content);
+  const historyEntities = await extractHistory(relativePath, content, projectRoot);
 
-  const entities: DataEntity[] = [...concepts, ...flowData.entities];
+  const entities: DataEntity[] = [...concepts, ...flowData.entities, ...historyEntities];
 
   return {
     analysis: {

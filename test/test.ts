@@ -169,6 +169,17 @@ assert(!!cgScheduler, "Call graph contains scheduler.ts");
 assert(cgScheduler.exports.length > 0, "Scheduler has exports in call graph");
 assert(cgScheduler.calls.length > 0, "Scheduler has calls in call graph");
 
+// === Test 11.5: History entity extraction ===
+console.log("\nTest 11.5: History entity extraction");
+const reloadedScheduler = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const schedulerHist = reloadedScheduler.entities.filter((e: { type: string }) => e.type === "history");
+assert(schedulerHist.length >= 1, `At least 1 history entity in scheduler.ts (got ${schedulerHist.length})`);
+const fileHistory = schedulerHist.find((e: { detail: { kind: string } }) => e.detail.kind === "file_history");
+assert(!!fileHistory, "Found file_history entity");
+assert(typeof fileHistory.detail.total_commits === "number", "file_history has total_commits");
+
 // === Test 12: Schema validation rejects malformed data ===
 console.log("\nTest 12: Schema validation rejects malformed data");
 
