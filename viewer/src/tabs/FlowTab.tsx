@@ -110,6 +110,58 @@ function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
   );
 }
 
+const diagramStyles: Record<string, React.CSSProperties> = {
+  container: { display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 8px", marginBottom: 8, borderBottom: "1px solid #333" },
+  node: { padding: "4px 10px", borderRadius: 4, fontSize: 11, fontFamily: "monospace", textAlign: "center" as const, maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const },
+  connector: { width: 1, height: 12, background: "#555" },
+  label: { fontSize: 9, color: "#666", textTransform: "uppercase" as const, marginBottom: 2 },
+};
+
+function FlowDiagram({ imports, calls, exports }: {
+  imports: DataEntity[];
+  calls: DataEntity[];
+  exports: DataEntity[];
+}) {
+  const localDeps = imports.flatMap(e => (e.detail.local_deps as string[]) || []);
+  const externalDeps = imports.flatMap(e => (e.detail.external_deps as string[]) || []);
+  const callees = calls.flatMap(e => (e.detail.callees as string[]) || []);
+  const exportNames = exports.flatMap(e => (e.detail.names as string[]) || []);
+
+  const hasUp = localDeps.length > 0 || externalDeps.length > 0;
+  const hasDown = exportNames.length > 0;
+
+  return (
+    <div style={diagramStyles.container}>
+      {hasUp && (
+        <>
+          <div style={diagramStyles.label}>imports ({localDeps.length + externalDeps.length})</div>
+          <div style={{ ...diagramStyles.node, background: "#1a2a3a", color: "#4fc1ff", border: "1px solid #4fc1ff33" }}>
+            {localDeps.length > 0 && <span>{localDeps.slice(0, 3).join(", ")}{localDeps.length > 3 ? ` +${localDeps.length - 3}` : ""}</span>}
+            {localDeps.length > 0 && externalDeps.length > 0 && <span> | </span>}
+            {externalDeps.length > 0 && <span style={{ color: "#888" }}>{externalDeps.slice(0, 2).join(", ")}{externalDeps.length > 2 ? ` +${externalDeps.length - 2}` : ""}</span>}
+          </div>
+          <div style={diagramStyles.connector} />
+          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
+        </>
+      )}
+      <div style={{ ...diagramStyles.node, background: "#2a2d2e", color: "#d4d4d4", border: "1px solid #555", fontWeight: "bold" }}>
+        this file
+        {callees.length > 0 && <span style={{ color: "#dcdcaa", fontWeight: "normal" }}> → {callees.slice(0, 3).join(", ")}{callees.length > 3 ? ` +${callees.length - 3}` : ""}</span>}
+      </div>
+      {hasDown && (
+        <>
+          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
+          <div style={diagramStyles.connector} />
+          <div style={diagramStyles.label}>exports ({exportNames.length})</div>
+          <div style={{ ...diagramStyles.node, background: "#1a3a2a", color: "#4ec9b0", border: "1px solid #4ec9b033" }}>
+            {exportNames.slice(0, 4).join(", ")}{exportNames.length > 4 ? ` +${exportNames.length - 4}` : ""}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function FlowTab({ entities, onCardClick }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No flow cards for this file.</div>;
@@ -121,10 +173,13 @@ export function FlowTab({ entities, onCardClick }: Props) {
   const ordered = [...imports, ...calls, ...exports];
 
   return (
-    <AnimatePresence mode="popLayout">
-      {ordered.map((e, i) => (
-        <FlowCard key={`flow-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
-      ))}
-    </AnimatePresence>
+    <div>
+      <FlowDiagram imports={imports} calls={calls} exports={exports} />
+      <AnimatePresence mode="popLayout">
+        {ordered.map((e, i) => (
+          <FlowCard key={`flow-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }
