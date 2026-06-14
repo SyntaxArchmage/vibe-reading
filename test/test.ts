@@ -137,6 +137,20 @@ assert(taskEntity?.detail?.description === "Defines the unit of work.", `Enriche
 const otherEntity = enrichedData.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
 assert(otherEntity?.summary.includes("Scheduler"), `Non-enriched entity keeps name (got "${otherEntity?.summary}")`);
 
+// === Test 9.5: Enrich --from-file ===
+console.log("\nTest 9.5: Enrich --from-file");
+const enrichFilePath = path.join(FIXTURE_DIR, ".vibe-reading", "tmp-enrich.json");
+fs.writeFileSync(enrichFilePath, JSON.stringify([
+  { name: "Scheduler", summary: "Priority task scheduler", description: "Manages async tasks by priority." },
+]));
+run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts --from-file ${enrichFilePath}`);
+const enrichedByFile = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const schedulerEnriched = enrichedByFile.entities.find((e: { detail: { name: string } }) => e.detail.name === "Scheduler");
+assert(schedulerEnriched?.summary === "Priority task scheduler", `--from-file enriched summary (got "${schedulerEnriched?.summary}")`);
+fs.unlinkSync(enrichFilePath);
+
 // === Test 10: Flow entity extraction ===
 console.log("\nTest 10: Flow entity extraction");
 const schedulerFlow = schedulerData.entities.filter((e: { type: string }) => e.type === "flow");
