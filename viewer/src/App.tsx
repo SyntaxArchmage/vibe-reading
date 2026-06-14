@@ -287,7 +287,10 @@ export function App() {
       case "concept":
         return <ConceptTab entities={filtered} onCardClick={onCardClick} />;
       case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} />;
+        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
+          const fk = allFiles.find(f => f.file === file)?.key;
+          if (fk) selectFile(fk);
+        }} />;
       case "history":
         return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} />;
       case "jump":

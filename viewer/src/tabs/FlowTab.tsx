@@ -14,6 +14,7 @@ interface Props {
   onCardClick: (entity: DataEntity) => void;
   currentFile?: string | null;
   callGraph?: { files: CallGraphFile[] } | null;
+  onFileSelect?: (file: string) => void;
 }
 
 const KIND_ICONS: Record<string, string> = {
@@ -171,7 +172,7 @@ function FlowDiagram({ imports, calls, exports }: {
   );
 }
 
-function CrossFileInfo({ currentFile, callGraph }: { currentFile: string; callGraph: { files: CallGraphFile[] } }) {
+function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: string; callGraph: { files: CallGraphFile[] }; onFileSelect?: (file: string) => void }) {
   const cgEntry = callGraph.files.find(f => f.file === currentFile);
   if (!cgEntry) return null;
 
@@ -190,7 +191,11 @@ function CrossFileInfo({ currentFile, callGraph }: { currentFile: string; callGr
         Imported by ({importers.length})
       </div>
       {importers.slice(0, 8).map(f => (
-        <div key={f.file} style={{ color: "#9cdcfe", padding: "2px 0" }}>
+        <div
+          key={f.file}
+          style={{ color: "#9cdcfe", padding: "2px 0", cursor: onFileSelect ? "pointer" : "default" }}
+          onClick={() => onFileSelect?.(f.file)}
+        >
           {f.file}
         </div>
       ))}
@@ -201,7 +206,7 @@ function CrossFileInfo({ currentFile, callGraph }: { currentFile: string; callGr
   );
 }
 
-export function FlowTab({ entities, onCardClick, currentFile, callGraph }: Props) {
+export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileSelect }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No flow cards for this file.</div>;
   }
@@ -214,7 +219,7 @@ export function FlowTab({ entities, onCardClick, currentFile, callGraph }: Props
   return (
     <div>
       <FlowDiagram imports={imports} calls={calls} exports={exports} />
-      {currentFile && callGraph && <CrossFileInfo currentFile={currentFile} callGraph={callGraph} />}
+      {currentFile && callGraph && <CrossFileInfo currentFile={currentFile} callGraph={callGraph} onFileSelect={onFileSelect} />}
       <AnimatePresence mode="popLayout">
         {ordered.map((e, i) => (
           <FlowCard key={`flow-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
