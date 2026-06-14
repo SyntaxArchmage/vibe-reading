@@ -77,9 +77,9 @@ function HistoryCard({ entity, onClick }: { entity: DataEntity; onClick: (e: Dat
                 <div><strong>By:</strong> {entity.detail.last_author as string}</div>
                 <div><strong>Message:</strong> {entity.detail.last_message as string}</div>
                 <div><strong>Total commits:</strong> {entity.detail.total_commits as number}</div>
-                {entity.detail.created_at && (
-                  <div><strong>Created:</strong> {formatDate(entity.detail.created_at as string)}</div>
-                )}
+                {entity.detail.created_at ? (
+                  <div><strong>Created:</strong> {formatDate(String(entity.detail.created_at))}</div>
+                ) : null}
               </div>
             )}
             {kind === "recent_changes" && (
