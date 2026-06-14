@@ -1,0 +1,34 @@
+---
+description: Vibe Reading project conventions
+globs: ["**/*.ts", "**/*.tsx", "**/*.js"]
+---
+
+# Vibe Reading Project Rules
+
+## Architecture
+- CLI tools in `cli/` — Node.js/TypeScript, run via `npx tsx`
+- Web viewer in `viewer/` — React + esbuild, no framework
+- Extractors in `cli/extractors/` — Tree-sitter WASM for AST parsing
+- Shared parser in `cli/extractors/parser.ts` — all extractors import from here
+- Types in `cli/types.ts` (CLI) and `viewer/src/shared-types.ts` (viewer)
+
+## Testing
+- CLI tests: `cd cli && npx tsx ../test/test.ts` (70 assertions)
+- Build viewer: `cd viewer && node build.mjs`
+- Always run tests after changes to extractors, types, or analyze pipeline
+- Fixture files in `test/fixture/src/` — keep small and focused
+
+## Conventions
+- Entity types: concept, flow, history, jump
+- File analysis JSONs stored in `.vibe-reading/files/`
+- Global data in `.vibe-reading/global/`
+- Use `parseFile()` and `cleanupParser()` from `parser.ts` — never duplicate Tree-sitter init
+- Viewer styles are inline CSS strings in component files (no CSS modules)
+- Monaco loaded from CDN, not bundled
+
+## CLI Tools
+- `analyze.ts` — extract entities from source files
+- `enrich.ts` — agent writes enriched descriptions
+- `auto-enrich.ts` — batch enrich from JSDoc
+- `harness.ts` — validate coverage and schema
+- `stats.ts` — quick project stats overview
