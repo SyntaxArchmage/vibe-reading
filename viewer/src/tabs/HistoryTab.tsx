@@ -193,13 +193,40 @@ const blameButtonStyle: React.CSSProperties = {
   marginTop: 8,
 };
 
+function CommitTimeline({ commits }: { commits: Array<{ date: string }> }) {
+  if (!commits || commits.length < 2) return null;
+  const now = Date.now();
+  const WEEKS = 12;
+  const buckets = new Array(WEEKS).fill(0);
+  for (const c of commits) {
+    const age = now - new Date(c.date).getTime();
+    const week = Math.floor(age / (7 * 86400000));
+    if (week >= 0 && week < WEEKS) buckets[WEEKS - 1 - week]++;
+  }
+  const max = Math.max(...buckets, 1);
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 24, padding: "4px 8px" }}
+         title={`Commit frequency over last ${WEEKS} weeks`}>
+      {buckets.map((v, i) => (
+        <div key={i} style={{
+          flex: 1, background: v > 0 ? "#4ec9b0" : "#333",
+          height: `${Math.max((v / max) * 100, 4)}%`, borderRadius: 1, minHeight: 2, opacity: v > 0 ? 0.7 : 0.3 }} />
+      ))}
+    </div>
+  );
+}
+
 export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
   if (entities.length === 0 && !currentFile) {
     return <div className="vr-no-cards">No history cards for this file.</div>;
   }
 
+  const recentChanges = entities.find(e => e.detail.kind === "recent_changes");
+  const commits = recentChanges?.detail.commits as Array<{ date: string }> | undefined;
+
   return (
     <div>
+      {commits && commits.length >= 2 && <CommitTimeline commits={commits} />}
       <AnimatePresence mode="popLayout">
         {entities.map((e, i) => (
           <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
