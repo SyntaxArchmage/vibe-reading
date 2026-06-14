@@ -7,11 +7,47 @@ interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
   highlightEntity?: DataEntity | null;
+  totalLines?: number;
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
 
-export function ConceptTab({ entities, onCardClick, highlightEntity }: Props) {
+const KIND_COLORS: Record<string, string> = {
+  function: "#4ec9b0",
+  class: "#dcdcaa",
+  method: "#4ec9b0",
+  variable: "#ce9178",
+  type: "#9cdcfe",
+  interface: "#9cdcfe",
+  enum: "#b5cea8",
+};
+
+function DensityBar({ entities, totalLines, onCardClick }: {
+  entities: DataEntity[];
+  totalLines: number;
+  onCardClick: (e: DataEntity) => void;
+}) {
+  if (totalLines <= 0) return null;
+  return (
+    <div style={{ height: 18, background: "#181818", margin: "0 8px 6px", borderRadius: 3,
+                  position: "relative", overflow: "hidden", cursor: "pointer" }}
+         title="Entity density — click a segment to jump">
+      {entities.map((e, i) => {
+        const left = (e.anchor.start_line / totalLines) * 100;
+        const width = Math.max(((e.anchor.end_line - e.anchor.start_line + 1) / totalLines) * 100, 0.5);
+        const kind = (e.detail.node_type as string || "other").toLowerCase();
+        const color = KIND_COLORS[kind] || "#b5cea8";
+        return (
+          <div key={i} onClick={() => onCardClick(e)}
+               style={{ position: "absolute", left: `${left}%`, width: `${width}%`, top: 0, bottom: 0,
+                        background: color, opacity: 0.5, borderRight: "1px solid #252525" }} />
+        );
+      })}
+    </div>
+  );
+}
+
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
@@ -39,19 +75,27 @@ export function ConceptTab({ entities, onCardClick, highlightEntity }: Props) {
     });
   };
 
+  const densityBar = totalLines && totalLines > 0
+    ? <DensityBar entities={entities} totalLines={totalLines} onCardClick={onCardClick} />
+    : null;
+
   if (groups.length <= 1) {
     return (
-      <AnimatePresence mode="popLayout">
-        {entities.map((e, i) => (
-          <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
-                highlight={highlightEntity === e} />
-        ))}
-      </AnimatePresence>
+      <div>
+        {densityBar}
+        <AnimatePresence mode="popLayout">
+          {entities.map((e, i) => (
+            <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
+                  highlight={highlightEntity === e} />
+          ))}
+        </AnimatePresence>
+      </div>
     );
   }
 
   return (
     <div>
+      {densityBar}
       {groups.map(([kind, items]) => (
         <div key={kind}>
           <div className="vr-concept-group-header" onClick={() => toggle(kind)}

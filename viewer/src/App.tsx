@@ -373,7 +373,8 @@ export function App() {
   const tabContent = () => {
     switch (activeTab) {
       case "concept":
-        return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity} />;
+        return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity}
+                           totalLines={sourceCode ? sourceCode.split("\n").length : 0} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
           const fk = allFiles.find(f => f.file === file)?.key;
