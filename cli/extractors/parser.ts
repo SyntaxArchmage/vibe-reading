@@ -15,12 +15,32 @@ const NODE_MODULES = path.join(
   "node_modules"
 );
 
+const WASMS_DIR = "tree-sitter-wasms/out";
+
 const EXT_TO_WASM: Record<string, string> = {
   ".ts": "tree-sitter-typescript/tree-sitter-typescript.wasm",
   ".tsx": "tree-sitter-typescript/tree-sitter-tsx.wasm",
   ".js": "tree-sitter-javascript/tree-sitter-javascript.wasm",
   ".jsx": "tree-sitter-javascript/tree-sitter-javascript.wasm",
   ".py": "tree-sitter-python/tree-sitter-python.wasm",
+  ".go": `${WASMS_DIR}/tree-sitter-go.wasm`,
+  ".rs": `${WASMS_DIR}/tree-sitter-rust.wasm`,
+  ".rb": `${WASMS_DIR}/tree-sitter-ruby.wasm`,
+  ".java": `${WASMS_DIR}/tree-sitter-java.wasm`,
+  ".c": `${WASMS_DIR}/tree-sitter-c.wasm`,
+  ".h": `${WASMS_DIR}/tree-sitter-c.wasm`,
+  ".cpp": `${WASMS_DIR}/tree-sitter-cpp.wasm`,
+  ".hpp": `${WASMS_DIR}/tree-sitter-cpp.wasm`,
+  ".cs": `${WASMS_DIR}/tree-sitter-c_sharp.wasm`,
+  ".swift": `${WASMS_DIR}/tree-sitter-swift.wasm`,
+  ".kt": `${WASMS_DIR}/tree-sitter-kotlin.wasm`,
+  ".scala": `${WASMS_DIR}/tree-sitter-scala.wasm`,
+  ".lua": `${WASMS_DIR}/tree-sitter-lua.wasm`,
+  ".zig": `${WASMS_DIR}/tree-sitter-zig.wasm`,
+  ".php": `${WASMS_DIR}/tree-sitter-php.wasm`,
+  ".vue": `${WASMS_DIR}/tree-sitter-vue.wasm`,
+  ".sh": `${WASMS_DIR}/tree-sitter-bash.wasm`,
+  ".bash": `${WASMS_DIR}/tree-sitter-bash.wasm`,
 };
 
 async function ensureInit() {

@@ -52,15 +52,20 @@ function getFirstCommitDate(projectRoot: string, filePath: string): string | nul
   }
 }
 
+const gitRepoCache = new Map<string, boolean>();
+
 function isGitRepo(projectRoot: string): boolean {
+  if (gitRepoCache.has(projectRoot)) return gitRepoCache.get(projectRoot)!;
   try {
     execSync("git rev-parse --is-inside-work-tree", {
       cwd: projectRoot,
       encoding: "utf-8",
       timeout: 3000,
     });
+    gitRepoCache.set(projectRoot, true);
     return true;
   } catch {
+    gitRepoCache.set(projectRoot, false);
     return false;
   }
 }
