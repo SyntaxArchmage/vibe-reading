@@ -137,6 +137,24 @@ const server = http.createServer((req, res) => {
         })),
       }));
     }
+  } else if (url.pathname === "/api/stats") {
+    const fileCount = Object.keys(analysisData).length;
+    let totalEntities = 0;
+    const typeCounts: Record<string, number> = {};
+    for (const [, data] of Object.entries(analysisData) as [string, any][]) {
+      totalEntities += data.entities.length;
+      for (const e of data.entities) {
+        typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
+      }
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      project: path.basename(projectRoot),
+      files: fileCount,
+      total_entities: totalEntities,
+      types: typeCounts,
+      call_graph_files: callGraph ? (callGraph as any).files?.length ?? 0 : 0,
+    }));
   } else if (url.pathname === "/api/blame") {
     const filePath = url.searchParams.get("file");
     if (!filePath) {
