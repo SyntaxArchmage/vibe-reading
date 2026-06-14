@@ -477,6 +477,33 @@ console.log("\nTest 25: Manifest consistency");
   );
 }
 
+// === Test 26: Python concept extraction depth ===
+console.log("\nTest 26: Python method extraction");
+{
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__engine.py.json"), "utf-8")
+  );
+  const pyConcepts = data.entities.filter((e: { type: string }) => e.type === "concept");
+  const initMethod = pyConcepts.find((e: { detail: { name: string } }) => e.detail.name === "__init__");
+  assert(!!initMethod, "Found __init__ method in Python");
+  const startMethod = pyConcepts.find((e: { detail: { name: string } }) => e.detail.name === "start");
+  assert(!!startMethod, "Found start method in Python");
+  assert(pyConcepts.length >= 8, `At least 8 Python concepts (got ${pyConcepts.length})`);
+}
+
+// === Test 27: Multiple entity types per file ===
+console.log("\nTest 27: Multiple entity types per file");
+{
+  const data = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const types = new Set(data.entities.map((e: { type: string }) => e.type));
+  assert(types.has("concept"), "scheduler.ts has concept entities");
+  assert(types.has("flow"), "scheduler.ts has flow entities");
+  assert(types.has("jump"), "scheduler.ts has jump entities");
+  assert(types.size >= 3, `At least 3 entity types (got ${types.size})`);
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
