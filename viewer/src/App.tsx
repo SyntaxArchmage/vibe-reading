@@ -198,6 +198,11 @@ export function App() {
         setEntitySearchOpen((v) => !v);
         if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0);
       }
+      if (e.altKey && e.key >= "1" && e.key <= "4") {
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        if (TABS[idx]) setActiveTab(TABS[idx].id);
+      }
       if (e.altKey && e.key === "ArrowLeft") {
         e.preventDefault();
         navigateBack();
@@ -480,7 +485,7 @@ export function App() {
         <span className="vr-statusbar-right">
           {currentFile && `${entities.length} entities`}
           {currentFile && ` · Ln ${highlightRange?.startLine ?? "-"}`}
-          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer{" · "}Alt+←→: navigate
+          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer{" · "}Alt+1-4: tabs{" · "}Alt+←→: navigate
         </span>
       </div>
 
