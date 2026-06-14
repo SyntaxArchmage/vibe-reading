@@ -61,11 +61,15 @@ let html = buildHtml(analysisData, callGraph);
 
 const vibeFilesDir = path.join(vibeDir, "files");
 if (fs.existsSync(vibeFilesDir)) {
+  let reloadTimer: ReturnType<typeof setTimeout> | null = null;
   fs.watch(vibeFilesDir, { persistent: false }, () => {
-    analysisData = loadAnalysisData();
-    callGraph = loadCallGraph();
-    html = buildHtml(analysisData, callGraph);
-    console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);
+    if (reloadTimer) clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(() => {
+      analysisData = loadAnalysisData();
+      callGraph = loadCallGraph();
+      html = buildHtml(analysisData, callGraph);
+      console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);
+    }, 300);
   });
 }
 
