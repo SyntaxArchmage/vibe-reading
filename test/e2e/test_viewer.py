@@ -132,7 +132,7 @@ def test_file_picker_visible(page):
 def test_file_picker_has_items(page):
     """File picker shows file items."""
     items = page.locator(".vr-picker-item")
-    assert items.count() >= 3, f"Expected ≥3 picker items, got {items.count()}"
+    assert items.count() >= 3, f"Expected ≥3 picker items, got {items.count()}"  # 4 files total
 
 
 def test_file_picker_search(page):

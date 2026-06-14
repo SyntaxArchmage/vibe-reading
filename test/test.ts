@@ -42,10 +42,11 @@ assert(fs.existsSync(path.join(VIBE_DIR, "global")), "global/ directory exists")
 console.log("\nTest 2: Per-file JSONs created correctly");
 const filesDir = path.join(VIBE_DIR, "files");
 const jsonFiles = fs.readdirSync(filesDir);
-assert(jsonFiles.length === 3, `3 JSON files created (got ${jsonFiles.length})`);
+assert(jsonFiles.length === 4, `4 JSON files created (got ${jsonFiles.length})`);
 assert(jsonFiles.some(f => f.includes("scheduler.ts")), "scheduler.ts JSON exists");
 assert(jsonFiles.some(f => f.includes("engine.py")), "engine.py JSON exists");
 assert(jsonFiles.some(f => f.includes("utils.js")), "utils.js JSON exists");
+assert(jsonFiles.some(f => f.includes("empty.ts")), "empty.ts JSON exists");
 
 // === Test 3: TypeScript extraction accuracy ===
 console.log("\nTest 3: TypeScript extraction accuracy (scheduler.ts)");
@@ -108,8 +109,8 @@ console.log("\nTest 7: Manifest correctness");
 const manifest = JSON.parse(
   fs.readFileSync(path.join(VIBE_DIR, "manifest.json"), "utf-8")
 );
-assert(manifest.total_files === 3, `Total files is 3 (got ${manifest.total_files})`);
-assert(manifest.analyzed_files === 3, `Analyzed files is 3 (got ${manifest.analyzed_files})`);
+assert(manifest.total_files === 4, `Total files is 4 (got ${manifest.total_files})`);
+assert(manifest.analyzed_files === 4, `Analyzed files is 4 (got ${manifest.analyzed_files})`);
 assert(manifest.coverage === 1, `Coverage is 1.0 (got ${manifest.coverage})`);
 assert(manifest.files.every((f: { status: string }) => f.status === "analyzed"), "All files have status 'analyzed'");
 
@@ -163,7 +164,7 @@ console.log("\nTest 11: Call graph generation");
 const callGraphPath = path.join(VIBE_DIR, "global", "call-graph.json");
 assert(fs.existsSync(callGraphPath), "call-graph.json exists");
 const callGraph = JSON.parse(fs.readFileSync(callGraphPath, "utf-8"));
-assert(callGraph.files.length === 3, `Call graph has 3 files (got ${callGraph.files.length})`);
+assert(callGraph.files.length === 4, `Call graph has 4 files (got ${callGraph.files.length})`);
 const cgScheduler = callGraph.files.find((f: { file: string }) => f.file.includes("scheduler.ts"));
 assert(!!cgScheduler, "Call graph contains scheduler.ts");
 assert(cgScheduler.exports.length > 0, "Scheduler has exports in call graph");
@@ -180,8 +181,21 @@ const fileHistory = schedulerHist.find((e: { detail: { kind: string } }) => e.de
 assert(!!fileHistory, "Found file_history entity");
 assert(typeof fileHistory.detail.total_commits === "number", "file_history has total_commits");
 
-// === Test 12: Schema validation rejects malformed data ===
-console.log("\nTest 12: Schema validation rejects malformed data");
+// === Test 12: Edge case — empty file extraction ===
+console.log("\nTest 12: Edge case — empty file extraction");
+const emptyFile = jsonFiles.find((f: string) => f.includes("empty.ts"));
+assert(!!emptyFile, "empty.ts JSON was created");
+if (emptyFile) {
+  const emptyData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, emptyFile), "utf-8")
+  );
+  assert(emptyData.entities.length === 0 || emptyData.entities.every(
+    (e: { type: string }) => e.type === "history" || e.type === "flow"
+  ), "Empty file has no concept entities (may have history/flow)");
+}
+
+// === Test 13: Schema validation rejects malformed data ===
+console.log("\nTest 13: Schema validation rejects malformed data");
 
 // Create a malformed JSON file
 const malformedDir = path.join(FIXTURE_DIR, ".vibe-reading-malformed");
