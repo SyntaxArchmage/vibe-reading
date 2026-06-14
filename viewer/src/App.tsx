@@ -340,8 +340,9 @@ export function App() {
                   const hit = entitySearchResults[entitySearchIdx];
                   selectFile((hit as any)._key);
                   setActiveTab(hit.type as TabId);
+                  setEntitySearchOpen(false);
                   setTimeout(() => {
-                    setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line });
+                    setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
                   }, 100);
                 }
               }}
@@ -359,11 +360,10 @@ export function App() {
                 className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
                 onClick={() => {
                   selectFile((e as any)._key);
-                  if (e.type === "concept" || e.type === "flow" || e.type === "history" || e.type === "jump") {
-                    setActiveTab(e.type as TabId);
-                  }
+                  setActiveTab(e.type as TabId);
+                  setEntitySearchOpen(false);
                   setTimeout(() => {
-                    setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line });
+                    setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line || e.anchor.start_line });
                   }, 100);
                 }}
               >
