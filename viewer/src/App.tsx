@@ -326,7 +326,7 @@ export function App() {
             <input
               ref={entitySearchRef}
               type="text"
-              placeholder="Search entities..."
+              placeholder="Search entities... (Esc to close)"
               value={entitySearch}
               onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
               onKeyDown={(e) => {
