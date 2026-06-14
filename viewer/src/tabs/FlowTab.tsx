@@ -198,10 +198,20 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
       return { source: imp.source, names: imp.names, resolved: resolved?.file };
     });
 
+  const circular = dependencies.some(dep =>
+    dep.resolved && importers.some(imp => imp.file === dep.resolved)
+  );
+
   if (importers.length === 0 && dependencies.length === 0) return null;
 
   return (
     <div style={{ padding: "8px 10px", borderBottom: "1px solid #333", fontSize: 11 }}>
+      {circular && (
+        <div style={{ color: "#f44747", fontSize: 10, marginBottom: 6, padding: "2px 6px",
+                      background: "#3a1a1a", borderRadius: 3, border: "1px solid #f4474733" }}>
+          &#x26A0; Circular dependency detected
+        </div>
+      )}
       {dependencies.length > 0 && (
         <>
           <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
