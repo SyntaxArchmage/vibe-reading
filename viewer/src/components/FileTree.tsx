@@ -157,14 +157,26 @@ function DirNode({
   );
 }
 
+type SortMode = "name" | "entities" | "commits";
+
 export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   const [filter, setFilter] = useState("");
   const [collapseKey, setCollapseKey] = useState(0);
+  const [sortMode, setSortMode] = useState<SortMode>("name");
+  const sorted = useMemo(() => {
+    const arr = [...files];
+    switch (sortMode) {
+      case "entities": arr.sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)); break;
+      case "commits": arr.sort((a, b) => b.commits - a.commits || a.file.localeCompare(b.file)); break;
+      default: arr.sort((a, b) => a.file.localeCompare(b.file));
+    }
+    return arr;
+  }, [files, sortMode]);
   const filtered = useMemo(() => {
-    if (!filter.trim()) return files;
+    if (!filter.trim()) return sorted;
     const q = filter.toLowerCase();
-    return files.filter(f => f.file.toLowerCase().includes(q));
-  }, [files, filter]);
+    return sorted.filter(f => f.file.toLowerCase().includes(q));
+  }, [sorted, filter]);
   const tree = useMemo(() => collapseRoot(buildTree(filtered)), [filtered]);
   const maxCommits = useMemo(() => Math.max(...files.map(f => f.commits), 1), [files]);
 
@@ -172,8 +184,16 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
     <div className="vr-tree">
       <div className="vr-tree-header">
         EXPLORER
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <span className="vr-tree-header-count">{filtered.length} files</span>
+          {(["name", "entities", "commits"] as SortMode[]).map(m => (
+            <button key={m}
+              className="vr-tree-collapse-btn"
+              style={{ opacity: sortMode === m ? 1 : 0.4, fontSize: 9, padding: "0 3px" }}
+              onClick={() => setSortMode(m)}
+              title={`Sort by ${m}`}
+            >{m === "name" ? "Az" : m === "entities" ? "#" : "~"}</button>
+          ))}
           <button
             className="vr-tree-collapse-btn"
             onClick={() => setCollapseKey(k => k + 1)}
