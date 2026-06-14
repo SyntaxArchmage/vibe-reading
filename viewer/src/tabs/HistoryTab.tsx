@@ -198,7 +198,7 @@ export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
           <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
         ))}
       </AnimatePresence>
-      {currentFile && <BlameView file={currentFile} />}
+      {currentFile && <BlameView key={currentFile} file={currentFile} />}
     </div>
   );
 }
