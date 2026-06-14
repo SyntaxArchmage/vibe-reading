@@ -56,6 +56,7 @@ export function App() {
   const [entitySearch, setEntitySearch] = useState("");
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
+  const [helpOpen, setHelpOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -218,6 +219,10 @@ export function App() {
       if (e.key === "Escape") {
         setPickerOpen(false);
         setEntitySearchOpen(false);
+        setHelpOpen(false);
+      }
+      if (e.key === "?" && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
+        setHelpOpen(v => !v);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "b") {
         e.preventDefault();
@@ -605,6 +610,28 @@ export function App() {
         </div>
         </>
       )}
+
+      {helpOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setHelpOpen(false)} />
+        <div className="vr-help-panel">
+          <div className="vr-help-title">Keyboard Shortcuts</div>
+          <div className="vr-help-grid">
+            <kbd>Ctrl+P</kbd><span>File picker</span>
+            <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
+            <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
+            <kbd>Ctrl+W</kbd><span>Close tab</span>
+            <kbd>Alt+1-4</kbd><span>Switch tab</span>
+            <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
+            <kbd>?</kbd><span>Toggle this help</span>
+            <kbd>Esc</kbd><span>Close overlays</span>
+          </div>
+          <div className="vr-help-footer">
+            Search: <code>t:concept</code> <code>t:flow</code> filter by type
+          </div>
+        </div>
+        </>
+      )}
     </div>
   );
 }
@@ -975,6 +1002,53 @@ const layoutStyles = `
     color: #666;
     border-top: 1px solid #444;
     text-align: right;
+  }
+
+  .vr-help-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #252526;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px 24px;
+    z-index: 200;
+    min-width: 300px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .vr-help-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d4d4d4;
+    margin-bottom: 12px;
+  }
+  .vr-help-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    font-size: 12px;
+    color: #bbb;
+  }
+  .vr-help-grid kbd {
+    background: #3c3c3c;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #d4d4d4;
+  }
+  .vr-help-footer {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #666;
+  }
+  .vr-help-footer code {
+    background: #3c3c3c;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 10px;
   }
 `;
 
