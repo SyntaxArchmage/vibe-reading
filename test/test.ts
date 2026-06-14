@@ -1151,7 +1151,20 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(harnessOut.includes("Schema valid"), "Schema valid after enrichment");
 }
 
-// --- Test 79: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 79: Summary tool output ---
+{
+  console.log("\n--- Test 79: Summary tool ---");
+  const out = run(`npx tsx summary.ts ${FIXTURE_DIR}`);
+  assert(out.includes("engine.py"), "Summary lists engine.py");
+  assert(out.includes("14e"), "Summary shows entity count");
+  const jsonOut = run(`npx tsx summary.ts ${FIXTURE_DIR} --json`);
+  const parsed = JSON.parse(jsonOut);
+  assert(Array.isArray(parsed), "JSON output is an array");
+  assert(parsed.length === 5, `JSON has 5 files (got ${parsed.length})`);
+  assert(parsed[0].file === "src/engine.py", "Top file by entities is engine.py");
+}
+
+// --- Test 80: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
