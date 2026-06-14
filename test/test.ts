@@ -353,6 +353,52 @@ assert(
   "Re-analyze produces fresh placeholder descriptions"
 );
 
+// === Test 17: Python flow extraction ===
+console.log("\nTest 17: Python flow extraction");
+const pyFlowData = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__engine.py.json"), "utf-8")
+);
+const pyFlowEntities = pyFlowData.entities.filter((e: { type: string }) => e.type === "flow");
+const pyImportFlow = pyFlowEntities.find((e: { detail: { kind: string } }) => e.detail.kind === "imports");
+assert(!!pyImportFlow, "Python has import flow entity");
+assert(
+  (pyImportFlow?.detail?.external_deps as string[])?.length >= 2,
+  `Python has external deps (got ${(pyImportFlow?.detail?.external_deps as string[])?.length})`
+);
+
+// === Test 18: TypeScript export flow entity ===
+console.log("\nTest 18: TypeScript export flow entity");
+const tsFlowData = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const tsExportFlow = tsFlowData.entities.find(
+  (e: { type: string; detail: { kind: string } }) => e.type === "flow" && e.detail.kind === "exports"
+);
+assert(!!tsExportFlow, "TypeScript has export flow entity");
+assert(
+  (tsExportFlow?.detail?.names as string[])?.length > 0,
+  "Export entity has exported names"
+);
+
+// === Test 19: Python decorated class extraction ===
+console.log("\nTest 19: Python decorated class extraction");
+const pyConfig = pyEntities.find(
+  (e: { detail: { name: string } }) => e.detail.name === "Config"
+);
+assert(!!pyConfig, "Found @dataclass Config");
+assert(
+  pyConfig?.detail?.kind === "class" || pyConfig?.detail?.kind === "decorated",
+  `Config kind is class or decorated (got ${pyConfig?.detail?.kind})`
+);
+
+// === Test 20: Empty file has no concept entities ===
+console.log("\nTest 20: Empty file concept entities");
+const emptyData2 = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__empty.ts.json"), "utf-8")
+);
+const emptyConcepts = emptyData2.entities.filter((e: { type: string }) => e.type === "concept");
+assert(emptyConcepts.length === 0, "Empty file has zero concept entities");
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
