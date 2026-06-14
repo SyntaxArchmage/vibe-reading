@@ -503,6 +503,7 @@ export function App() {
                 {currentFile}
               </span>
               <span className="vr-file-count" title="entities">{entities.length}</span>
+              {sourceCode && <span className="vr-file-loc" title="lines of code">{sourceCode.split("\n").length}L</span>}
               {(() => {
                 const hist = entities.find(e => e.type === "history" && e.detail.kind === "file_history");
                 const commits = hist?.detail.total_commits as number | undefined;
@@ -1246,6 +1247,17 @@ const sidebarStyles = `
     opacity: 0.5;
     background: #4d4d4d;
     color: #ccc;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
+  }
+
+  .vr-file-loc {
+    flex-shrink: 0;
+    font-size: 10px;
+    opacity: 0.5;
+    background: #2a3a2a;
+    color: #b5cea8;
     padding: 0 5px;
     border-radius: 8px;
     line-height: 16px;
