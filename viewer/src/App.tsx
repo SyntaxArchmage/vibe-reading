@@ -399,7 +399,12 @@ export function App() {
       case "history":
         return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile ?? undefined} />;
       case "jump":
-        return <JumpTab entities={filtered} onCardClick={onCardClick} />;
+        return <JumpTab entities={filtered} onCardClick={onCardClick}
+                        callGraph={CALL_GRAPH} currentFile={currentFile}
+                        onFileSelect={(file) => {
+                          const fk = allFiles.find(f => f.file === file)?.key;
+                          if (fk) selectFile(fk);
+                        }} />;
     }
   };
 
