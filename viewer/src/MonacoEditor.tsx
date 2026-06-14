@@ -18,6 +18,8 @@ interface HoverInfo {
   name: string;
   kind: string;
   summary: string;
+  params?: string[];
+  returnType?: string;
 }
 
 interface MonacoEditorProps {
@@ -159,9 +161,12 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
         const line = position.lineNumber;
         const matches = hoverInfos.filter(h => line >= h.startLine && line <= h.endLine);
         if (matches.length === 0) return null;
-        const contents = matches.map(m => ({
-          value: `**${m.kind}** \`${m.name}\`\n\n${m.summary}`,
-        }));
+        const contents = matches.map(m => {
+          let val = `**${m.kind}** \`${m.name}\`\n\n${m.summary}`;
+          if (m.params?.length) val += `\n\n\`(${m.params.join(", ")})\``;
+          if (m.returnType) val += ` → \`${m.returnType}\``;
+          return { value: val };
+        });
         return {
           range: new window.monaco.Range(line, 1, line, 1),
           contents,

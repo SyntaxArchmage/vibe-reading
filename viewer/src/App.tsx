@@ -782,6 +782,8 @@ export function App() {
                 name: String(e.detail.name),
                 kind: String(e.detail.node_type || e.detail.kind || ""),
                 summary: e.summary,
+                params: e.detail.params as string[] | undefined,
+                returnType: e.detail.return_type as string | undefined,
               })), [entities])}
             />
           ) : (
