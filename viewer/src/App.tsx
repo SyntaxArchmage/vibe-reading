@@ -107,11 +107,19 @@ export function App() {
   );
 
   const onCardClick = useCallback((entity: DataEntity) => {
+    if (entity.type === "jump" && entity.detail.target_file) {
+      const targetFile = entity.detail.target_file as string;
+      const fk = allFiles.find((f) => f.file === targetFile)?.key;
+      if (fk) {
+        selectFile(fk);
+        return;
+      }
+    }
     setHighlightRange({
       startLine: entity.anchor.start_line,
       endLine: entity.anchor.end_line || entity.anchor.start_line,
     });
-  }, []);
+  }, [allFiles, selectFile]);
 
   useEffect(() => {
     if (allFiles.length > 0 && !currentFile) {
