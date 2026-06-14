@@ -874,7 +874,27 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(names.includes("Button"), "TSX extracts Button component");
 }
 
-// --- Test 53: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 53: export-dot output is valid DOT syntax ---
+{
+  console.log("\n--- Test 53: DOT syntax validation ---");
+  const dotOut = run(`npx tsx export-dot.ts ${FIXTURE_DIR}`);
+  assert(dotOut.startsWith("digraph"), "DOT starts with digraph");
+  assert(dotOut.trim().endsWith("}"), "DOT ends with closing brace");
+  const openBraces = (dotOut.match(/{/g) || []).length;
+  const closeBraces = (dotOut.match(/}/g) || []).length;
+  assert(openBraces === closeBraces, `DOT has balanced braces (${openBraces} open, ${closeBraces} close)`);
+}
+
+// --- Test 54: Analyze output includes extension breakdown ---
+{
+  console.log("\n--- Test 54: Analyze extension breakdown ---");
+  const analyzeOut = run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  assert(analyzeOut.includes("By extension"), "Analyze shows extension breakdown");
+  assert(analyzeOut.includes(".ts("), "Analyze includes .ts extension");
+  assert(analyzeOut.includes(".py("), "Analyze includes .py extension");
+}
+
+// --- Test 55: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
