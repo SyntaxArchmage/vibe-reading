@@ -558,6 +558,39 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(typeof fileHist.detail.last_author === "string", "file_history has last_author string");
 }
 
+// --- Test 31: Auto-enrich preserves non-concept entities ---
+{
+  console.log("\n--- Test 31: Auto-enrich preserves non-concept entities ---");
+  cleanOutput();
+  run("npx tsx analyze.ts ../test/fixture");
+  const beforeFile = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const beforeFlowCount = beforeFile.entities.filter((e: any) => e.type === "flow").length;
+  const beforeHistCount = beforeFile.entities.filter((e: any) => e.type === "history").length;
+  run("npx tsx auto-enrich.ts ../test/fixture");
+  const afterFile = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const afterFlowCount = afterFile.entities.filter((e: any) => e.type === "flow").length;
+  const afterHistCount = afterFile.entities.filter((e: any) => e.type === "history").length;
+  assert(afterFlowCount === beforeFlowCount, `Flow entities preserved after auto-enrich (${afterFlowCount})`);
+  assert(afterHistCount === beforeHistCount, `History entities preserved after auto-enrich (${afterHistCount})`);
+}
+
+// --- Test 32: Jump entity target file resolution ---
+{
+  console.log("\n--- Test 32: Jump entity target file resolution ---");
+  const buttonData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__Button.tsx.json"), "utf-8")
+  );
+  const jumpEntities = buttonData.entities.filter((e: any) => e.type === "jump");
+  for (const j of jumpEntities) {
+    assert(typeof j.detail.target_file === "string", `Jump has target_file: ${j.detail.target_file}`);
+    assert(typeof j.detail.reason === "string", `Jump has reason`);
+  }
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
