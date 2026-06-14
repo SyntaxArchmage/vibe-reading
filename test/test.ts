@@ -543,6 +543,21 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!exports.detail.names.includes("priority"), "parameter 'priority' not in exports");
 }
 
+// --- Test 30: History entity structure ---
+{
+  console.log("\n--- Test 30: History entity structure ---");
+  const schedData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const histEntities = schedData.entities.filter((e: any) => e.type === "history");
+  assert(histEntities.length >= 1, "scheduler.ts has history entities");
+  const fileHist = histEntities.find((e: any) => e.detail.kind === "file_history");
+  assert(fileHist !== undefined, "scheduler.ts has file_history entity");
+  assert(typeof fileHist.detail.total_commits === "number", "file_history has total_commits number");
+  assert(typeof fileHist.detail.last_modified === "string", "file_history has last_modified string");
+  assert(typeof fileHist.detail.last_author === "string", "file_history has last_author string");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
