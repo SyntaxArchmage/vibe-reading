@@ -29,3 +29,5 @@ export class Scheduler {
 export function createTask(id: string, priority: number, fn: () => Promise<void>): Task {
   return { id, priority, execute: fn };
 }
+
+export const DEFAULT_PRIORITY = 5;

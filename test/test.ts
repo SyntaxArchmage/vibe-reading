@@ -526,6 +526,23 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!exportEntity.detail.names.includes("label"), "TSX: parameter 'label' not in exports");
 }
 
+// --- Test 29: export const extraction ---
+{
+  console.log("\n--- Test 29: export const extraction ---");
+  const schedData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const exports = schedData.entities.find(
+    (e: any) => e.type === "flow" && e.detail.kind === "exports"
+  );
+  assert(exports !== undefined, "scheduler.ts has exports entity");
+  assert(exports.detail.names.includes("DEFAULT_PRIORITY"), "export const DEFAULT_PRIORITY extracted");
+  assert(exports.detail.names.includes("Task"), "export interface Task extracted");
+  assert(exports.detail.names.includes("Scheduler"), "export class Scheduler extracted");
+  assert(exports.detail.names.includes("createTask"), "export function createTask extracted");
+  assert(!exports.detail.names.includes("priority"), "parameter 'priority' not in exports");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
