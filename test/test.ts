@@ -942,7 +942,15 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(serverSrc.includes("sseClients"), "Server tracks SSE clients");
 }
 
-// --- Test 59: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 59: Viewer build has outline tab ---
+{
+  console.log("\n--- Test 59: Viewer build outline tab ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  assert(bundle.includes("No outline available"), "Viewer has outline empty state text");
+  assert(bundle.includes("Outline"), "Viewer has Outline tab label");
+}
+
+// --- Test 60: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
