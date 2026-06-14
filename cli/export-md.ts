@@ -14,6 +14,12 @@ function entityToMd(e: DataEntity): string {
   return `- **${name}** (\`${kind}\`, ${loc}): ${e.summary}${desc ? `\n  > ${desc.split("\n")[0]}` : ""}`;
 }
 
+function isChild(e: DataEntity, all: DataEntity[]): boolean {
+  return all.some(p => p !== e &&
+    p.anchor.start_line <= e.anchor.start_line &&
+    p.anchor.end_line >= e.anchor.end_line);
+}
+
 function main() {
   const args = process.argv.slice(2);
   const projectRoot = args[0];
@@ -24,6 +30,7 @@ function main() {
 
   const fileArg = args.indexOf("--file");
   const specificFile = fileArg >= 0 ? args[fileArg + 1] : null;
+  const outlineMode = args.includes("--outline");
 
   const filesDir = path.join(projectRoot, ".vibe-reading", "files");
   if (!fs.existsSync(filesDir)) {
@@ -43,17 +50,28 @@ function main() {
 
     lines.push(`## ${data.file}\n`);
 
-    const byType: Record<string, DataEntity[]> = {};
-    for (const e of data.entities) {
-      (byType[e.type] ??= []).push(e);
-    }
-
-    for (const [type, entities] of Object.entries(byType)) {
-      lines.push(`### ${type.charAt(0).toUpperCase() + type.slice(1)} (${entities.length})\n`);
-      for (const e of entities) {
-        lines.push(entityToMd(e));
+    if (outlineMode) {
+      const sorted = [...data.entities].sort((a, b) => a.anchor.start_line - b.anchor.start_line);
+      for (const e of sorted) {
+        const indent = isChild(e, sorted) ? "  " : "";
+        const name = (e.detail.name as string) || e.summary;
+        const kind = (e.detail.kind as string) || e.type;
+        lines.push(`${indent}- **${name}** (\`${kind}\`, L${e.anchor.start_line})`);
       }
       lines.push("");
+    } else {
+      const byType: Record<string, DataEntity[]> = {};
+      for (const e of data.entities) {
+        (byType[e.type] ??= []).push(e);
+      }
+
+      for (const [type, entities] of Object.entries(byType)) {
+        lines.push(`### ${type.charAt(0).toUpperCase() + type.slice(1)} (${entities.length})\n`);
+        for (const e of entities) {
+          lines.push(entityToMd(e));
+        }
+        lines.push("");
+      }
     }
   }
 

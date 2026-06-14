@@ -1199,6 +1199,15 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!harnessOut.includes("schema errors"), "No schema errors in harness output");
 }
 
+// --- Test: export-md --outline mode ---
+{
+  console.log("\n--- Test: export-md --outline ---");
+  const mdOutline = run(`npx tsx export-md.ts ${FIXTURE_DIR} --outline`);
+  assert(mdOutline.includes("## src/"), "Outline mode has file sections");
+  assert(/- \*\*\w+\*\* \(`\w+`, L\d+\)/.test(mdOutline), "Outline entries have name/kind/line format");
+  assert(mdOutline.includes("  - "), "Outline has indented children");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
