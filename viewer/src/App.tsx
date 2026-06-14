@@ -355,6 +355,7 @@ export function App() {
             {entitySearchResults.map((e, i) => (
               <div
                 key={`es-${i}`}
+                ref={i === entitySearchIdx ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
                 className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
                 onClick={() => {
                   selectFile((e as any)._key);
