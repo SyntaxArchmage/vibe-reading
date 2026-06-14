@@ -1,6 +1,6 @@
 # Vibe Reading — Handoff Document
 
-Session: 2026-06-08 → 2026-06-12
+Session: 2026-06-08 → 2026-06-14
 Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
 ## Quick Start (New Machine)
@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (42 assertions)
+# 3. Run CLI tests (67 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -41,27 +41,47 @@ python3 test/e2e/test_viewer.py
 - `.vibe-reading/` directory convention (files/, global/, manifest.json)
 - `cli/analyze.ts` — AST extraction orchestrator (Tree-sitter WASM)
 - `cli/enrich.ts` — agent writes enriched concept data
-- `cli/harness.ts` — coverage verification tool
+- `cli/harness.ts` — coverage verification + schema validation
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 42 automated tests in `test/test.ts`
+- 67 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
 - Agent enrichment pipeline (agent IS the LLM)
-- `cli/auto-enrich.ts` — batch enrichment from JSDoc
+- `cli/auto-enrich.ts` — batch enrichment from JSDoc (genericized)
 - Polished Card component with kind badges, expand/collapse
 - Demo: Pi agent project (663 files, 1465 entities enriched)
 
-### Phase 1.5: Viewer Foundation 🟡 (In Progress)
+### Phase 1.5: Viewer Foundation ✅ (mostly)
 - [x] `viewer/` extracted as standalone React app
 - [x] `skills/learn-code/` and `skills/teach-me/` skills
 - [x] Monaco Editor integrated (CDN-loaded, syntax highlighting)
-- [x] Full React layout: sidebar + Monaco + floating file picker
+- [x] Activity bar, file tree, multi-tab bar, command palette (Ctrl+P)
 - [x] Card click → Monaco decoration highlighting
-- [x] Playwright E2E test script (18 tests)
-- [ ] Playwright browser install (blocked by network)
-- [ ] Schema validation in harness
+- [x] Schema validation in harness (rejects malformed JSON)
+- [x] Navigation history with back/forward (Alt+←/→)
+- [x] Status bar with keyboard shortcut hints
+- [ ] Playwright E2E tests (written, blocked by system lib)
 - [ ] Visual regression baseline screenshots
+
+### Phase 2: Macro Flow ✅
+- Flow extractor: imports, function calls, exports (Tree-sitter)
+- Global call-graph.json for cross-file relationships
+- FlowTab with categorized cards (imports/calls/exports)
+
+### Phase 3: Evolve Map ✅
+- History extractor: git log, change frequency, hot spots
+- HistoryTab with commit timeline and hot spot indicators
+
+### Phase 4: Vibe Jump ✅
+- Jump extractor: local import resolution to target files
+- JumpTab with one-click navigation to target files
+- Jump card click navigates to target file in Monaco
+
+### Code Quality
+- Shared Tree-sitter parser module (eliminated ~200 lines of duplication)
+- Server hardened: malformed JSON handling, path traversal protection
+- Genericized auto-enrich (removed project-specific hardcoding)
 
 ## Architecture Decisions (2026-06-12)
 
@@ -88,7 +108,11 @@ vibe-reading/
 │   ├── enrich.ts               # Agent enrichment tool
 │   ├── auto-enrich.ts          # Batch enrichment from JSDoc
 │   ├── harness.ts              # Coverage verification
+│   ├── extractors/parser.ts    # Shared Tree-sitter init/parse
 │   ├── extractors/concept.ts   # Tree-sitter concept extractor
+│   ├── extractors/flow.ts      # Import/call/export flow extractor
+│   ├── extractors/history.ts   # Git history extractor
+│   ├── extractors/jump.ts      # Navigation jump extractor
 │   ├── types.ts                # Shared TypeScript types
 │   └── package.json            # Dependencies: web-tree-sitter, tsx
 ├── viewer/                     # Standalone web viewer
@@ -112,9 +136,9 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 42 CLI pipeline tests
+│   ├── test.ts                 # 67 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
-│   └── fixture/                # Test fixture (3 source files)
+│   └── fixture/                # Test fixture (4 source files)
 ├── prd/
 │   ├── prd.md                  # Product requirements
 │   ├── devplan.md              # Development plan (6 phases)
@@ -153,7 +177,8 @@ vibe-reading/
 │   ├── src__scheduler_ts.json
 │   ├── src__engine_py.json
 │   └── ...
-└── global/                 # Cross-file data (future)
+└── global/                 # Cross-file data
+    └── call-graph.json     # Import/export/call relationships
 ```
 
 Each file JSON:
@@ -190,16 +215,15 @@ Each file JSON:
    run. Need `playwright install chromium` on a machine with good
    network.
 
-3. **extension/ has duplicated code**: The old `extension/webview/`
-   still exists alongside the new `viewer/`. Can be cleaned up when
-   we confirm extension is no longer needed.
+3. **Playwright system lib missing**: `libxkbcommon.so.0` cannot be
+   installed via apt on this machine. E2E tests are written and ready
+   to run when the dependency is resolved.
 
 ## What To Do Next
 
 1. **Install Playwright Chromium** — run E2E tests, capture baseline
    screenshots, iterate on UI
-2. **Schema validation harness** — enforce data contract between CLI
-   output and viewer consumption
-3. **Enrich remaining Pi data** — coding-agent (404 files), tui (59)
-4. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-5. **Consider**: file tree component, multi-tab support
+2. **LSP integration** — go-to-definition targets for jump tab
+3. **LLM enrichment** — semantic relationship inference for jumps
+4. **Visual flow diagram** — vertical call chain visualization
+5. **Git blame** — per-line last-change info for history tab

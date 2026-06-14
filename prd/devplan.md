@@ -65,7 +65,7 @@ architecture concepts for every entity in the current file.
 
 ---
 
-## Phase 1.5: Viewer Foundation (IN PROGRESS)
+## Phase 1.5: Viewer Foundation ✅ DONE (mostly)
 
 **Goal**: Upgrade the preview prototype into a proper standalone web
 viewer with Monaco editor, file tree, and Playwright E2E testing.
@@ -201,11 +201,14 @@ want to read this next" based on the code you're currently viewing.
   - Informative empty state when no jumps available
 - [x] Jump card click navigates to target file in viewer
 
+### Completed (Added in later cycles)
+
+- [x] Navigation history with back/forward (Alt+←/→)
+
 ### Deferred
 
 - [ ] LSP: go-to-definition targets
 - [ ] LLM: semantic relationship inference
-- [ ] Breadcrumb trail of previously visited locations
 - [ ] Playwright E2E tests
 
 ### Files
@@ -221,7 +224,7 @@ want to read this next" based on the code you're currently viewing.
 |-------|------|--------|------|
 | 0 | Foundation | ✅ Done | Schema + /learn-code + harness + CLI |
 | 1 | Concept Push | ✅ Done | Concept cards in web viewer |
-| 1.5 | Viewer Foundation | In Progress | Standalone viewer + Playwright + /teach-me |
+| 1.5 | Viewer Foundation | ✅ Done | Standalone viewer + Playwright + /teach-me |
 | 2 | Macro Flow | ✅ Done | Call chain visualization |
 | 3 | Evolve Map | ✅ Done | Git evolution timeline |
 | 4 | Vibe Jump | ✅ Done | Semantic navigation suggestions |
