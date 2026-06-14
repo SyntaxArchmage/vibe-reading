@@ -2,23 +2,38 @@
 
 ### Auto-Dev Session 2026-06-14 18:12 (current)
 - **Duration**: 90 minutes (in progress)
-- **Tests**: 155 assertions (up from 148)
+- **Tests**: 225 assertions (up from 148 → 77 new)
 - **Defects found**: 1
-  - All tree-sitter-wasms language parsers (Go, Rust, Java, C/C++, Ruby, etc.) had ABI mismatch
+  - All tree-sitter-wasms language parsers had ABI mismatch (silent failures)
 - **Defects fixed**: 1
-  - Removed broken tree-sitter-wasms entries + dead Go/Rust concept extractor code
-- **Features implemented**:
+  - Removed broken tree-sitter-wasms entries + dead concept extractor code
+- **Features implemented** (25 items):
   - Keyboard shortcuts help overlay (? to toggle)
-  - Commit count badge in file header (NNc)
+  - Ctrl+G goto line dialog
+  - Commit count badge in file header
+  - Lines of code badge in file header
   - Breadcrumb: status bar shows entity at cursor position
+  - Clickable breadcrumb navigates to concept tab
   - Auto-enrich supports Rust `///`, Go `//`, Ruby `#` doc comments
-  - Entity search: `f:filename` filter, searches across file paths
+  - Entity search: `f:filename` filter, file path search
   - Entity search results show kind and line number
   - Blame view shows source code alongside annotations
   - `/api/stats` endpoint for project-level statistics
+  - `/api/search` endpoint for programmatic entity search
+  - `export-md.ts` — Markdown analysis export
+  - `export-dot.ts` — Graphviz DOT call graph export
   - Top 5 most complex files in empty state sidebar
+  - Folder entity counts in file tree
+  - Fuzzy file matching in command palette
+  - Relative date formatting in HistoryTab
+  - Persist last viewed file and active tab (localStorage)
+  - Close other tabs button
+  - Copy entity name button in card
+  - Stats tool: average entities/file, extension breakdown
+  - Analyze reports entity counts by file extension
   - Status bar simplification with ? help hint
-- **Commits**: 15 commits (abb84c0 → c95a908)
+  - HANDOFF.md updated with all features
+- **Commits**: 32 commits
 
 ### Auto-Dev Session 2026-06-14 16:12 (completed)
 - **Duration**: 90 minutes
