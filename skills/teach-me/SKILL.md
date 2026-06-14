@@ -48,10 +48,14 @@ xdg-open http://localhost:3460
 
 ## What the User Sees
 
-- **Left panel**: Knowledge cards sidebar with tabs (Concept, Flow, History, Jump)
-- **Right panel**: Source code with line numbers
-- **File picker** (bottom-right): Searchable, Ctrl+P to focus, arrow keys to navigate
-- **Click card** → corresponding code lines highlighted in the right panel
+- **Activity bar** (far left): Toggle file explorer and search
+- **File tree** (left sidebar): Collapsible directory tree, auto-expands to current file
+- **Tab bar** (top): Multi-file tabs, click to switch, X to close
+- **Source code** (center): Monaco editor with syntax highlighting
+- **Cards sidebar** (right): Four tabs — Concept, Flow, History, Jump
+- **Command palette** (Ctrl+P): Searchable overlay to quickly open any file
+- **Click card** → corresponding code lines highlighted in the editor
+- **Click jump card** → navigates to target file
 - **Expand card** → description paragraph + metadata chips
 
 ## Notes

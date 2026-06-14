@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface FileTreeProps {
   files: { key: string; file: string; count: number }[];
@@ -60,7 +60,12 @@ function DirNode({
   onSelect: (key: string) => void;
   depth: number;
 }) {
-  const [open, setOpen] = useState(depth < 2);
+  const containsCurrent = currentFile ? currentFile.startsWith(node.path + "/") || currentFile === node.path : false;
+  const [open, setOpen] = useState(depth < 2 || containsCurrent);
+
+  useEffect(() => {
+    if (containsCurrent && !open) setOpen(true);
+  }, [currentFile]);
 
   const dirs: TreeNode[] = [];
   const fileNodes: TreeNode[] = [];

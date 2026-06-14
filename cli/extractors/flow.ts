@@ -1,54 +1,6 @@
-import { createRequire } from "module";
 import * as path from "path";
 import type { DataEntity } from "../types.js";
-
-const _require = createRequire(import.meta.url);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const TreeSitter: any = _require("web-tree-sitter");
-
-let initialized = false;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const languageCache = new Map<string, any>();
-
-const NODE_MODULES = path.join(
-  path.dirname(new URL(import.meta.url).pathname),
-  "..",
-  "node_modules"
-);
-
-const EXT_TO_WASM: Record<string, string> = {
-  ".ts": "tree-sitter-typescript/tree-sitter-typescript.wasm",
-  ".tsx": "tree-sitter-typescript/tree-sitter-tsx.wasm",
-  ".js": "tree-sitter-javascript/tree-sitter-javascript.wasm",
-  ".jsx": "tree-sitter-javascript/tree-sitter-javascript.wasm",
-  ".py": "tree-sitter-python/tree-sitter-python.wasm",
-};
-
-async function ensureInit() {
-  if (!initialized) {
-    await TreeSitter.Parser.init();
-    initialized = true;
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getLanguage(ext: string): Promise<any> {
-  const wasmRelPath = EXT_TO_WASM[ext];
-  if (!wasmRelPath) return null;
-
-  if (languageCache.has(ext)) {
-    return languageCache.get(ext)!;
-  }
-
-  const wasmPath = path.join(NODE_MODULES, wasmRelPath);
-  try {
-    const lang = await TreeSitter.Language.load(wasmPath);
-    languageCache.set(ext, lang);
-    return lang;
-  } catch {
-    return null;
-  }
-}
+import { parseFile, cleanupParser } from "./parser.js";
 
 interface ImportInfo {
   source: string;
@@ -240,21 +192,13 @@ export async function extractFlow(
   filePath: string,
   content: string
 ): Promise<FlowData> {
-  await ensureInit();
+  const parsed = await parseFile(filePath, content);
+  if (!parsed) return { entities: [], imports: [], calls: [], exports: [] };
 
   const ext = path.extname(filePath).toLowerCase();
-  const language = await getLanguage(ext);
-  if (!language) {
-    return { entities: [], imports: [], calls: [], exports: [] };
-  }
-
-  const parser = new TreeSitter.Parser();
-  parser.setLanguage(language);
-  const tree = parser.parse(content);
-
-  const imports = extractImports(tree.rootNode, ext);
-  const calls = extractCalls(tree.rootNode);
-  const fileExports = extractExports(tree.rootNode, ext);
+  const imports = extractImports(parsed.rootNode, ext);
+  const calls = extractCalls(parsed.rootNode);
+  const fileExports = extractExports(parsed.rootNode, ext);
 
   const entities: DataEntity[] = [];
 
@@ -348,8 +292,7 @@ export async function extractFlow(
     });
   }
 
-  parser.delete();
-  tree.delete();
+  cleanupParser(parsed);
 
   const simplifiedCalls = calls.map((c) => ({
     callee: c.callee,

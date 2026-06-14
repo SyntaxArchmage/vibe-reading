@@ -1,13 +1,19 @@
 ---
 name: learn-code
-description: Analyze a codebase and generate Vibe Reading concept cards. Two-phase pipeline — AST extraction (CLI) then concept enrichment (you, the agent, reading code and generating explanations).
+description: Analyze a codebase and generate Vibe Reading data — concept cards, call flow, git history, and navigation jumps. Two-phase pipeline — extraction (CLI) then concept enrichment (you, the agent, reading code and generating explanations).
 ---
 
 # /learn-code — Generate Vibe Reading Data
 
 ## What This Does
 
-Generates concept cards for every source file in a project. Each card explains what a function, class, or interface does — purpose, patterns, architecture role. The data powers the Vibe Reading VS Code sidebar.
+Generates knowledge data for every source file in a project:
+- **Concept cards**: What each function, class, interface does
+- **Flow cards**: Import dependencies, function call chains, exports
+- **History cards**: Git commit history, change frequency, hot spots
+- **Jump suggestions**: Navigation links to related files via imports
+
+The data powers the Vibe Reading web viewer.
 
 ## Prerequisites
 
@@ -23,7 +29,12 @@ cd <vibe-reading-repo>/cli && npm install  # first time only
 cd <vibe-reading-repo>/cli && npx tsx analyze.ts <target-project-root>
 ```
 
-This creates `<target-project-root>/.vibe-reading/files/*.json` with skeleton entities — entity names, line numbers, AST types. Summaries are placeholders like `"function: foo"`. These need enrichment.
+This creates `<target-project-root>/.vibe-reading/` with:
+- `files/*.json` — per-file entities (concepts, flow, history, jumps)
+- `global/call-graph.json` — cross-file call relationships
+- `manifest.json` — coverage status
+
+Concept summaries are placeholders like `"function: foo"` that need enrichment. Flow, history, and jump entities are auto-generated.
 
 ### Step 2: Enrich Each File (This Is Your Main Job)
 

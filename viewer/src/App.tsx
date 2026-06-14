@@ -137,6 +137,10 @@ export function App() {
       if (e.key === "Escape") {
         setPickerOpen(false);
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        setTreeOpen((v) => !v);
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
@@ -297,6 +301,16 @@ export function App() {
         </div>
       </div>
 
+      {/* Status bar */}
+      <div className="vr-statusbar">
+        <span>{currentFile ?? "No file selected"}</span>
+        <span className="vr-statusbar-right">
+          {currentFile && `${entities.length} entities`}
+          {currentFile && ` · Ln ${highlightRange?.startLine ?? "-"}`}
+          {" · "}Ctrl+P: files{" · "}Ctrl+B: explorer
+        </span>
+      </div>
+
       {/* File picker — command palette */}
       {pickerOpen && (
         <>
@@ -357,7 +371,7 @@ export function App() {
 const layoutStyles = `
   .vr-layout {
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 22px);
     width: 100vw;
     overflow: hidden;
     background: #1e1e1e;
@@ -493,6 +507,27 @@ const layoutStyles = `
     width: 3px !important;
     margin-left: 3px;
     border-radius: 1px;
+  }
+
+  .vr-statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 22px;
+    background: #007acc;
+    color: #fff;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .vr-statusbar-right {
+    opacity: 0.85;
   }
 
   /* File picker — VS Code-style command palette */
