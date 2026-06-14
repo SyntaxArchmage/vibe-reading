@@ -227,6 +227,18 @@ function buildDescription(
     parts.push("Computed property; accessed like a field but may trigger logic.");
   }
 
+  const decorators: string[] = [];
+  for (let i = 0; i < Math.min(5, sourceLines.length); i++) {
+    const dl = sourceLines[i]?.trim();
+    if (dl && /^@\w+/.test(dl)) {
+      const decName = dl.match(/^@(\w+)/)?.[1];
+      if (decName && !["property"].includes(decName)) decorators.push(`@${decName}`);
+    }
+  }
+  if (decorators.length > 0) {
+    parts.push(`Decorated: ${decorators.join(", ")}.`);
+  }
+
   const unique = [...new Set(parts)];
   const joined = unique.join(" ");
   if (joined.length > 20) return joined;
