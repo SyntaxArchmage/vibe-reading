@@ -768,7 +768,45 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
-// --- Test 46: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 46: Jump entities reference valid target files ---
+{
+  console.log("\n--- Test 46: Jump target file validation ---");
+  const allJsonFiles = fs.readdirSync(filesDir).filter((f: string) => f.endsWith(".json"));
+  const allAnalyzedFiles: string[] = [];
+  for (const jf of allJsonFiles) {
+    const data = JSON.parse(fs.readFileSync(path.join(filesDir, jf), "utf-8"));
+    allAnalyzedFiles.push(data.file);
+  }
+  let invalidTargets = 0;
+  for (const jf of allJsonFiles) {
+    const data = JSON.parse(fs.readFileSync(path.join(filesDir, jf), "utf-8"));
+    for (const e of data.entities) {
+      if (e.type === "jump" && e.detail.target_file) {
+        if (!allAnalyzedFiles.includes(e.detail.target_file)) {
+          invalidTargets++;
+        }
+      }
+    }
+  }
+  assert(invalidTargets === 0, `All jump targets reference valid files (${invalidTargets} invalid)`);
+}
+
+// --- Test 47: Call graph imports reference valid files ---
+{
+  console.log("\n--- Test 47: Call graph consistency ---");
+  const cg = JSON.parse(
+    fs.readFileSync(path.join(VIBE_DIR, "global", "call-graph.json"), "utf-8")
+  );
+  assert(Array.isArray(cg.files), "Call graph has files array");
+  const cgFiles = cg.files.map((f: any) => f.file);
+  for (const f of cg.files) {
+    assert(typeof f.file === "string", `CG entry has file field`);
+    assert(Array.isArray(f.imports), `CG entry ${f.file} has imports`);
+    assert(Array.isArray(f.exports), `CG entry ${f.file} has exports`);
+  }
+}
+
+// --- Test 48: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
