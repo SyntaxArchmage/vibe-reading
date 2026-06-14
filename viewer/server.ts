@@ -74,7 +74,18 @@ if (fs.existsSync(vibeFilesDir)) {
 }
 
 const server = http.createServer((req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
+
+  if (url.pathname === "/api/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      status: "ok",
+      project: path.basename(projectRoot),
+      files: Object.keys(analysisData).length,
+    }));
+    return;
+  }
 
   if (url.pathname === "/" || url.pathname === "/index.html") {
     res.writeHead(200, { "Content-Type": "text/html" });
