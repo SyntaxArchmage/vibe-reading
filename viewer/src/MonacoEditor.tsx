@@ -12,6 +12,14 @@ interface EntityMarker {
   type: string;
 }
 
+interface HoverInfo {
+  startLine: number;
+  endLine: number;
+  name: string;
+  kind: string;
+  summary: string;
+}
+
 interface MonacoEditorProps {
   code: string;
   language: string;
@@ -19,6 +27,7 @@ interface MonacoEditorProps {
   entityMarkers?: EntityMarker[];
   onCursorLine?: (line: number) => void;
   onVisibleRange?: (startLine: number, endLine: number) => void;
+  hoverInfos?: HoverInfo[];
 }
 
 function detectLanguage(filePath: string): string {
@@ -63,7 +72,7 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
@@ -139,6 +148,28 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
     const disposable = editor.onDidScrollChange(report);
     return () => disposable.dispose();
   }, [ready, onVisibleRange]);
+
+  useEffect(() => {
+    if (!ready || !hoverInfos?.length) return;
+    const model = editorRef.current?.getModel();
+    if (!model) return;
+    const provider = window.monaco.languages.registerHoverProvider(language, {
+      provideHover(_model: any, position: any) {
+        if (_model !== model) return null;
+        const line = position.lineNumber;
+        const matches = hoverInfos.filter(h => line >= h.startLine && line <= h.endLine);
+        if (matches.length === 0) return null;
+        const contents = matches.map(m => ({
+          value: `**${m.kind}** \`${m.name}\`\n\n${m.summary}`,
+        }));
+        return {
+          range: new window.monaco.Range(line, 1, line, 1),
+          contents,
+        };
+      },
+    });
+    return () => provider.dispose();
+  }, [ready, hoverInfos, language]);
 
   useEffect(() => {
     return () => {

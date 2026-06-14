@@ -731,6 +731,13 @@ export function App() {
               }))}
               onCursorLine={setCursorLine}
               onVisibleRange={useCallback((s: number, e: number) => setVisibleRange({ start: s, end: e }), [])}
+              hoverInfos={useMemo(() => entities.filter(e => e.type === "concept" && e.detail.name).map(e => ({
+                startLine: e.anchor.start_line,
+                endLine: e.anchor.end_line,
+                name: String(e.detail.name),
+                kind: String(e.detail.node_type || e.detail.kind || ""),
+                summary: e.summary,
+              })), [entities])}
             />
           ) : (
             <div className="vr-editor-placeholder">
