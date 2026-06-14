@@ -129,9 +129,9 @@ function actionSummary(name: string, kind: string, jsdoc?: string, sourceLine?: 
 function buildDescription(
   name: string,
   kind: string,
+  filePath: string,
   jsdoc?: string,
   sourceLines: string[] = [],
-  filePath: string
 ): string {
   const parts: string[] = [];
 
@@ -220,7 +220,7 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
     enrichments.push({
       name,
       summary: actionSummary(name, kind, jsdoc, sourceSlice[0]),
-      description: buildDescription(name, kind, jsdoc, sourceSlice, relPath),
+      description: buildDescription(name, kind, relPath, jsdoc, sourceSlice),
     });
   }
 
