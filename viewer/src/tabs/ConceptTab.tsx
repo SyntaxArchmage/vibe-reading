@@ -92,7 +92,9 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     return m;
   }, [callGraph, currentFile]);
 
-  const groups = useMemo(() => {
+  const [kindFilter, setKindFilter] = useState<string | null>(null);
+
+  const allGroups = useMemo(() => {
     const m = new Map<string, DataEntity[]>();
     for (const e of entities) {
       const kind = (e.detail.node_type as string || "other").toLowerCase();
@@ -104,6 +106,10 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
   }, [entities]);
+
+  const groups = kindFilter
+    ? allGroups.filter(([kind]) => kind === kindFilter)
+    : allGroups;
 
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -125,16 +131,34 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       const d = e.detail.description as string | undefined;
       return d && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(d);
     });
-    return { total: concepts.length, enriched: enriched.length, kinds: groups.length };
-  }, [entities, groups]);
+    return { total: concepts.length, enriched: enriched.length, kinds: allGroups.length };
+  }, [entities, allGroups]);
 
   const summaryLine = (
-    <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "4px 8px 2px" }}>
-      {fileSummary.total} concept{fileSummary.total !== 1 ? "s" : ""}
-      {fileSummary.kinds > 1 && ` in ${fileSummary.kinds} kinds`}
-      {fileSummary.enriched > 0 && fileSummary.enriched < fileSummary.total && ` · ${fileSummary.enriched} enriched`}
-      {fileSummary.enriched === fileSummary.total && fileSummary.total > 0 && " · all enriched"}
-      {totalLines ? ` · ${totalLines} lines` : ""}
+    <div style={{ fontSize: 10, color: "#666", padding: "4px 8px 2px" }}>
+      <div style={{ textAlign: "center" }}>
+        {fileSummary.total} concept{fileSummary.total !== 1 ? "s" : ""}
+        {fileSummary.enriched > 0 && fileSummary.enriched < fileSummary.total && ` · ${fileSummary.enriched} enriched`}
+        {fileSummary.enriched === fileSummary.total && fileSummary.total > 0 && " · all enriched"}
+        {totalLines ? ` · ${totalLines} lines` : ""}
+      </div>
+      {allGroups.length > 1 && (
+        <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, flexWrap: "wrap" }}>
+          <span
+            style={{ cursor: "pointer", padding: "0 4px", borderRadius: 2,
+                     background: !kindFilter ? "#333" : "transparent", color: !kindFilter ? "#fff" : "#888" }}
+            onClick={() => setKindFilter(null)}
+          >all</span>
+          {allGroups.map(([kind, items]) => (
+            <span key={kind}
+              style={{ cursor: "pointer", padding: "0 4px", borderRadius: 2,
+                       background: kindFilter === kind ? "#333" : "transparent",
+                       color: KIND_COLORS[kind] || "#b5cea8" }}
+              onClick={() => setKindFilter(kindFilter === kind ? null : kind)}
+            >{kind}({items.length})</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 
