@@ -63,6 +63,20 @@ function collapseRoot(root: TreeNode): TreeNode {
   return root;
 }
 
+const EXT_ICONS: Record<string, string> = {
+  ".ts": "TS", ".tsx": "TX", ".js": "JS", ".jsx": "JX",
+  ".py": "Py", ".rs": "Rs", ".go": "Go", ".rb": "Rb",
+  ".java": "Jv", ".c": "C", ".cpp": "C+", ".h": "H",
+  ".css": "Cs", ".html": "Ht", ".json": "Js", ".md": "Md",
+  ".vue": "Vu", ".svelte": "Sv",
+};
+
+function extIcon(name: string): string {
+  const dot = name.lastIndexOf(".");
+  if (dot < 0) return "·";
+  return EXT_ICONS[name.slice(dot)] || "·";
+}
+
 function heatColor(commits: number, maxCommits: number): string | null {
   if (commits <= 0 || maxCommits <= 0) return null;
   const ratio = commits / maxCommits;
@@ -144,6 +158,9 @@ function DirNode({
                 title={f.commits > 0 ? `${f.commits} commits` : undefined}
               >
                 {heat && <span className="vr-tree-heat" style={{ background: heat }} />}
+                <span style={{ fontSize: 10, color: "#666", flexShrink: 0, width: 14, textAlign: "center" }}>
+                  {extIcon(f.name)}
+                </span>
                 <span className="vr-tree-file-name">{f.name}</span>
                 {f.count > 0 && (
                   <span className="vr-tree-file-count">{f.count}</span>
