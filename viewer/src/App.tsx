@@ -127,9 +127,22 @@ export function App() {
   []);
 
   const filteredFiles = searchQuery.trim()
-    ? allFiles.filter((f) =>
-        f.file.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
+    ? (() => {
+        const q = searchQuery.toLowerCase().trim();
+        const scored = allFiles
+          .map(f => {
+            const file = f.file.toLowerCase();
+            if (file.includes(q)) return { f, score: 2 };
+            let qi = 0;
+            for (let fi = 0; fi < file.length && qi < q.length; fi++) {
+              if (file[fi] === q[qi]) qi++;
+            }
+            return qi === q.length ? { f, score: 1 } : null;
+          })
+          .filter(Boolean) as { f: typeof allFiles[0]; score: number }[];
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map(s => s.f);
+      })()
     : allFiles;
 
   const visibleFiles = filteredFiles.slice(0, 100);
