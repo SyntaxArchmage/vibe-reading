@@ -827,7 +827,31 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(viewerSrc.includes("Vibe Reading"), "Viewer includes title");
 }
 
-// --- Test 50: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 50: Auto-enrich is idempotent ---
+{
+  console.log("\n--- Test 50: Auto-enrich idempotency ---");
+  run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+  const first = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const firstSummaries = first.entities.map((e: any) => e.summary);
+  run(`npx tsx auto-enrich.ts ${FIXTURE_DIR}`);
+  const second = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+  );
+  const secondSummaries = second.entities.map((e: any) => e.summary);
+  assert(
+    JSON.stringify(firstSummaries) === JSON.stringify(secondSummaries),
+    "Auto-enrich is idempotent (summaries unchanged on re-run)"
+  );
+  assert(
+    first.entities.length === second.entities.length,
+    "Entity count unchanged after second auto-enrich"
+  );
+}
+
+// --- Test 51: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
