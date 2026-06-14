@@ -18,6 +18,8 @@ interface Props {
   callGraph?: { files: CallGraphFile[] } | null;
   currentFile?: string | null;
   onFileSelect?: (file: string) => void;
+  bookmarks?: Set<string>;
+  onBookmark?: (key: string) => void;
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
@@ -65,7 +67,7 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   );
 }
 
-export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect }: Props) {
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect, bookmarks, onBookmark }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
@@ -126,7 +128,9 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
             <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
                   highlight={highlightEntity === e}
                   usages={usagesMap.get(e.detail.name as string)}
-                  onFileSelect={onFileSelect} />
+                  onFileSelect={onFileSelect}
+                  bookmarked={bookmarks?.has(`${currentFile}:${e.detail.name}`)}
+                  onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined} />
           ))}
         </AnimatePresence>
       </div>
@@ -150,7 +154,9 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
                 <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
                       highlight={highlightEntity === e}
                       usages={usagesMap.get(e.detail.name as string)}
-                      onFileSelect={onFileSelect} />
+                      onFileSelect={onFileSelect}
+                      bookmarked={bookmarks?.has(`${currentFile}:${e.detail.name}`)}
+                      onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined} />
               ))}
             </AnimatePresence>
           )}

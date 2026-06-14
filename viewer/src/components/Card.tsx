@@ -8,6 +8,8 @@ interface CardProps {
   highlight?: boolean;
   usages?: Array<{ file: string; names: string[] }>;
   onFileSelect?: (file: string) => void;
+  bookmarked?: boolean;
+  onBookmark?: () => void;
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -25,7 +27,7 @@ function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
-export function Card({ entity, onClick, highlight, usages, onFileSelect }: CardProps) {
+export function Card({ entity, onClick, highlight, usages, onFileSelect, bookmarked, onBookmark }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const kind = (entity.detail.kind as string) || "";
   const name = (entity.detail.name as string) || "";
@@ -66,6 +68,13 @@ export function Card({ entity, onClick, highlight, usages, onFileSelect }: CardP
           </div>
         </div>
         <div className="vr-card-meta">
+          {onBookmark && (
+            <span
+              style={{ cursor: "pointer", fontSize: 12, opacity: bookmarked ? 1 : 0.3, marginRight: 2 }}
+              onClick={(e) => { e.stopPropagation(); onBookmark(); }}
+              title={bookmarked ? "Remove bookmark" : "Add bookmark"}
+            >{bookmarked ? "★" : "☆"}</span>
+          )}
           <span className="vr-card-loc">{loc}</span>
           <span className="vr-card-lines">{lines}L</span>
           <span className={`vr-card-chevron ${expanded ? "vr-card-chevron--open" : ""}`}>&#x25B8;</span>

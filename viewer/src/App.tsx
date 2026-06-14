@@ -72,6 +72,20 @@ export function App() {
   const [symbolQuery, setSymbolQuery] = useState("");
   const [symbolIdx, setSymbolIdx] = useState(0);
   const symbolRef = useRef<HTMLInputElement>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("vr-bookmarks");
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { return new Set(); }
+  });
+  const toggleBookmark = useCallback((key: string) => {
+    setBookmarks(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      try { localStorage.setItem("vr-bookmarks", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }, []);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -429,7 +443,9 @@ export function App() {
                            onFileSelect={(file) => {
                              const fk = allFiles.find(f => f.file === file)?.key;
                              if (fk) selectFile(fk);
-                           }} />;
+                           }}
+                           bookmarks={bookmarks}
+                           onBookmark={toggleBookmark} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
           const fk = allFiles.find(f => f.file === file)?.key;
