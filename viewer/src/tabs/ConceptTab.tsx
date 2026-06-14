@@ -41,10 +41,20 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   visibleRange?: { start: number; end: number } | null;
 }) {
   if (totalLines <= 0) return null;
+  const handleBarClick = (ev: React.MouseEvent<HTMLDivElement>) => {
+    const rect = ev.currentTarget.getBoundingClientRect();
+    const pct = (ev.clientX - rect.left) / rect.width;
+    const targetLine = Math.round(pct * totalLines);
+    const nearest = entities.reduce((best, e) =>
+      Math.abs(e.anchor.start_line - targetLine) < Math.abs(best.anchor.start_line - targetLine) ? e : best,
+      entities[0]);
+    if (nearest) onCardClick(nearest);
+  };
   return (
     <div style={{ height: 18, background: "#181818", margin: "0 8px 6px", borderRadius: 3,
                   position: "relative", overflow: "hidden", cursor: "pointer" }}
-         title="Entity density — click a segment to jump">
+         onClick={handleBarClick}
+         title="Entity density — click to jump to nearest entity">
       {visibleRange && (
         <div style={{ position: "absolute", top: 0, bottom: 0,
                       left: `${(visibleRange.start / totalLines) * 100}%`,
