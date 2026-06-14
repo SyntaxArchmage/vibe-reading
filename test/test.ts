@@ -1049,7 +1049,35 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(withReturn, "At least one entity has return type info");
 }
 
-// --- Test 69: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 69: CLI tool presence ---
+{
+  console.log("\n--- Test 69: CLI tool presence ---");
+  const tools = ["analyze.ts", "enrich.ts", "auto-enrich.ts", "harness.ts", "stats.ts",
+                 "export-md.ts", "export-dot.ts", "complexity.ts", "diff.ts", "search.ts"];
+  for (const tool of tools) {
+    assert(fs.existsSync(path.join(CLI_DIR, tool)), `CLI tool ${tool} exists`);
+  }
+}
+
+// --- Test 70: Viewer has 5 tabs ---
+{
+  console.log("\n--- Test 70: Viewer tabs ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  const tabs = ["Concept", "Flow", "History", "Jump", "Outline"];
+  for (const tab of tabs) {
+    assert(bundle.includes(tab), `Viewer has ${tab} tab`);
+  }
+}
+
+// --- Test 71: Export-md filter ---
+{
+  console.log("\n--- Test 71: Export-md file filter ---");
+  const mdSingle = run(`npx tsx export-md.ts ${FIXTURE_DIR} --file src/scheduler.ts`);
+  assert(mdSingle.includes("scheduler"), "Filtered MD includes scheduler");
+  assert(!mdSingle.includes("## src/utils.js"), "Filtered MD excludes utils as top-level section");
+}
+
+// --- Test 72: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
