@@ -176,12 +176,17 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
   const cgEntry = callGraph.files.find(f => f.file === currentFile);
   if (!cgEntry) return null;
 
-  const importers = callGraph.files.filter(f =>
-    f.imports.some(imp => {
-      const source = imp.source.replace(/^\.\//, "");
-      return currentFile.endsWith(source) || currentFile.endsWith(source + ".ts") || currentFile.endsWith(source + ".js");
+  const importers = callGraph.files
+    .map(f => {
+      const matchingImps = f.imports.filter(imp => {
+        const source = imp.source.replace(/^\.\//, "");
+        return currentFile.endsWith(source) || currentFile.endsWith(source + ".ts") || currentFile.endsWith(source + ".js");
+      });
+      if (matchingImps.length === 0) return null;
+      const names = matchingImps.flatMap(imp => imp.names);
+      return { file: f.file, names };
     })
-  );
+    .filter((x): x is { file: string; names: string[] } => x !== null);
 
   const dependencies = cgEntry.imports
     .filter(imp => imp.source.startsWith("."))
@@ -227,6 +232,7 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
               onClick={() => onFileSelect?.(f.file)}
             >
               {f.file}
+              {f.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({f.names.slice(0, 3).join(", ")}{f.names.length > 3 ? ` +${f.names.length - 3}` : ""})</span>}
             </div>
           ))}
           {importers.length > 8 && <div style={{ color: "#666" }}>+{importers.length - 8} more</div>}
