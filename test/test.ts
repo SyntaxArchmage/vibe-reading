@@ -591,7 +591,23 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
-// --- Test 33: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 33: Python __all__ export extraction ---
+{
+  console.log("\n--- Test 33: Python __all__ export extraction ---");
+  const engineData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__engine.py.json"), "utf-8")
+  );
+  const exports = engineData.entities.find(
+    (e: any) => e.type === "flow" && e.detail.kind === "exports"
+  );
+  assert(exports !== undefined, "Python file has exports entity");
+  assert(exports.detail.names.includes("Config"), "Python __all__ includes Config");
+  assert(exports.detail.names.includes("Engine"), "Python __all__ includes Engine");
+  assert(exports.detail.names.includes("create_engine"), "Python __all__ includes create_engine");
+  assert(exports.detail.names.length === 3, `Python __all__ has exactly 3 names (got ${exports.detail.names.length})`);
+}
+
+// --- Test 34: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();

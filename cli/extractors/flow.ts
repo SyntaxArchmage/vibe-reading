@@ -162,7 +162,36 @@ export interface FlowData {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractExports(rootNode: any, ext: string): string[] {
   const exports: string[] = [];
-  if (ext === ".py") return exports;
+  if (ext === ".py") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const child of rootNode.children) {
+      if (child.type === "expression_statement") {
+        const assign = child.children.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (c: any) => c.type === "assignment"
+        );
+        if (!assign) continue;
+        const lhs = assign.children[0];
+        if (lhs?.type === "identifier" && lhs.text === "__all__") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          function collectStrings(n: any) {
+            if (n.type === "string") {
+              const content = n.children?.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (c: any) => c.type === "string_content"
+              );
+              const val = content?.text || n.text.replace(/^["']|["']$/g, "");
+              if (val) exports.push(val);
+              return;
+            }
+            for (const c of n.children || []) collectStrings(c);
+          }
+          collectStrings(assign);
+        }
+      }
+    }
+    return exports;
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function walk(node: any) {
