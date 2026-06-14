@@ -654,7 +654,35 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(!fs.existsSync(stalePath), "Stale file removed after re-analyze");
 }
 
-// --- Test 38: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 38: Empty file produces minimal entities ---
+{
+  console.log("\n--- Test 38: Empty file produces minimal entities ---");
+  const emptyData = JSON.parse(
+    fs.readFileSync(path.join(filesDir, "src__empty.ts.json"), "utf-8")
+  );
+  assert(emptyData.entities.length >= 0, "empty.ts has non-negative entity count");
+  assert(emptyData.file === "src/empty.ts", "empty.ts file field correct");
+  const concepts = emptyData.entities.filter((e: any) => e.type === "concept");
+  assert(concepts.length <= 1, `Empty file has at most 1 concept (got ${concepts.length})`);
+}
+
+// --- Test 39: Anchor consistency across all files ---
+{
+  console.log("\n--- Test 39: Anchor consistency ---");
+  const allJsonFiles = fs.readdirSync(filesDir).filter((f: string) => f.endsWith(".json"));
+  let anchorErrors = 0;
+  for (const jf of allJsonFiles) {
+    const data = JSON.parse(fs.readFileSync(path.join(filesDir, jf), "utf-8"));
+    for (const e of data.entities) {
+      if (e.anchor.start_line > e.anchor.end_line) anchorErrors++;
+      if (e.anchor.start_line < 1) anchorErrors++;
+      if (e.anchor.file !== data.file && e.type !== "jump") anchorErrors++;
+    }
+  }
+  assert(anchorErrors === 0, `No anchor consistency errors (found ${anchorErrors})`);
+}
+
+// --- Test 40: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
