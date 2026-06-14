@@ -370,6 +370,12 @@ export function App() {
         e.preventDefault();
         navigateForward();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault();
+        if (breadcrumbEntity && currentFile) {
+          toggleBookmark(`${currentFile}:${breadcrumbEntity.detail.name}`);
+        }
+      }
       if ((e.key === "[" || e.key === "]") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
         const idx = allFiles.findIndex(f => f.key === currentFile);
         if (idx >= 0) {
@@ -950,6 +956,7 @@ export function App() {
             <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
             <kbd>Ctrl+Shift+O</kbd><span>Go to symbol</span>
             <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
+            <kbd>Ctrl+D</kbd><span>Bookmark entity</span>
             <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
             <kbd>Alt+1-5</kbd><span>Switch tab</span>
