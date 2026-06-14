@@ -123,12 +123,21 @@ async function main() {
 
   const totalEntities = manifestEntries.reduce((sum, e) => sum + e.entity_count, 0);
 
+  const extCounts: Record<string, { files: number; entities: number }> = {};
+  for (const e of manifestEntries) {
+    const ext = path.extname(e.path).toLowerCase() || "(none)";
+    if (!extCounts[ext]) extCounts[ext] = { files: 0, entities: 0 };
+    extCounts[ext].files++;
+    extCounts[ext].entities += e.entity_count;
+  }
+
   console.log(
     `\n[vibe-reading] Done. Coverage: ${(manifest.coverage * 100).toFixed(1)}% ` +
     `(${manifest.analyzed_files}/${manifest.total_files})`
   );
   console.log(`[vibe-reading] Total entities: ${totalEntities}`);
   console.log(`[vibe-reading] Call graph: ${callGraph.length} files`);
+  console.log(`[vibe-reading] By extension: ${Object.entries(extCounts).map(([ext, c]) => `${ext}(${c.files} files, ${c.entities} entities)`).join(", ")}`);
 }
 
 async function analyzeFile(
