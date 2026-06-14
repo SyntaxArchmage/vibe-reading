@@ -43,10 +43,14 @@ function main() {
     .sort();
 
   const lines: string[] = [`# ${path.basename(path.resolve(projectRoot))} — Analysis Summary\n`];
+  let fileCount = 0, entityCount = 0, enrichedCount = 0;
 
   for (const jf of jsonFiles) {
     const data: FileAnalysis = JSON.parse(fs.readFileSync(path.join(filesDir, jf), "utf-8"));
     if (specificFile && data.file !== specificFile) continue;
+    fileCount++;
+    entityCount += data.entities.length;
+    enrichedCount += data.entities.filter(e => e.detail.description).length;
 
     lines.push(`## ${data.file}\n`);
 
@@ -74,6 +78,9 @@ function main() {
       }
     }
   }
+
+  lines.push("---");
+  lines.push(`**${fileCount} files · ${entityCount} entities · ${enrichedCount} enriched**\n`);
 
   console.log(lines.join("\n"));
 }
