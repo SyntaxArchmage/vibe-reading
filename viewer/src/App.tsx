@@ -54,6 +54,7 @@ export function App() {
   const [cardSort, setCardSort] = useState<"line" | "name" | "kind">("line");
   const [entitySearch, setEntitySearch] = useState("");
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
+  const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -327,7 +328,23 @@ export function App() {
               type="text"
               placeholder="Search entities..."
               value={entitySearch}
-              onChange={(e) => setEntitySearch(e.target.value)}
+              onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setEntitySearchIdx(i => Math.min(i + 1, entitySearchResults.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setEntitySearchIdx(i => Math.max(i - 1, 0));
+                } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
+                  const hit = entitySearchResults[entitySearchIdx];
+                  selectFile((hit as any)._key);
+                  setActiveTab(hit.type as TabId);
+                  setTimeout(() => {
+                    setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line });
+                  }, 100);
+                }
+              }}
               className="vr-entity-search-input"
             />
           </div>
@@ -338,7 +355,7 @@ export function App() {
             {entitySearchResults.map((e, i) => (
               <div
                 key={`es-${i}`}
-                className="vr-entity-search-item"
+                className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
                 onClick={() => {
                   selectFile((e as any)._key);
                   if (e.type === "concept" || e.type === "flow" || e.type === "history" || e.type === "jump") {
@@ -653,6 +670,7 @@ const layoutStyles = `
     border-bottom: 1px solid #2d2d2d;
   }
   .vr-entity-search-item:hover { background: #2a2d2e; }
+  .vr-entity-search-item--active { background: #094771; }
   .vr-entity-search-type {
     font-size: 9px;
     padding: 1px 4px;
