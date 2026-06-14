@@ -109,6 +109,8 @@ function main() {
 
   const filesDir = path.join(projectRoot, ".vibe-reading", "files");
   let missingCount = 0;
+  let totalConcepts = 0;
+  let enrichedConcepts = 0;
   const schemaErrors: string[] = [];
 
   for (const entry of manifest.files) {
@@ -120,6 +122,17 @@ function main() {
       missingCount++;
     } else {
       schemaErrors.push(...validateFileJson(jsonPath, entry.path));
+      try {
+        const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8")) as FileAnalysis;
+        for (const e of data.entities) {
+          if (e.type !== "concept") continue;
+          totalConcepts++;
+          const desc = (e.detail as Record<string, unknown>)?.description;
+          if (typeof desc === "string" && !desc.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/)) {
+            enrichedConcepts++;
+          }
+        }
+      } catch { /* already reported as schema error */ }
     }
   }
 
@@ -128,6 +141,11 @@ function main() {
     for (const e of schemaErrors) {
       console.log(`  ${e}`);
     }
+  }
+
+  if (totalConcepts > 0) {
+    const enrichPct = ((enrichedConcepts / totalConcepts) * 100).toFixed(1);
+    console.log(`[harness] Enrichment: ${enrichedConcepts}/${totalConcepts} concepts (${enrichPct}%)`);
   }
 
   if (failedFiles.length === 0 && missingCount === 0 && schemaErrors.length === 0 && manifest.coverage === 1) {
