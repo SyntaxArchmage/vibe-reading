@@ -888,9 +888,10 @@ export function App() {
                 }}
               >
                 <span className="vr-picker-path">{f.file}</span>
-                {f.count > 0 && (
-                  <span className="vr-picker-count">{f.count}</span>
-                )}
+                <span style={{ marginLeft: "auto", display: "flex", gap: 6, fontSize: 10, color: "#666", flexShrink: 0 }}>
+                  {f.count > 0 && <span>{f.count}e</span>}
+                  {f.complexity > 0 && <span style={{ color: f.complexity > 10 ? "#f44747" : f.complexity > 5 ? "#dcdcaa" : "#4ec9b0" }}>{f.complexity}cx</span>}
+                </span>
               </div>
             ))}
             {remaining > 0 && (
