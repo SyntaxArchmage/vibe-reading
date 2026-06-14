@@ -415,6 +415,31 @@ assert(
   `Python docstring enriched create_engine (got "${createEngineEntity?.summary}")`
 );
 
+// === Test 22: Harness enrichment tracking ===
+console.log("\nTest 22: Harness enrichment tracking");
+{
+  cleanOutput();
+  run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  run(`npx tsx enrich.ts ${FIXTURE_DIR} src/scheduler.ts '${JSON.stringify([
+    { name: "Task", summary: "Task interface", description: "Defines work units." },
+  ])}'`);
+  const harnessOut2 = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
+  assert(harnessOut2.includes("Enrichment:"), "Harness reports enrichment stats");
+  assert(harnessOut2.includes("/"), "Enrichment shows X/Y format");
+}
+
+// === Test 23: Call graph correctness ===
+console.log("\nTest 23: Call graph details");
+{
+  cleanOutput();
+  run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+  const cg = JSON.parse(fs.readFileSync(path.join(VIBE_DIR, "global", "call-graph.json"), "utf-8"));
+  assert(typeof cg.generated_at === "string", "Call graph has generated_at timestamp");
+  const utilsCg = cg.files.find((f: { file: string }) => f.file.includes("utils.js"));
+  assert(!!utilsCg, "Call graph contains utils.js");
+  assert(utilsCg.calls.length > 0, "utils.js has calls in call graph");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
