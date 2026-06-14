@@ -68,7 +68,8 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
         const kind = (e.detail.node_type as string || "other").toLowerCase();
         const color = KIND_COLORS[kind] || "#b5cea8";
         return (
-          <div key={i} onClick={() => onCardClick(e)}
+          <div key={i} onClick={(ev) => { ev.stopPropagation(); onCardClick(e); }}
+               title={`${(e.detail.name as string) || e.summary} (L${e.anchor.start_line})`}
                style={{ position: "absolute", left: `${left}%`, width: `${width}%`, top: 0, bottom: 0,
                         background: color, opacity: 0.5, borderRight: "1px solid #252525" }} />
         );
