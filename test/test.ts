@@ -644,7 +644,17 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(types.size >= 3, `scheduler.ts has at least 3 entity types (got ${types.size})`);
 }
 
-// --- Test 37: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 37: Re-analyze cleans stale files ---
+{
+  console.log("\n--- Test 37: Re-analyze cleans stale files ---");
+  const stalePath = path.join(filesDir, "stale__file.ts.json");
+  fs.writeFileSync(stalePath, JSON.stringify({ file: "stale/file.ts", entities: [] }));
+  assert(fs.existsSync(stalePath), "Stale file created");
+  run("npx tsx analyze.ts ../test/fixture");
+  assert(!fs.existsSync(stalePath), "Stale file removed after re-analyze");
+}
+
+// --- Test 38: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
