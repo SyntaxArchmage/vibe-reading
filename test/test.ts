@@ -591,6 +591,18 @@ console.log("\nTest 27: Multiple entity types per file");
   }
 }
 
+// --- Test 33: Full pipeline (analyze → auto-enrich → harness) ---
+{
+  console.log("\n--- Test 33: Full pipeline ---");
+  cleanOutput();
+  run("npx tsx analyze.ts ../test/fixture");
+  run("npx tsx auto-enrich.ts ../test/fixture");
+  const harnessOut = run("npx tsx harness.ts ../test/fixture");
+  assert(harnessOut.includes("100.0%"), "Harness shows 100% coverage after full pipeline");
+  assert(harnessOut.includes("Schema valid"), "Harness reports valid schema");
+  assert(!harnessOut.includes("schema errors"), "No schema errors in harness output");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
