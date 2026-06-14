@@ -1208,6 +1208,40 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(mdOutline.includes("  - "), "Outline has indented children");
 }
 
+// --- Test: export-md summary footer ---
+{
+  console.log("\n--- Test: export-md summary footer ---");
+  const md = run(`npx tsx export-md.ts ${FIXTURE_DIR}`);
+  assert(md.includes("---"), "Export-md has footer separator");
+  assert(/\d+ files.*\d+ entities.*\d+ enriched/.test(md), "Export-md has summary footer with counts");
+}
+
+// --- Test: viewer has entity filter input ---
+{
+  console.log("\n--- Test: viewer entity filter ---");
+  const viewer = fs.readFileSync(path.join(__dirname, "../viewer/out/viewer.js"), "utf-8");
+  assert(viewer.includes("Filter "), "Viewer bundle has entity filter placeholder");
+  assert(viewer.includes("Ctrl+D"), "Viewer bundle has bookmark shortcut");
+}
+
+// --- Test: summary tool JSON output ---
+{
+  console.log("\n--- Test: summary --json ---");
+  const jsonOut = run(`npx tsx summary.ts ${FIXTURE_DIR} --json`);
+  const parsed = JSON.parse(jsonOut);
+  assert(Array.isArray(parsed), "Summary JSON is an array");
+  assert(parsed.length > 0, "Summary JSON has entries");
+  assert(parsed[0].file !== undefined, "Summary JSON entries have file field");
+  assert(parsed[0].entities !== undefined, "Summary JSON entries have entities field");
+}
+
+// --- Test: summary tool sort mode ---
+{
+  console.log("\n--- Test: summary --sort entities ---");
+  const sortOut = run(`npx tsx summary.ts ${FIXTURE_DIR} --sort entities`);
+  assert(sortOut.includes("src/"), "Sorted summary includes file paths");
+}
+
 // === Summary ===
 console.log(`\n${"=".repeat(50)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
