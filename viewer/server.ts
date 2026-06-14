@@ -29,12 +29,22 @@ function loadAnalysisData(): Record<string, unknown> {
   return data;
 }
 
-function buildHtml(data: Record<string, unknown>): string {
+function loadCallGraph(): unknown {
+  const cgPath = path.join(vibeDir, "global", "call-graph.json");
+  if (!fs.existsSync(cgPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(cgPath, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+function buildHtml(data: Record<string, unknown>, callGraph: unknown): string {
   const template = fs.readFileSync(
     path.join(VIEWER_DIR, "index.html"),
     "utf-8"
   );
-  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};</script>`;
+  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};const CALL_GRAPH = ${JSON.stringify(callGraph)};</script>`;
   return template
     .replace("out/viewer.js", "/viewer.js")
     .replace("<div id=\"root\"></div>", `<div id="root"></div>\n  ${dataScript}`);
@@ -46,13 +56,15 @@ if (!fs.existsSync(vibeDir)) {
 }
 
 let analysisData = loadAnalysisData();
-let html = buildHtml(analysisData);
+let callGraph = loadCallGraph();
+let html = buildHtml(analysisData, callGraph);
 
 const vibeFilesDir = path.join(vibeDir, "files");
 if (fs.existsSync(vibeFilesDir)) {
   fs.watch(vibeFilesDir, { persistent: false }, () => {
     analysisData = loadAnalysisData();
-    html = buildHtml(analysisData);
+    callGraph = loadCallGraph();
+    html = buildHtml(analysisData, callGraph);
     console.log(`[vibe-reading] Reloaded ${Object.keys(analysisData).length} analysis files`);
   });
 }

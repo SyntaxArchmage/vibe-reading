@@ -12,6 +12,15 @@ declare const PREVIEW_DATA: Record<
   { file: string; entities: DataEntity[] }
 >;
 
+declare const CALL_GRAPH: {
+  files: Array<{
+    file: string;
+    imports: Array<{ source: string; names: string[] }>;
+    exports: string[];
+    calls: Array<{ callee: string; inFunction: string | null }>;
+  }>;
+} | null;
+
 const TABS: { id: TabId; label: string }[] = [
   { id: "concept", label: "Concept" },
   { id: "flow", label: "Flow" },
@@ -267,7 +276,7 @@ export function App() {
       case "concept":
         return <ConceptTab entities={filtered} onCardClick={onCardClick} />;
       case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} />;
+        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} />;
       case "history":
         return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} />;
       case "jump":

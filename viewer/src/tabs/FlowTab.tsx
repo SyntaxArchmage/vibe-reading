@@ -2,9 +2,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 
+interface CallGraphFile {
+  file: string;
+  imports: Array<{ source: string; names: string[] }>;
+  exports: string[];
+  calls: Array<{ callee: string; inFunction: string | null }>;
+}
+
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
+  currentFile?: string | null;
+  callGraph?: { files: CallGraphFile[] } | null;
 }
 
 const KIND_ICONS: Record<string, string> = {
@@ -162,7 +171,37 @@ function FlowDiagram({ imports, calls, exports }: {
   );
 }
 
-export function FlowTab({ entities, onCardClick }: Props) {
+function CrossFileInfo({ currentFile, callGraph }: { currentFile: string; callGraph: { files: CallGraphFile[] } }) {
+  const cgEntry = callGraph.files.find(f => f.file === currentFile);
+  if (!cgEntry) return null;
+
+  const importers = callGraph.files.filter(f =>
+    f.imports.some(imp => {
+      const source = imp.source.replace(/^\.\//, "");
+      return currentFile.endsWith(source) || currentFile.endsWith(source + ".ts") || currentFile.endsWith(source + ".js");
+    })
+  );
+
+  if (importers.length === 0) return null;
+
+  return (
+    <div style={{ padding: "8px 10px", borderBottom: "1px solid #333", fontSize: 11 }}>
+      <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
+        Imported by ({importers.length})
+      </div>
+      {importers.slice(0, 8).map(f => (
+        <div key={f.file} style={{ color: "#9cdcfe", padding: "2px 0" }}>
+          {f.file}
+        </div>
+      ))}
+      {importers.length > 8 && (
+        <div style={{ color: "#666" }}>+{importers.length - 8} more</div>
+      )}
+    </div>
+  );
+}
+
+export function FlowTab({ entities, onCardClick, currentFile, callGraph }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No flow cards for this file.</div>;
   }
@@ -175,6 +214,7 @@ export function FlowTab({ entities, onCardClick }: Props) {
   return (
     <div>
       <FlowDiagram imports={imports} calls={calls} exports={exports} />
+      {currentFile && callGraph && <CrossFileInfo currentFile={currentFile} callGraph={callGraph} />}
       <AnimatePresence mode="popLayout">
         {ordered.map((e, i) => (
           <FlowCard key={`flow-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
