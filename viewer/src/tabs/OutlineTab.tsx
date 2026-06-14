@@ -127,8 +127,24 @@ function OutlineItem({ node, depth, onCardClick, cursorLine }: {
   );
 }
 
+function matchesFilter(node: OutlineNode, q: string): boolean {
+  const name = ((node.entity.detail.name as string) || node.entity.summary).toLowerCase();
+  if (name.includes(q)) return true;
+  return node.children.some(c => matchesFilter(c, q));
+}
+
+function filterOutline(nodes: OutlineNode[], q: string): OutlineNode[] {
+  if (!q) return nodes;
+  return nodes.filter(n => matchesFilter(n, q)).map(n => ({
+    ...n,
+    children: filterOutline(n.children, q),
+  }));
+}
+
 export function OutlineTab({ entities, onCardClick, cursorLine }: Props) {
   const outline = useMemo(() => buildOutline(entities), [entities]);
+  const [filter, setFilter] = useState("");
+  const filtered = useMemo(() => filterOutline(outline, filter.toLowerCase().trim()), [outline, filter]);
 
   if (outline.length === 0) {
     return <div className="vr-no-cards">No outline available for this file.</div>;
@@ -136,7 +152,16 @@ export function OutlineTab({ entities, onCardClick, cursorLine }: Props) {
 
   return (
     <div style={{ padding: "4px 0" }}>
-      {outline.map((node, i) => (
+      {outline.length > 3 && (
+        <div style={{ padding: "2px 8px 4px" }}>
+          <input type="text" value={filter} onChange={e => setFilter(e.target.value)}
+            placeholder={`Filter ${outline.length} symbols...`}
+            style={{ width: "100%", boxSizing: "border-box", background: "#1e1e1e", color: "#ccc",
+                     border: "1px solid #444", borderRadius: 3, padding: "2px 6px", fontSize: 11, outline: "none" }}
+          />
+        </div>
+      )}
+      {filtered.map((node, i) => (
         <OutlineItem key={i} node={node} depth={0} onCardClick={onCardClick} cursorLine={cursorLine} />
       ))}
     </div>
