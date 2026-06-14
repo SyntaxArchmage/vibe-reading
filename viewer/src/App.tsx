@@ -32,6 +32,7 @@ interface FileInfo {
   key: string;
   file: string;
   count: number;
+  commits: number;
 }
 
 export function App() {
@@ -74,11 +75,17 @@ export function App() {
 
   const allFiles: FileInfo[] = useMemo(() =>
     Object.entries(PREVIEW_DATA)
-      .map(([key, data]) => ({
-        key,
-        file: data.file,
-        count: data.entities.length,
-      }))
+      .map(([key, data]) => {
+        const hist = (data.entities as DataEntity[]).find(
+          e => e.type === "history" && (e.detail.kind === "file_history")
+        );
+        return {
+          key,
+          file: data.file,
+          count: data.entities.length,
+          commits: (hist?.detail.total_commits as number) || 0,
+        };
+      })
       .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)),
   []);
 

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 
 interface FileTreeProps {
-  files: { key: string; file: string; count: number }[];
+  files: { key: string; file: string; count: number; commits: number }[];
   currentFile: string | null;
   onSelect: (key: string) => void;
 }
@@ -12,10 +12,11 @@ interface TreeNode {
   children: Map<string, TreeNode>;
   fileKey?: string;
   count: number;
+  commits: number;
 }
 
-function buildTree(files: { key: string; file: string; count: number }[]): TreeNode {
-  const root: TreeNode = { name: "", path: "", children: new Map(), count: 0 };
+function buildTree(files: { key: string; file: string; count: number; commits: number }[]): TreeNode {
+  const root: TreeNode = { name: "", path: "", children: new Map(), count: 0, commits: 0 };
 
   for (const f of files) {
     const parts = f.file.split("/");
@@ -28,12 +29,14 @@ function buildTree(files: { key: string; file: string; count: number }[]): TreeN
           path: parts.slice(0, i + 1).join("/"),
           children: new Map(),
           count: 0,
+          commits: 0,
         });
       }
       node = node.children.get(part)!;
     }
     node.fileKey = f.key;
     node.count = f.count;
+    node.commits = f.commits;
   }
 
   return root;
@@ -49,16 +52,27 @@ function collapseRoot(root: TreeNode): TreeNode {
   return root;
 }
 
+function heatColor(commits: number, maxCommits: number): string | null {
+  if (commits <= 0 || maxCommits <= 0) return null;
+  const ratio = commits / maxCommits;
+  if (ratio < 0.25) return "#4ec9b0";
+  if (ratio < 0.5) return "#dcdcaa";
+  if (ratio < 0.75) return "#ce9178";
+  return "#f44747";
+}
+
 function DirNode({
   node,
   currentFile,
   onSelect,
   depth,
+  maxCommits,
 }: {
   node: TreeNode;
   currentFile: string | null;
   onSelect: (key: string) => void;
   depth: number;
+  maxCommits: number;
 }) {
   const containsCurrent = currentFile ? currentFile.startsWith(node.path + "/") || currentFile === node.path : false;
   const [open, setOpen] = useState(depth < 2 || containsCurrent);
@@ -102,23 +116,29 @@ function DirNode({
               currentFile={currentFile}
               onSelect={onSelect}
               depth={node.name ? depth + 1 : depth}
+              maxCommits={maxCommits}
             />
           ))}
-          {fileNodes.map((f) => (
-            <div
-              key={f.path}
-              className={`vr-tree-file ${
-                currentFile === f.path ? "vr-tree-file--active" : ""
-              }`}
-              style={{ paddingLeft: (node.name ? depth + 1 : depth) * 12 + 4 }}
-              onClick={() => f.fileKey && onSelect(f.fileKey)}
-            >
-              <span className="vr-tree-file-name">{f.name}</span>
-              {f.count > 0 && (
-                <span className="vr-tree-file-count">{f.count}</span>
-              )}
-            </div>
-          ))}
+          {fileNodes.map((f) => {
+            const heat = heatColor(f.commits, maxCommits);
+            return (
+              <div
+                key={f.path}
+                className={`vr-tree-file ${
+                  currentFile === f.path ? "vr-tree-file--active" : ""
+                }`}
+                style={{ paddingLeft: (node.name ? depth + 1 : depth) * 12 + 4 }}
+                onClick={() => f.fileKey && onSelect(f.fileKey)}
+                title={f.commits > 0 ? `${f.commits} commits` : undefined}
+              >
+                {heat && <span className="vr-tree-heat" style={{ background: heat }} />}
+                <span className="vr-tree-file-name">{f.name}</span>
+                {f.count > 0 && (
+                  <span className="vr-tree-file-count">{f.count}</span>
+                )}
+              </div>
+            );
+          })}
         </>
       )}
     </>
@@ -127,6 +147,7 @@ function DirNode({
 
 export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   const tree = useMemo(() => collapseRoot(buildTree(files)), [files]);
+  const maxCommits = useMemo(() => Math.max(...files.map(f => f.commits), 1), [files]);
 
   return (
     <div className="vr-tree">
@@ -135,7 +156,7 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
         <span className="vr-tree-header-count">{files.length} files</span>
       </div>
       <div className="vr-tree-list">
-        <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} />
+        <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} />
       </div>
     </div>
   );
@@ -235,5 +256,13 @@ export const fileTreeStyles = `
     font-size: 10px;
     color: #666;
     margin-left: 4px;
+  }
+
+  .vr-tree-heat {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 4px;
   }
 `;
