@@ -146,14 +146,29 @@ function DirNode({
 }
 
 export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
-  const tree = useMemo(() => collapseRoot(buildTree(files)), [files]);
+  const [filter, setFilter] = useState("");
+  const filtered = useMemo(() => {
+    if (!filter.trim()) return files;
+    const q = filter.toLowerCase();
+    return files.filter(f => f.file.toLowerCase().includes(q));
+  }, [files, filter]);
+  const tree = useMemo(() => collapseRoot(buildTree(filtered)), [filtered]);
   const maxCommits = useMemo(() => Math.max(...files.map(f => f.commits), 1), [files]);
 
   return (
     <div className="vr-tree">
       <div className="vr-tree-header">
         EXPLORER
-        <span className="vr-tree-header-count">{files.length} files</span>
+        <span className="vr-tree-header-count">{filtered.length} files</span>
+      </div>
+      <div className="vr-tree-filter">
+        <input
+          type="text"
+          placeholder="Filter files..."
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          className="vr-tree-filter-input"
+        />
       </div>
       <div className="vr-tree-list">
         <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} />
@@ -189,6 +204,26 @@ export const fileTreeStyles = `
     opacity: 0.7;
     letter-spacing: 0;
   }
+
+  .vr-tree-filter {
+    padding: 4px 8px;
+    border-bottom: 1px solid #3c3c3c;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-filter-input {
+    width: 100%;
+    background: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .vr-tree-filter-input:focus { border-color: #007acc; }
 
   .vr-tree-list {
     flex: 1;
