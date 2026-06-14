@@ -200,7 +200,7 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
   const seen = new Set<string>();
 
   const isUnenriched = (summary: string | undefined) =>
-    !summary || /^(type|interface|function|class):/.test(summary);
+    !summary || /^(type|interface|function|class|enum|method|struct|module|decorated): /.test(summary);
 
   for (const entity of analysis.entities) {
     const name = entity.detail.name as string | undefined;
