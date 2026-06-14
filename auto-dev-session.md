@@ -1,13 +1,13 @@
 # Auto-Dev Session Log
 
-### Auto-Dev Session 2026-06-14 22:12 (in progress)
-- **Duration**: 90 minutes
-- **Tests**: 328 assertions (up from 245 → +83 new)
+### Auto-Dev Session 2026-06-14 22:12 (Cycle 4 complete → Cycle 5 in progress)
+- **Duration**: 90+ minutes across 2 cycles
+- **Tests**: 357 assertions (up from 245 → +112 new)
 - **Defects found**: 4
   - 3 TypeScript strict errors in viewer (null→undefined, unknown→ReactNode)
   - 1 stale entitySearchOpen closure in keyboard handler
 - **Defects fixed**: 4
-- **Features implemented** (25+ items):
+- **Features implemented** (40+ items):
   - Outline tab with nested entity tree and cursor tracking (Alt+5)
   - Viewport indicator on entity density minimap
   - Cross-file usages in expanded concept cards
@@ -25,9 +25,21 @@
   - Auto-enrich: parameter and return type extraction
   - `complexity.ts` — ranked complexity report
   - `diff.ts` — snapshot-based comparison
-  - `search.ts` — cross-file entity search
+  - `search.ts` — cross-file entity search with --kind and --regex
   - `summary.ts` — tab-separated file overview
   - `export-dot --clusters` — directory grouping
+  - Concept tab kind filter chips
+  - Tab tooltips (entity count + complexity)
+  - `export-md --outline` mode
+  - Export-md summary footer
+  - Density minimap click-to-jump
+  - Entity filter input in concept tab
+  - Ctrl+D bookmark shortcut
+  - Params/return type in card detail and hover
+  - Author distribution bar in history tab
+  - Outline tab filter/search
+  - Circular dependency detection in flow tab
+  - Ctrl+Shift+T reopen closed tab
   - Stats: dependency graph analysis
   - Enhanced /api/health
   - Bookmarks in empty state

@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (328 assertions)
+# 3. Run CLI tests (357 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -157,6 +157,20 @@ python3 test/e2e/test_viewer.py
 - `export-dot --clusters` groups files by directory into subgraphs
 - Stats tool: dependency graph analysis (imports, exports, isolated files, longest chain)
 - `export-dot --focus` flag for targeted graph visualization
+- Concept tab kind filter chips (click to filter by entity type)
+- Tab tooltips showing entity count and complexity score
+- `export-md --outline` mode with hierarchical indentation
+- Export-md summary footer (file/entity/enriched counts)
+- Density minimap click-to-jump to nearest entity
+- Entity filter input in concept tab (search by name/summary)
+- Ctrl+D bookmark shortcut for current entity
+- Function params and return type in expanded card detail
+- Params and return type in editor hover tooltips
+- Author distribution bar in history tab
+- Outline tab filter/search input
+- Circular dependency detection warning in flow tab
+- Ctrl+Shift+T to reopen recently closed tabs
+- `search --kind` and `--regex` filter modes
 
 ## Architecture Decisions (2026-06-12)
 
