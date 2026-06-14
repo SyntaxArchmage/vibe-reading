@@ -460,6 +460,11 @@ export function App() {
               code={sourceCode}
               language={sourceLanguage}
               highlightRange={highlightRange}
+              entityMarkers={entities.map(e => ({
+                startLine: e.anchor.start_line,
+                endLine: e.anchor.end_line,
+                type: e.type,
+              }))}
             />
           ) : (
             <div className="vr-editor-placeholder">
@@ -755,6 +760,11 @@ const layoutStyles = `
     margin-left: 3px;
     border-radius: 1px;
   }
+
+  .vr-marker-concept { background: #4ec9b0; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-flow { background: #dcdcaa; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-history { background: #9cdcfe; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-jump { background: #c586c0; width: 3px !important; margin-left: 1px; border-radius: 1px; }
 
   .vr-statusbar {
     position: fixed;

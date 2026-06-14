@@ -6,10 +6,17 @@ declare global {
   }
 }
 
+interface EntityMarker {
+  startLine: number;
+  endLine: number;
+  type: string;
+}
+
 interface MonacoEditorProps {
   code: string;
   language: string;
   highlightRange?: { startLine: number; endLine: number } | null;
+  entityMarkers?: EntityMarker[];
 }
 
 function detectLanguage(filePath: string): string {
@@ -54,10 +61,11 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
+  const markerDecorationsRef = useRef<string[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -137,6 +145,36 @@ export function MonacoEditor({ code, language, highlightRange }: MonacoEditorPro
       editor.revealLineInCenter(startLine);
     }
   }, [highlightRange, ready]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !ready || !entityMarkers?.length) {
+      if (editor && markerDecorationsRef.current.length > 0) {
+        markerDecorationsRef.current = editor.deltaDecorations(markerDecorationsRef.current, []);
+      }
+      return;
+    }
+
+    const TYPE_CLASSES: Record<string, string> = {
+      concept: "vr-marker-concept",
+      flow: "vr-marker-flow",
+      history: "vr-marker-history",
+      jump: "vr-marker-jump",
+    };
+
+    const decorations = entityMarkers.map(m => ({
+      range: new window.monaco.Range(m.startLine, 1, m.startLine, 1),
+      options: {
+        isWholeLine: false,
+        linesDecorationsClassName: TYPE_CLASSES[m.type] || "vr-marker-concept",
+      },
+    }));
+
+    markerDecorationsRef.current = editor.deltaDecorations(
+      markerDecorationsRef.current,
+      decorations
+    );
+  }, [entityMarkers, ready]);
 
   return (
     <div
