@@ -42,9 +42,10 @@ python3 test/e2e/test_viewer.py
 - `cli/analyze.ts` — AST extraction orchestrator (Tree-sitter WASM)
 - `cli/enrich.ts` — agent writes enriched concept data
 - `cli/harness.ts` — coverage verification + schema validation
-- `cli/stats.ts` — quick project stats overview
+- `cli/stats.ts` — project stats (avg entities/file, extension breakdown)
+- `cli/export-md.ts` — export analysis as Markdown summary
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 130 automated tests in `test/test.ts`
+- 187 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -89,23 +90,35 @@ python3 test/e2e/test_viewer.py
 - Genericized auto-enrich (removed project-specific hardcoding)
 - Global entity search panel (Ctrl+Shift+F) across all files
 - Entity search keyboard navigation (arrows + enter)
+- Entity search: `t:` type filter, `f:` file filter, path search
 - Card enrichment indicator (shows "enriched" chip)
 - Card filter and sort controls in sidebar
 - Monaco gutter entity markers (colored by type)
 - Python docstring support in auto-enrich
+- Rust `///`, Go `//`, Ruby `#` doc comment support in auto-enrich
 - Debounced server file watcher for hot-reload
 - Memoized allEntities/allFiles for render performance
 - `.cursor/rules/` for AI session consistency
 - File tree heat dots (commit frequency color-coded indicators)
+- File tree folder entity counts (propagated from children)
 - Clickable "Imported by" and "Depends on" cross-file navigation
 - Type filtering in entity search (`t:concept`, `t:flow`)
 - Entity type distribution in empty state
+- Top 5 most complex files in empty state sidebar
 - React error boundary for crash resilience
 - Python `__all__` export extraction
+- Breadcrumb: status bar shows entity at cursor position
+- Clickable breadcrumb navigates to concept tab
+- Commit count badge in file header
+- Keyboard shortcuts help overlay (? key)
+- `/api/stats` endpoint for project-level statistics
+- `export-md.ts` tool for Markdown summaries
+- Analyze reports entity counts by file extension
+- Blame view shows source code alongside annotations
 - Fix: export extractor no longer over-collects internal identifiers
 - Fix: entity search closes on selection, safe end_line fallback
 - Fix: summaryIsPlaceholder regex covers all entity kinds
-- Stats tool shows top 5 files by entity count
+- Fix: removed broken tree-sitter-wasms language entries
 
 ## Architecture Decisions (2026-06-12)
 
@@ -160,7 +173,7 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 130 CLI pipeline tests
+│   ├── test.ts                 # 187 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
 │   └── fixture/                # Test fixture (5 source files)
 ├── prd/
