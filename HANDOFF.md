@@ -15,7 +15,7 @@ cd cli && npm install && cd ..
 # 2. Install viewer dependencies
 cd viewer && npm install && cd ..
 
-# 3. Run CLI tests (101 assertions)
+# 3. Run CLI tests (130 assertions)
 npx tsx test/test.ts
 
 # 4. Build viewer
@@ -44,7 +44,7 @@ python3 test/e2e/test_viewer.py
 - `cli/harness.ts` — coverage verification + schema validation
 - `cli/stats.ts` — quick project stats overview
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 101 automated tests in `test/test.ts`
+- 130 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
@@ -96,6 +96,16 @@ python3 test/e2e/test_viewer.py
 - Debounced server file watcher for hot-reload
 - Memoized allEntities/allFiles for render performance
 - `.cursor/rules/` for AI session consistency
+- File tree heat dots (commit frequency color-coded indicators)
+- Clickable "Imported by" and "Depends on" cross-file navigation
+- Type filtering in entity search (`t:concept`, `t:flow`)
+- Entity type distribution in empty state
+- React error boundary for crash resilience
+- Python `__all__` export extraction
+- Fix: export extractor no longer over-collects internal identifiers
+- Fix: entity search closes on selection, safe end_line fallback
+- Fix: summaryIsPlaceholder regex covers all entity kinds
+- Stats tool shows top 5 files by entity count
 
 ## Architecture Decisions (2026-06-12)
 
@@ -150,9 +160,9 @@ vibe-reading/
 │   ├── webview/                # Original webview (now in viewer/)
 │   └── package.json
 ├── test/
-│   ├── test.ts                 # 101 CLI pipeline tests
+│   ├── test.ts                 # 130 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 18 Playwright E2E tests
-│   └── fixture/                # Test fixture (4 source files)
+│   └── fixture/                # Test fixture (5 source files)
 ├── prd/
 │   ├── prd.md                  # Product requirements
 │   ├── devplan.md              # Development plan (6 phases)
@@ -239,5 +249,4 @@ Each file JSON:
    screenshots, iterate on UI
 2. **LSP integration** — go-to-definition targets for jump tab
 3. **LLM enrichment** — semantic relationship inference for jumps
-4. **Heat map overlay** — file change frequency visualization on Monaco
-5. **PR description extraction** — GitHub API integration for history
+4. **PR description extraction** — GitHub API integration for history
