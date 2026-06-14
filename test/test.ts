@@ -750,7 +750,25 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(dotOut.includes("->"), "DOT output has edges");
 }
 
-// --- Test 45: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 45: Manifest matches analysis files on disk ---
+{
+  console.log("\n--- Test 45: Manifest ↔ files consistency ---");
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(VIBE_DIR, "manifest.json"), "utf-8")
+  );
+  const onDisk = fs.readdirSync(filesDir).filter((f: string) => f.endsWith(".json"));
+  const analyzedPaths = manifest.files
+    .filter((f: any) => f.status === "analyzed")
+    .map((f: any) => f.path.replace(/[/\\]/g, "__") + ".json");
+  for (const ap of analyzedPaths) {
+    assert(onDisk.includes(ap), `Manifest entry ${ap} exists on disk`);
+  }
+  for (const od of onDisk) {
+    assert(analyzedPaths.includes(od), `Disk file ${od} is in manifest`);
+  }
+}
+
+// --- Test 46: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
