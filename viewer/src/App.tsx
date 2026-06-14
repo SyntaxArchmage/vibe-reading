@@ -319,10 +319,17 @@ export function App() {
         e.preventDefault();
         navigateForward();
       }
+      if ((e.key === "[" || e.key === "]") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
+        const idx = allFiles.findIndex(f => f.key === currentFile);
+        if (idx >= 0) {
+          const next = e.key === "]" ? idx + 1 : idx - 1;
+          if (next >= 0 && next < allFiles.length) selectFile(allFiles[next].key);
+        }
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [navigateBack, navigateForward]);
+  }, [navigateBack, navigateForward, allFiles, currentFile]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -789,6 +796,7 @@ export function App() {
             <kbd>Ctrl+W</kbd><span>Close tab</span>
             <kbd>Alt+1-4</kbd><span>Switch tab</span>
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
+            <kbd>[ / ]</kbd><span>Previous/next file</span>
             <kbd>?</kbd><span>Toggle this help</span>
             <kbd>Esc</kbd><span>Close overlays</span>
           </div>
