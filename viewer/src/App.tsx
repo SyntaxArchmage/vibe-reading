@@ -70,17 +70,25 @@ export function App() {
     ? (() => {
         let q = entitySearch.toLowerCase().trim();
         let typeFilter: string | null = null;
+        let fileFilter: string | null = null;
         const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
         if (typeMatch) {
           typeFilter = typeMatch[1];
           q = q.slice(typeMatch[0].length);
         }
+        const fileMatch = q.match(/^(?:file:|f:)(\S+)\s*/);
+        if (fileMatch) {
+          fileFilter = fileMatch[1];
+          q = q.slice(fileMatch[0].length);
+        }
         return allEntities.filter(e => {
           if (typeFilter && !e.type.startsWith(typeFilter)) return false;
+          if (fileFilter && !e.anchor.file.toLowerCase().includes(fileFilter)) return false;
           if (!q) return true;
           const name = ((e.detail.name as string) || "").toLowerCase();
           const summary = e.summary.toLowerCase();
-          return name.includes(q) || summary.includes(q);
+          const file = e.anchor.file.toLowerCase();
+          return name.includes(q) || summary.includes(q) || file.includes(q);
         }).slice(0, 50);
       })()
     : [];
@@ -370,7 +378,7 @@ export function App() {
             <input
               ref={entitySearchRef}
               type="text"
-              placeholder="Search... (t:concept, t:flow, Esc to close)"
+              placeholder="Search... (t:concept, f:filename, Esc to close)"
               value={entitySearch}
               onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
               onKeyDown={(e) => {
@@ -656,7 +664,7 @@ export function App() {
             <kbd>Esc</kbd><span>Close overlays</span>
           </div>
           <div className="vr-help-footer">
-            Search: <code>t:concept</code> <code>t:flow</code> filter by type
+            <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
           </div>
         </div>
         </>
