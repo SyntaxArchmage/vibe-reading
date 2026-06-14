@@ -39,7 +39,18 @@ function buildTree(files: { key: string; file: string; count: number; commits: n
     node.commits = f.commits;
   }
 
+  propagateCounts(root);
   return root;
+}
+
+function propagateCounts(node: TreeNode): number {
+  if (node.children.size === 0) return node.count;
+  let total = node.fileKey ? node.count : 0;
+  for (const child of node.children.values()) {
+    total += propagateCounts(child);
+  }
+  if (!node.fileKey) node.count = total;
+  return total;
 }
 
 function collapseRoot(root: TreeNode): TreeNode {
@@ -105,6 +116,7 @@ function DirNode({
             &#x25B8;
           </span>
           <span className="vr-tree-dir-name">{node.name}</span>
+          {node.count > 0 && <span className="vr-tree-dir-count">{node.count}</span>}
         </div>
       )}
       {(open || !node.name) && (
@@ -260,6 +272,15 @@ export const fileTreeStyles = `
 
   .vr-tree-dir-name {
     font-weight: 500;
+    flex: 1;
+  }
+
+  .vr-tree-dir-count {
+    font-size: 10px;
+    color: #666;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-right: 8px;
   }
 
   .vr-tree-file {
