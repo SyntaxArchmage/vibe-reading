@@ -273,8 +273,11 @@ export function App() {
     }
   }, [navIndex, navHistory, allFiles, selectFile]);
 
+  const [closedTabs, setClosedTabs] = useState<string[]>([]);
+
   const closeTab = useCallback(
     (file: string) => {
+      setClosedTabs(prev => [file, ...prev.filter(f => f !== file)].slice(0, 10));
       setOpenFiles((prev) => {
         const next = prev.filter((f) => f !== file);
         if (file === currentFile && next.length > 0) {
@@ -290,6 +293,14 @@ export function App() {
     },
     [currentFile, allFiles, selectFile]
   );
+
+  const reopenTab = useCallback(() => {
+    if (closedTabs.length === 0) return;
+    const file = closedTabs[0];
+    setClosedTabs(prev => prev.slice(1));
+    const fk = allFiles.find(f => f.file === file)?.key;
+    if (fk) selectFile(fk);
+  }, [closedTabs, allFiles, selectFile]);
 
   const onCardClick = useCallback((entity: DataEntity) => {
     if (entity.type === "jump" && entity.detail.target_file) {
@@ -365,6 +376,10 @@ export function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === "w") {
         e.preventDefault();
         if (currentFile) closeTab(currentFile);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "T") {
+        e.preventDefault();
+        reopenTab();
       }
       if (e.altKey && e.key === "ArrowRight") {
         e.preventDefault();
@@ -961,6 +976,7 @@ export function App() {
             <kbd>Ctrl+D</kbd><span>Bookmark entity</span>
             <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
+            <kbd>Ctrl+Shift+T</kbd><span>Reopen closed tab</span>
             <kbd>Alt+1-5</kbd><span>Switch tab</span>
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
             <kbd>[ / ]</kbd><span>Previous/next file</span>
