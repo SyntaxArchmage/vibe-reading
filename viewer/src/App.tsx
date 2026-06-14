@@ -439,7 +439,12 @@ export function App() {
               >
                 {currentFile}
               </span>
-              <span className="vr-file-count">{entities.length}</span>
+              <span className="vr-file-count" title="entities">{entities.length}</span>
+              {(() => {
+                const hist = entities.find(e => e.type === "history" && e.detail.kind === "file_history");
+                const commits = hist?.detail.total_commits as number | undefined;
+                return commits ? <span className="vr-file-commits" title={`${commits} commits`}>{commits}c</span> : null;
+              })()}
             </div>
             <nav className="vr-tabs">
               {TABS.map((tab) => {
@@ -1113,6 +1118,17 @@ const sidebarStyles = `
     opacity: 0.5;
     background: #4d4d4d;
     color: #ccc;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
+  }
+
+  .vr-file-commits {
+    flex-shrink: 0;
+    font-size: 10px;
+    opacity: 0.5;
+    background: #3a3a2a;
+    color: #dcdcaa;
     padding: 0 5px;
     border-radius: 8px;
     line-height: 16px;
