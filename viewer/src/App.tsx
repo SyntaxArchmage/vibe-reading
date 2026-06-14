@@ -182,7 +182,12 @@ export function App() {
         scored.sort((a, b) => b.score - a.score);
         return scored.map(s => s.f);
       })()
-    : allFiles;
+    : (() => {
+        const recentSet = new Set(openFiles);
+        const recent = allFiles.filter(f => recentSet.has(f.key));
+        const rest = allFiles.filter(f => !recentSet.has(f.key));
+        return [...recent, ...rest];
+      })();
 
   const visibleFiles = filteredFiles.slice(0, 100);
   const remaining = filteredFiles.length - visibleFiles.length;
