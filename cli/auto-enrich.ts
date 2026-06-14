@@ -36,6 +36,13 @@ function extractJSDoc(lines: string[], startLine: number): string | undefined {
       }
       break;
     }
+    // Rust `///` doc comments
+    if (line.startsWith("///")) {
+      docLines.unshift(lines[i]);
+      i--;
+      continue;
+    }
+    // Go/C++ `//` line comments (contiguous block)
     if (line.startsWith("//")) {
       docLines.unshift(lines[i]);
       i--;
@@ -50,10 +57,27 @@ function extractJSDoc(lines: string[], startLine: number): string | undefined {
         .replace(/^\s*\/\*\*?\s?/, "")
         .replace(/\s*\*\/\s*$/, "")
         .replace(/^\s*\*\s?/, "")
-        .replace(/^\s*\/\s?/, "")
+        .replace(/^\s*\/\/\/\s?/, "")
+        .replace(/^\s*\/\/\s?/, "")
     )
     .join("\n")
     .trim();
+}
+
+function extractHashDoc(lines: string[], startLine: number): string | undefined {
+  let i = startLine - 2;
+  const docLines: string[] = [];
+  while (i >= 0) {
+    const line = lines[i].trim();
+    if (line === "") { i--; continue; }
+    if (line.startsWith("#")) {
+      docLines.unshift(line.replace(/^#\s?/, ""));
+      i--;
+      continue;
+    }
+    break;
+  }
+  return docLines.length > 0 ? docLines.join("\n").trim() : undefined;
 }
 
 function extractPyDocstring(lines: string[], startLine: number): string | undefined {
@@ -212,9 +236,15 @@ function enrichFile(projectRoot: string, jsonPath: string): { matched: number; t
     const end = entity.anchor.end_line;
     const sourceSlice = lines.slice(start - 1, end);
     const isPython = relPath.endsWith(".py");
-    const jsdoc = isPython
-      ? extractPyDocstring(lines, start)
-      : extractJSDoc(lines, start);
+    const isRuby = relPath.endsWith(".rb");
+    let jsdoc: string | undefined;
+    if (isPython) {
+      jsdoc = extractPyDocstring(lines, start) ?? extractHashDoc(lines, start);
+    } else if (isRuby) {
+      jsdoc = extractHashDoc(lines, start);
+    } else {
+      jsdoc = extractJSDoc(lines, start);
+    }
     const kind = (entity.detail.kind as string) ?? "concept";
 
     enrichments.push({
