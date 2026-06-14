@@ -167,16 +167,41 @@ function extractExports(rootNode: any, ext: string): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function walk(node: any) {
     if (node.type === "export_statement") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      function collectIds(n: any) {
-        if (n.type === "identifier" || n.type === "type_identifier") {
-          exports.push(n.text);
-        }
-        for (const child of n.children) {
-          collectIds(child);
+      for (const child of node.children) {
+        if (child.type === "export_clause") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const spec of child.children) {
+            if (spec.type === "export_specifier") {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const id = spec.children.find((c: any) => c.type === "identifier");
+              if (id) exports.push(id.text);
+            }
+          }
+        } else if (
+          child.type === "function_declaration" ||
+          child.type === "class_declaration" ||
+          child.type === "type_alias_declaration" ||
+          child.type === "interface_declaration" ||
+          child.type === "enum_declaration" ||
+          child.type === "lexical_declaration"
+        ) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const id = child.children.find((c: any) =>
+            c.type === "identifier" || c.type === "type_identifier"
+          );
+          if (id) exports.push(id.text);
+          if (child.type === "lexical_declaration") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            for (const decl of child.children) {
+              if (decl.type === "variable_declarator") {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const vid = decl.children.find((c: any) => c.type === "identifier");
+                if (vid) exports.push(vid.text);
+              }
+            }
+          }
         }
       }
-      collectIds(node);
       return;
     }
     for (const child of node.children) {

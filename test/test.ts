@@ -519,6 +519,11 @@ console.log("\nTest 27: Multiple entity types per file");
   const flows = buttonData.entities.filter((e: any) => e.type === "flow");
   const importEntity = flows.find((f: any) => f.detail.kind === "imports");
   assert(importEntity && importEntity.detail.all_names.includes("useState"), "TSX: useState import extracted");
+  const exportEntity = flows.find((f: any) => f.detail.kind === "exports");
+  assert(exportEntity !== undefined, "TSX: export entity exists");
+  assert(exportEntity.detail.names.includes("Button"), "TSX: Button is exported");
+  assert(!exportEntity.detail.names.includes("pressed"), "TSX: internal var 'pressed' not in exports");
+  assert(!exportEntity.detail.names.includes("label"), "TSX: parameter 'label' not in exports");
 }
 
 // === Summary ===
