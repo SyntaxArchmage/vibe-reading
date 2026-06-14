@@ -49,6 +49,8 @@ For each JSON file in `<target-project-root>/.vibe-reading/files/`:
 
 ```bash
 cd <vibe-reading-repo>/cli && npx tsx enrich.ts <target-project-root> <relative-file-path> '<enrichments-json>'
+# Or use --from-file for large enrichments (avoids shell escaping issues):
+cd <vibe-reading-repo>/cli && npx tsx enrich.ts <target-project-root> <relative-file-path> --from-file /tmp/enrichments.json
 ```
 
 The enrichments JSON format:
