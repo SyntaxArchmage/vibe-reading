@@ -18,8 +18,12 @@ function loadAnalysisData(): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   for (const file of fs.readdirSync(filesDir)) {
     if (!file.endsWith(".json")) continue;
-    const raw = fs.readFileSync(path.join(filesDir, file), "utf-8");
-    data[file] = JSON.parse(raw);
+    try {
+      const raw = fs.readFileSync(path.join(filesDir, file), "utf-8");
+      data[file] = JSON.parse(raw);
+    } catch (e) {
+      console.warn(`[vibe-reading] Skipping malformed JSON: ${file}`);
+    }
   }
   return data;
 }
@@ -65,8 +69,8 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({ error: "missing ?file= param" }));
       return;
     }
-    const absPath = path.join(projectRoot, filePath);
-    if (!absPath.startsWith(projectRoot) || !fs.existsSync(absPath)) {
+    const absPath = path.resolve(projectRoot, filePath);
+    if (!absPath.startsWith(projectRoot + path.sep) || !fs.existsSync(absPath)) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "file not found" }));
       return;

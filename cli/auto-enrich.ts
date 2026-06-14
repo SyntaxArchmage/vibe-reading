@@ -118,19 +118,9 @@ function buildDescription(
     parts.push(...sentences.slice(0, 3));
   }
 
-  const rel = filePath.replace(/^packages\/(agent|ai)\//, "");
-  if (rel.includes("harness/")) {
-    parts.push("Part of the agent harness layer for session management, compaction, and runtime orchestration.");
-  } else if (rel.includes("providers/")) {
-    parts.push("Provider adapter in the pi-ai multi-provider streaming stack.");
-  } else if (rel.includes("utils/oauth")) {
-    parts.push("OAuth helper used by provider authentication flows.");
-  } else if (rel.includes("test/")) {
+  const rel = filePath;
+  if (rel.includes("test/") || rel.includes("__test__") || rel.includes(".test.")) {
     parts.push("Test coverage validating behavior and regressions for the surrounding module.");
-  } else if (rel.startsWith("packages/agent/src/")) {
-    parts.push("Core agent runtime component used by Agent and the low-level agent loop.");
-  } else if (rel.startsWith("packages/ai/src/")) {
-    parts.push("Shared pi-ai library surface for models, streaming, and provider integration.");
   }
 
   if (kind === "class") {
@@ -150,7 +140,8 @@ function buildDescription(
   const joined = unique.join(" ");
   if (joined.length > 20) return joined;
 
-  return `${kind} "${name}" in ${rel}. Implements ${name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} for the Pi agent toolkit.`;
+  const readable = name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
+  return `${kind} "${name}" in ${rel}. Implements ${readable}.`;
 }
 
 function enrichFile(projectRoot: string, jsonPath: string): { matched: number; total: number } {
@@ -223,7 +214,6 @@ function main() {
     .filter(
       (f) =>
         f.endsWith(".json") &&
-        (f.startsWith("packages__agent__") || f.startsWith("packages__ai__")) &&
         (prefix === "" || f.startsWith(prefix))
     )
     .sort();
