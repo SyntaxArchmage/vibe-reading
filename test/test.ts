@@ -622,7 +622,16 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(engine.imports.length >= 2, `Call graph: engine.py has imports (${engine.imports.length})`);
 }
 
-// --- Test 35: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 35: Viewer build produces output ---
+{
+  console.log("\n--- Test 35: Viewer build produces output ---");
+  const viewerOut = path.join(__dirname, "..", "viewer", "out", "viewer.js");
+  assert(fs.existsSync(viewerOut), "viewer.js build artifact exists");
+  const viewerSize = fs.statSync(viewerOut).size;
+  assert(viewerSize > 1000, `viewer.js is non-trivial (${(viewerSize / 1024).toFixed(0)} KB)`);
+}
+
+// --- Test 36: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
