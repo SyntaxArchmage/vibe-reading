@@ -923,7 +923,26 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(statsOut.includes("By extension"), "Stats shows extension breakdown");
 }
 
-// --- Test 57: Full pipeline (analyze → auto-enrich → harness) ---
+// --- Test 57: Viewer build has bi-directional jump and usages ---
+{
+  console.log("\n--- Test 57: Viewer build jump/usages ---");
+  const bundle = fs.readFileSync(path.join(CLI_DIR, "../viewer/out/viewer.js"), "utf8");
+  assert(bundle.includes("imported by"), "Viewer has 'imported by' label");
+  assert(bundle.includes("Imports from"), "Viewer has 'Imports from' section header");
+  assert(bundle.includes("Used by"), "Viewer has 'Used by' usages label");
+  assert(bundle.includes("onVisibleRange"), "Viewer has viewport sync prop");
+}
+
+// --- Test 58: Server has SSE endpoint ---
+{
+  console.log("\n--- Test 58: Server SSE endpoint ---");
+  const serverSrc = fs.readFileSync(path.join(CLI_DIR, "../viewer/server.ts"), "utf8");
+  assert(serverSrc.includes("/api/events"), "Server has /api/events endpoint");
+  assert(serverSrc.includes("text/event-stream"), "Server uses SSE content type");
+  assert(serverSrc.includes("sseClients"), "Server tracks SSE clients");
+}
+
+// --- Test 59: Full pipeline (analyze → auto-enrich → harness) ---
 {
   console.log("\n--- Test 33: Full pipeline ---");
   cleanOutput();
