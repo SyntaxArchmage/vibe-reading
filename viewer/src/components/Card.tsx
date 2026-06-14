@@ -88,6 +88,14 @@ export function Card({ entity, onClick }: CardProps) {
               <span className="vr-card-chip">{lines} lines</span>
               <span className="vr-card-chip">{loc}</span>
               {isEnriched && <span className="vr-card-chip vr-card-chip--enriched">enriched</span>}
+              {name && (
+                <span
+                  className="vr-card-chip"
+                  style={{ cursor: "pointer" }}
+                  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(name); }}
+                  title="Copy name"
+                >📋</span>
+              )}
             </div>
           </motion.div>
         )}
