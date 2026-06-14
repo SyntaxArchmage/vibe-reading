@@ -68,6 +68,10 @@ export function App() {
   const [gotoLineOpen, setGotoLineOpen] = useState(false);
   const [gotoLineValue, setGotoLineValue] = useState("");
   const gotoLineRef = useRef<HTMLInputElement>(null);
+  const [symbolOpen, setSymbolOpen] = useState(false);
+  const [symbolQuery, setSymbolQuery] = useState("");
+  const [symbolIdx, setSymbolIdx] = useState(0);
+  const symbolRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const entitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -301,6 +305,14 @@ export function App() {
         setEntitySearchOpen(false);
         setHelpOpen(false);
         setGotoLineOpen(false);
+        setSymbolOpen(false);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "O") {
+        e.preventDefault();
+        setSymbolOpen(true);
+        setSymbolQuery("");
+        setSymbolIdx(0);
+        setTimeout(() => symbolRef.current?.focus(), 0);
       }
       if (e.key === "?" && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
         setHelpOpen(v => !v);
@@ -396,6 +408,16 @@ export function App() {
       }
       return a.anchor.start_line - b.anchor.start_line;
     });
+
+  const symbolResults = useMemo(() => {
+    if (!symbolOpen) return [];
+    const q = symbolQuery.toLowerCase().trim();
+    return entities
+      .filter(e => e.type === "concept" && e.detail.name)
+      .filter(e => !q || String(e.detail.name).toLowerCase().includes(q))
+      .sort((a, b) => a.anchor.start_line - b.anchor.start_line)
+      .slice(0, 20);
+  }, [symbolOpen, symbolQuery, entities]);
 
   const tabContent = () => {
     switch (activeTab) {
@@ -827,6 +849,46 @@ export function App() {
         </>
       )}
 
+      {symbolOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setSymbolOpen(false)} />
+        <div className="vr-picker">
+          <input
+            ref={symbolRef}
+            type="text"
+            className="vr-picker-input"
+            placeholder="Go to symbol... (Ctrl+Shift+O)"
+            value={symbolQuery}
+            onChange={e => { setSymbolQuery(e.target.value); setSymbolIdx(0); }}
+            onKeyDown={e => {
+              if (e.key === "ArrowDown") { e.preventDefault(); setSymbolIdx(i => Math.min(i + 1, symbolResults.length - 1)); }
+              if (e.key === "ArrowUp") { e.preventDefault(); setSymbolIdx(i => Math.max(i - 1, 0)); }
+              if (e.key === "Enter" && symbolResults[symbolIdx]) {
+                onCardClick(symbolResults[symbolIdx]);
+                setSymbolOpen(false);
+              }
+              if (e.key === "Escape") setSymbolOpen(false);
+            }}
+          />
+          <div className="vr-picker-list" style={{ maxHeight: 300, overflowY: "auto" }}>
+            {symbolResults.map((e, i) => {
+              const kind = (e.detail.node_type as string || "").toLowerCase();
+              return (
+                <div key={i}
+                     className={`vr-picker-item ${i === symbolIdx ? "vr-picker-item--active" : ""}`}
+                     onClick={() => { onCardClick(e); setSymbolOpen(false); }}
+                >
+                  <span style={{ fontSize: 10, color: "#888", marginRight: 4 }}>{kind}</span>
+                  <span>{String(e.detail.name)}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 10, color: "#666" }}>L{e.anchor.start_line}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        </>
+      )}
+
       {helpOpen && (
         <>
         <div className="vr-picker-overlay" onClick={() => setHelpOpen(false)} />
@@ -835,6 +897,7 @@ export function App() {
           <div className="vr-help-grid">
             <kbd>Ctrl+P</kbd><span>File picker</span>
             <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
+            <kbd>Ctrl+Shift+O</kbd><span>Go to symbol</span>
             <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
             <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
