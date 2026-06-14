@@ -64,7 +64,7 @@ assert(tsNames.some((n: string) => n.includes("createTask")), "Found function cr
 
 // Verify anchors have correct line numbers
 const schedulerClass = tsEntities.find((e: { summary: string }) => e.summary.includes("Scheduler"));
-assert(schedulerClass && schedulerClass.anchor.start_line === 7, `Scheduler class starts at L7 (got L${schedulerClass?.anchor?.start_line})`);
+assert(schedulerClass && schedulerClass.anchor.start_line === 9, `Scheduler class starts at L9 (got L${schedulerClass?.anchor?.start_line})`);
 
 // === Test 4: Python extraction accuracy ===
 console.log("\nTest 4: Python extraction accuracy (engine.py)");
@@ -180,6 +180,28 @@ assert(schedulerHist.length >= 1, `At least 1 history entity in scheduler.ts (go
 const fileHistory = schedulerHist.find((e: { detail: { kind: string } }) => e.detail.kind === "file_history");
 assert(!!fileHistory, "Found file_history entity");
 assert(typeof fileHistory.detail.total_commits === "number", "file_history has total_commits");
+
+// === Test 11.7: Jump entity extraction ===
+console.log("\nTest 11.7: Jump entity extraction");
+// Re-analyze to pick up new local import in scheduler.ts
+cleanOutput();
+run(`npx tsx analyze.ts ${FIXTURE_DIR}`);
+const reanalyzedScheduler = JSON.parse(
+  fs.readFileSync(path.join(filesDir, "src__scheduler.ts.json"), "utf-8")
+);
+const schedulerJumps = reanalyzedScheduler.entities.filter((e: { type: string }) => e.type === "jump");
+assert(schedulerJumps.length >= 1, `At least 1 jump entity in scheduler.ts (got ${schedulerJumps.length})`);
+if (schedulerJumps.length > 0) {
+  const jumpEntity = schedulerJumps[0];
+  assert(jumpEntity.type === "jump", "Jump entity has correct type");
+  assert(typeof jumpEntity.detail.target_file === "string", "Jump entity has target_file");
+  assert(jumpEntity.detail.kind === "import_jump", "Jump entity has kind import_jump");
+}
+
+// === Test 11.8: File analysis has analyzed_at timestamp ===
+console.log("\nTest 11.8: File analysis has analyzed_at timestamp");
+assert(typeof reanalyzedScheduler.analyzed_at === "string", "File analysis has analyzed_at (string)");
+assert(!isNaN(Date.parse(reanalyzedScheduler.analyzed_at)), "analyzed_at is a valid ISO date");
 
 // === Test 12: Edge case — empty file extraction ===
 console.log("\nTest 12: Edge case — empty file extraction");
