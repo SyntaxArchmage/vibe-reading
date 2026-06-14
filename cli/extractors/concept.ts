@@ -13,12 +13,7 @@ const INTERESTING_NODE_TYPES: Record<string, Set<string>> = {
     "interface_declaration",
     "type_alias_declaration",
     "enum_declaration",
-    "struct_declaration",
-    "impl_item",
-    "trait_definition",
-    "module_definition",
     "decorated_definition",
-    "type_declaration",
   ]),
   python: new Set([
     "function_definition",
@@ -38,9 +33,6 @@ function getNodeName(node: any): string | null {
     ) {
       return child.text;
     }
-    if (child.type === "type_spec") {
-      return getNodeName(child);
-    }
   }
   return null;
 }
@@ -51,12 +43,7 @@ function getNodeKind(nodeType: string): string {
   if (nodeType.includes("interface")) return "interface";
   if (nodeType.includes("type_alias")) return "type";
   if (nodeType.includes("enum")) return "enum";
-  if (nodeType.includes("struct")) return "struct";
-  if (nodeType.includes("impl")) return "impl";
-  if (nodeType.includes("trait")) return "trait";
-  if (nodeType.includes("module")) return "module";
   if (nodeType.includes("decorated")) return "decorated";
-  if (nodeType === "type_declaration") return "type";
   return nodeType;
 }
 
