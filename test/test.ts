@@ -42,7 +42,7 @@ assert(fs.existsSync(path.join(VIBE_DIR, "global")), "global/ directory exists")
 console.log("\nTest 2: Per-file JSONs created correctly");
 const filesDir = path.join(VIBE_DIR, "files");
 const jsonFiles = fs.readdirSync(filesDir);
-assert(jsonFiles.length === 4, `4 JSON files created (got ${jsonFiles.length})`);
+assert(jsonFiles.length === 5, `5 JSON files created (got ${jsonFiles.length})`);
 assert(jsonFiles.some(f => f.includes("scheduler.ts")), "scheduler.ts JSON exists");
 assert(jsonFiles.some(f => f.includes("engine.py")), "engine.py JSON exists");
 assert(jsonFiles.some(f => f.includes("utils.js")), "utils.js JSON exists");
@@ -109,8 +109,8 @@ console.log("\nTest 7: Manifest correctness");
 const manifest = JSON.parse(
   fs.readFileSync(path.join(VIBE_DIR, "manifest.json"), "utf-8")
 );
-assert(manifest.total_files === 4, `Total files is 4 (got ${manifest.total_files})`);
-assert(manifest.analyzed_files === 4, `Analyzed files is 4 (got ${manifest.analyzed_files})`);
+assert(manifest.total_files === 5, `Total files is 5 (got ${manifest.total_files})`);
+assert(manifest.analyzed_files === 5, `Analyzed files is 5 (got ${manifest.analyzed_files})`);
 assert(manifest.coverage === 1, `Coverage is 1.0 (got ${manifest.coverage})`);
 assert(manifest.files.every((f: { status: string }) => f.status === "analyzed"), "All files have status 'analyzed'");
 
@@ -178,7 +178,7 @@ console.log("\nTest 11: Call graph generation");
 const callGraphPath = path.join(VIBE_DIR, "global", "call-graph.json");
 assert(fs.existsSync(callGraphPath), "call-graph.json exists");
 const callGraph = JSON.parse(fs.readFileSync(callGraphPath, "utf-8"));
-assert(callGraph.files.length === 4, `Call graph has 4 files (got ${callGraph.files.length})`);
+assert(callGraph.files.length === 5, `Call graph has 5 files (got ${callGraph.files.length})`);
 const cgScheduler = callGraph.files.find((f: { file: string }) => f.file.includes("scheduler.ts"));
 assert(!!cgScheduler, "Call graph contains scheduler.ts");
 assert(cgScheduler.exports.length > 0, "Scheduler has exports in call graph");
@@ -502,6 +502,23 @@ console.log("\nTest 27: Multiple entity types per file");
   assert(types.has("flow"), "scheduler.ts has flow entities");
   assert(types.has("jump"), "scheduler.ts has jump entities");
   assert(types.size >= 3, `At least 3 entity types (got ${types.size})`);
+}
+
+// --- Test 28: TSX component extraction ---
+{
+  console.log("\n--- Test 28: TSX component extraction ---");
+  cleanOutput();
+  run("npx tsx analyze.ts ../test/fixture");
+  const buttonPath = path.join(filesDir, "src__Button.tsx.json");
+  assert(fs.existsSync(buttonPath), "Button.tsx analysis file exists");
+  const buttonData = JSON.parse(fs.readFileSync(buttonPath, "utf-8"));
+  const concepts = buttonData.entities.filter((e: any) => e.type === "concept");
+  const names = concepts.map((c: any) => c.detail.name);
+  assert(names.includes("Button"), "TSX: Button function extracted");
+  assert(names.includes("ButtonProps"), "TSX: ButtonProps interface extracted");
+  const flows = buttonData.entities.filter((e: any) => e.type === "flow");
+  const importEntity = flows.find((f: any) => f.detail.kind === "imports");
+  assert(importEntity && importEntity.detail.all_names.includes("useState"), "TSX: useState import extracted");
 }
 
 // === Summary ===
