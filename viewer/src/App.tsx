@@ -121,19 +121,26 @@ export function App() {
       })()
     : [];
 
-  const breadcrumbEntity = useMemo(() => {
-    if (!cursorLine) return null;
+  const breadcrumbPath = useMemo(() => {
+    if (!cursorLine) return [];
     const concepts = entities.filter(e => e.type === "concept");
-    let best: DataEntity | null = null;
-    let bestSize = Infinity;
+    const chain: DataEntity[] = [];
     for (const e of concepts) {
       if (cursorLine >= e.anchor.start_line && cursorLine <= e.anchor.end_line) {
-        const size = e.anchor.end_line - e.anchor.start_line;
-        if (size < bestSize) { best = e; bestSize = size; }
+        chain.push(e);
       }
     }
-    return best;
+    chain.sort((a, b) => (a.anchor.end_line - a.anchor.start_line) - (b.anchor.end_line - b.anchor.start_line));
+    const result: DataEntity[] = [];
+    for (const e of chain.reverse()) {
+      if (result.length === 0 || (result[result.length - 1].anchor.start_line <= e.anchor.start_line && result[result.length - 1].anchor.end_line >= e.anchor.end_line)) {
+        result.push(e);
+      }
+    }
+    return result;
   }, [cursorLine, entities]);
+
+  const breadcrumbEntity = breadcrumbPath.length > 0 ? breadcrumbPath[breadcrumbPath.length - 1] : null;
 
   const allFiles: FileInfo[] = useMemo(() =>
     Object.entries(PREVIEW_DATA)
@@ -813,23 +820,25 @@ export function App() {
       <div className="vr-statusbar">
         <span>
           {currentFile ?? "No file selected"}
-          {breadcrumbEntity && (
+          {breadcrumbPath.map((be, i) => (
             <span
+              key={i}
               className="vr-breadcrumb"
               style={{ cursor: "pointer" }}
               onClick={() => {
                 setActiveTab("concept");
                 setHighlightRange({
-                  startLine: breadcrumbEntity.anchor.start_line,
-                  endLine: breadcrumbEntity.anchor.end_line,
+                  startLine: be.anchor.start_line,
+                  endLine: be.anchor.end_line,
                 });
               }}
-              title="Click to show in Concept tab"
+              title={`${be.detail.kind}: ${be.detail.name} (L${be.anchor.start_line}–${be.anchor.end_line})`}
             >
-              {" > "}{(breadcrumbEntity.detail.kind as string) ?? ""}
-              {" "}<strong>{breadcrumbEntity.detail.name as string}</strong>
+              {" > "}{i === breadcrumbPath.length - 1
+                ? <strong>{be.detail.name as string}</strong>
+                : <span style={{ color: "#666" }}>{be.detail.name as string}</span>}
             </span>
-          )}
+          ))}
         </span>
         <span className="vr-statusbar-right">
           {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
