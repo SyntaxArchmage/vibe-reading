@@ -31,7 +31,7 @@ export function Card({ entity, onClick }: CardProps) {
   const badgeColor = KIND_COLORS[kind] || "#b5cea8";
   const desc = entity.detail.description as string | undefined;
   const isEnriched = desc && !desc.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/);
-  const summaryIsPlaceholder = entity.summary.match(/^(function|class|interface|type|enum|method): /);
+  const summaryIsPlaceholder = entity.summary.match(/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated): /);
 
   return (
     <motion.div
