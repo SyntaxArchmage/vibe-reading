@@ -113,9 +113,11 @@ Every entity MUST include these fields alongside summary/description:
 Teaches entry fields:
 - `tag` (required): Name of the concept being taught
 - `explain` (required): 1-3 sentences explaining the concept independently
-- `rationale` (encouraged): Why THIS code uses this concept. What would happen without it.
-- `cross_lang` (encouraged): Equivalent in other languages (Java, Rust, Go, TS, C++)
-- `gotcha` (optional): Common pitfall or trap related to this concept in this context
+- `rationale` (MANDATORY): Why THIS code uses this concept. What would happen without it. Never skip this.
+- `cross_lang` (MANDATORY for known patterns): Equivalent in other languages (Java, Rust, Go, TS, C++). Only skip for truly domain-specific concepts with no equivalent.
+- `gotcha` (encouraged): Common pitfall or trap related to this concept in this context. Include if there's a non-obvious trap.
+
+**Every teaches entry MUST have rationale.** A teaches without rationale is useless — it tells the reader "what" but not "why here". The harness will validate this in future versions.
 
 ❌ Bad teaches (BANNED):
 - `"ColumnParallelLinear"` — this is a code class name, not a concept
@@ -171,6 +173,19 @@ The viewer will automatically display illustrations in concept cards when the fi
 
 See `docs/brainstorm-knowledge-dimensions.md` "Concept Illustrations" section for full guidance.
 
+### Step 3.7: Flow Extraction
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx extract-flow.ts <target-project-root>
+```
+
+Extracts the call graph using TreeSitter — produces `.vibe-reading/global/flow.json` with:
+- **Nodes**: Every function/method in the project
+- **Edges**: Resolved call relationships (self.method, ClassName(), bare functions)
+- **Segments**: Auto-detected meaningful flow chains (initialization, main loops, orchestration)
+
+This step enables the Flow panel in the viewer. It requires Step 1 (analyze) to have run first.
+
 ### Step 4: Verify Coverage, Quality, AND Knowledge
 
 ```bash
@@ -217,19 +232,27 @@ cd ~/workspace/vibe-reading/cli && npx tsx analyze.ts ~/workspace/my-project
 # Step 2: Auto-enrich (instant Tier 1 descriptions)
 cd ~/workspace/vibe-reading/cli && npx tsx auto-enrich.ts ~/workspace/my-project
 
-# Step 3: Check what needs deep enrichment
+# Step 3: Deep-enrich (agent reads code, generates knowledge)
+# Check what needs attention:
 ENRICH_THRESHOLD=0.9 npx tsx harness.ts ~/workspace/my-project
 # → Shows shallow entities that need attention
 
-# Step 4: Deep-enrich ALL shallow entities (iterate until harness passes)
-# Read .vibe-reading/files/src__scheduler.ts.json → see entities
-# Read src/scheduler.ts → understand the code
-# Write richer descriptions:
+# Deep-enrich with full knowledge fields:
 cd ~/workspace/vibe-reading/cli && npx tsx enrich.ts ~/workspace/my-project src/scheduler.ts '[
-  {"name": "Scheduler", "start_line": 7, "summary": "Priority task scheduler with sequential execution", "description": "Priority-based scheduler. Sorted queue, higher priority first. Sequential execution — each task awaits before next starts."}
+  {"name": "Scheduler", "start_line": 7, "summary": "Priority task scheduler with sequential execution",
+   "description": "Priority-based scheduler. Sorted queue, higher priority first.",
+   "why": "Multiple tasks compete for single execution thread",
+   "level": "advanced",
+   "teaches": [{"tag": "Priority Queue", "explain": "Elements dequeued by priority, not arrival order.",
+     "rationale": "Urgent tasks (preemption) must bypass waiting requests",
+     "cross_lang": "Java PriorityBlockingQueue, Rust BinaryHeap, Go heap interface",
+     "gotcha": "Priority inversion — low-priority task holding a lock blocks high-priority"}]}
 ]'
 
-# Step 5: Verify (must pass quality gate)
-ENRICH_THRESHOLD=0.9 npx tsx harness.ts ~/workspace/my-project
-# → Must show ✓ with ≥90% deep enrichment
+# Step 3.7: Extract call graph for Flow panel
+cd ~/workspace/vibe-reading/cli && npx tsx extract-flow.ts ~/workspace/my-project
+
+# Step 4: Verify (must pass ALL quality gates)
+ENRICH_THRESHOLD=0.9 KNOWLEDGE_THRESHOLD=0.9 npx tsx harness.ts ~/workspace/my-project
+# → Must show ✓ with ≥90% deep enrichment + knowledge
 ```
