@@ -1,0 +1,1304 @@
+{
+  "nodes": [
+    {
+      "id": "bench.py::main",
+      "file": "bench.py",
+      "name": "main",
+      "kind": "function",
+      "line": 8,
+      "end_line": 28
+    },
+    {
+      "id": "example.py::main",
+      "file": "example.py",
+      "name": "main",
+      "kind": "function",
+      "line": 6,
+      "end_line": 29
+    },
+    {
+      "id": "nanovllm.config.py::Config::__post_init__",
+      "file": "nanovllm/config.py",
+      "class": "Config",
+      "name": "__post_init__",
+      "kind": "method",
+      "line": 20,
+      "end_line": 25
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::Block::__init__",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "Block",
+      "name": "__init__",
+      "kind": "method",
+      "line": 10,
+      "end_line": 14
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::Block::update",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "Block",
+      "name": "update",
+      "kind": "method",
+      "line": 16,
+      "end_line": 18
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::Block::reset",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "Block",
+      "name": "reset",
+      "kind": "method",
+      "line": 20,
+      "end_line": 23
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::__init__",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "__init__",
+      "kind": "method",
+      "line": 28,
+      "end_line": 33
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::compute_hash",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "compute_hash",
+      "kind": "method",
+      "line": 36,
+      "end_line": 41
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::_allocate_block",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "_allocate_block",
+      "kind": "method",
+      "line": 43,
+      "end_line": 51
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::_deallocate_block",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "_deallocate_block",
+      "kind": "method",
+      "line": 53,
+      "end_line": 56
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::can_allocate",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "can_allocate",
+      "kind": "method",
+      "line": 58,
+      "end_line": 73
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::allocate",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "allocate",
+      "kind": "method",
+      "line": 75,
+      "end_line": 92
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::deallocate",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "deallocate",
+      "kind": "method",
+      "line": 94,
+      "end_line": 101
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::can_append",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "can_append",
+      "kind": "method",
+      "line": 103,
+      "end_line": 104
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::may_append",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "may_append",
+      "kind": "method",
+      "line": 106,
+      "end_line": 108
+    },
+    {
+      "id": "nanovllm.engine.block_manager.py::BlockManager::hash_blocks",
+      "file": "nanovllm/engine/block_manager.py",
+      "class": "BlockManager",
+      "name": "hash_blocks",
+      "kind": "method",
+      "line": 110,
+      "end_line": 120
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "__init__",
+      "kind": "method",
+      "line": 17,
+      "end_line": 35
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::exit",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "exit",
+      "kind": "method",
+      "line": 37,
+      "end_line": 41
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::add_request",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "add_request",
+      "kind": "method",
+      "line": 43,
+      "end_line": 47
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::step",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "step",
+      "kind": "method",
+      "line": 49,
+      "end_line": 55
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::is_finished",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "is_finished",
+      "kind": "method",
+      "line": 57,
+      "end_line": 58
+    },
+    {
+      "id": "nanovllm.engine.llm_engine.py::LLMEngine::generate",
+      "file": "nanovllm/engine/llm_engine.py",
+      "class": "LLMEngine",
+      "name": "generate",
+      "kind": "method",
+      "line": 60,
+      "end_line": 90
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::__init__",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "__init__",
+      "kind": "method",
+      "line": 17,
+      "end_line": 48
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::exit",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "exit",
+      "kind": "method",
+      "line": 50,
+      "end_line": 59
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::loop",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "loop",
+      "kind": "method",
+      "line": 61,
+      "end_line": 66
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::read_shm",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "read_shm",
+      "kind": "method",
+      "line": 68,
+      "end_line": 74
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::write_shm",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "write_shm",
+      "kind": "method",
+      "line": 76,
+      "end_line": 83
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::call",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "call",
+      "kind": "method",
+      "line": 85,
+      "end_line": 89
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::warmup_model",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "warmup_model",
+      "kind": "method",
+      "line": 91,
+      "end_line": 101
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::allocate_kv_cache",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "allocate_kv_cache",
+      "kind": "method",
+      "line": 103,
+      "end_line": 121
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::prepare_block_tables",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "prepare_block_tables",
+      "kind": "method",
+      "line": 123,
+      "end_line": 127
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::prepare_prefill",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "prepare_prefill",
+      "kind": "method",
+      "line": 129,
+      "end_line": 170
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::prepare_decode",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "prepare_decode",
+      "kind": "method",
+      "line": 172,
+      "end_line": 188
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::prepare_sample",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "prepare_sample",
+      "kind": "method",
+      "line": 190,
+      "end_line": 193
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::run_model",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "run_model",
+      "kind": "method",
+      "line": 196,
+      "end_line": 212
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::run",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "run",
+      "kind": "method",
+      "line": 214,
+      "end_line": 220
+    },
+    {
+      "id": "nanovllm.engine.model_runner.py::ModelRunner::capture_cudagraph",
+      "file": "nanovllm/engine/model_runner.py",
+      "class": "ModelRunner",
+      "name": "capture_cudagraph",
+      "kind": "method",
+      "line": 223,
+      "end_line": 257
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::__init__",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "__init__",
+      "kind": "method",
+      "line": 10,
+      "end_line": 17
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::is_finished",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "is_finished",
+      "kind": "method",
+      "line": 19,
+      "end_line": 20
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::add",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "add",
+      "kind": "method",
+      "line": 22,
+      "end_line": 23
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "schedule",
+      "kind": "method",
+      "line": 25,
+      "end_line": 73
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::preempt",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "preempt",
+      "kind": "method",
+      "line": 75,
+      "end_line": 79
+    },
+    {
+      "id": "nanovllm.engine.scheduler.py::Scheduler::postprocess",
+      "file": "nanovllm/engine/scheduler.py",
+      "class": "Scheduler",
+      "name": "postprocess",
+      "kind": "method",
+      "line": 81,
+      "end_line": 92
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::__init__",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "__init__",
+      "kind": "method",
+      "line": 18,
+      "end_line": 31
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::__len__",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "__len__",
+      "kind": "method",
+      "line": 33,
+      "end_line": 34
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::__getitem__",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "__getitem__",
+      "kind": "method",
+      "line": 36,
+      "end_line": 37
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::is_finished",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "is_finished",
+      "kind": "method",
+      "line": 40,
+      "end_line": 41
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::num_completion_tokens",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "num_completion_tokens",
+      "kind": "method",
+      "line": 44,
+      "end_line": 45
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::prompt_token_ids",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "prompt_token_ids",
+      "kind": "method",
+      "line": 48,
+      "end_line": 49
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::completion_token_ids",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "completion_token_ids",
+      "kind": "method",
+      "line": 52,
+      "end_line": 53
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::num_blocks",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "num_blocks",
+      "kind": "method",
+      "line": 56,
+      "end_line": 57
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::last_block_num_tokens",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "last_block_num_tokens",
+      "kind": "method",
+      "line": 60,
+      "end_line": 61
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::block",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "block",
+      "kind": "method",
+      "line": 63,
+      "end_line": 65
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::append_token",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "append_token",
+      "kind": "method",
+      "line": 67,
+      "end_line": 70
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::__getstate__",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "__getstate__",
+      "kind": "method",
+      "line": 72,
+      "end_line": 74
+    },
+    {
+      "id": "nanovllm.engine.sequence.py::Sequence::__setstate__",
+      "file": "nanovllm/engine/sequence.py",
+      "class": "Sequence",
+      "name": "__setstate__",
+      "kind": "method",
+      "line": 76,
+      "end_line": 83
+    },
+    {
+      "id": "nanovllm.layers.activation.py::SiluAndMul::forward",
+      "file": "nanovllm/layers/activation.py",
+      "class": "SiluAndMul",
+      "name": "forward",
+      "kind": "method",
+      "line": 9,
+      "end_line": 11
+    },
+    {
+      "id": "nanovllm.layers.attention.py::store_kvcache_kernel",
+      "file": "nanovllm/layers/attention.py",
+      "name": "store_kvcache_kernel",
+      "kind": "function",
+      "line": 11,
+      "end_line": 30
+    },
+    {
+      "id": "nanovllm.layers.attention.py::store_kvcache",
+      "file": "nanovllm/layers/attention.py",
+      "name": "store_kvcache",
+      "kind": "function",
+      "line": 33,
+      "end_line": 40
+    },
+    {
+      "id": "nanovllm.layers.attention.py::Attention::__init__",
+      "file": "nanovllm/layers/attention.py",
+      "class": "Attention",
+      "name": "__init__",
+      "kind": "method",
+      "line": 45,
+      "end_line": 57
+    },
+    {
+      "id": "nanovllm.layers.attention.py::Attention::forward",
+      "file": "nanovllm/layers/attention.py",
+      "class": "Attention",
+      "name": "forward",
+      "kind": "method",
+      "line": 59,
+      "end_line": 75
+    },
+    {
+      "id": "nanovllm.layers.embed_head.py::VocabParallelEmbedding::__init__",
+      "file": "nanovllm/layers/embed_head.py",
+      "class": "VocabParallelEmbedding",
+      "name": "__init__",
+      "kind": "method",
+      "line": 11,
+      "end_line": 25
+    },
+    {
+      "id": "nanovllm.layers.embed_head.py::VocabParallelEmbedding::weight_loader",
+      "file": "nanovllm/layers/embed_head.py",
+      "class": "VocabParallelEmbedding",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 27,
+      "end_line": 32
+    },
+    {
+      "id": "nanovllm.layers.embed_head.py::VocabParallelEmbedding::forward",
+      "file": "nanovllm/layers/embed_head.py",
+      "class": "VocabParallelEmbedding",
+      "name": "forward",
+      "kind": "method",
+      "line": 34,
+      "end_line": 42
+    },
+    {
+      "id": "nanovllm.layers.embed_head.py::ParallelLMHead::__init__",
+      "file": "nanovllm/layers/embed_head.py",
+      "class": "ParallelLMHead",
+      "name": "__init__",
+      "kind": "method",
+      "line": 47,
+      "end_line": 54
+    },
+    {
+      "id": "nanovllm.layers.embed_head.py::ParallelLMHead::forward",
+      "file": "nanovllm/layers/embed_head.py",
+      "class": "ParallelLMHead",
+      "name": "forward",
+      "kind": "method",
+      "line": 56,
+      "end_line": 66
+    },
+    {
+      "id": "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+      "file": "nanovllm/layers/layernorm.py",
+      "class": "RMSNorm",
+      "name": "__init__",
+      "kind": "method",
+      "line": 7,
+      "end_line": 14
+    },
+    {
+      "id": "nanovllm.layers.layernorm.py::RMSNorm::rms_forward",
+      "file": "nanovllm/layers/layernorm.py",
+      "class": "RMSNorm",
+      "name": "rms_forward",
+      "kind": "method",
+      "line": 17,
+      "end_line": 26
+    },
+    {
+      "id": "nanovllm.layers.layernorm.py::RMSNorm::add_rms_forward",
+      "file": "nanovllm/layers/layernorm.py",
+      "class": "RMSNorm",
+      "name": "add_rms_forward",
+      "kind": "method",
+      "line": 29,
+      "end_line": 40
+    },
+    {
+      "id": "nanovllm.layers.layernorm.py::RMSNorm::forward",
+      "file": "nanovllm/layers/layernorm.py",
+      "class": "RMSNorm",
+      "name": "forward",
+      "kind": "method",
+      "line": 42,
+      "end_line": 50
+    },
+    {
+      "id": "nanovllm.layers.linear.py::divide",
+      "file": "nanovllm/layers/linear.py",
+      "name": "divide",
+      "kind": "function",
+      "line": 7,
+      "end_line": 9
+    },
+    {
+      "id": "nanovllm.layers.linear.py::LinearBase::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "LinearBase",
+      "name": "__init__",
+      "kind": "method",
+      "line": 14,
+      "end_line": 31
+    },
+    {
+      "id": "nanovllm.layers.linear.py::LinearBase::forward",
+      "file": "nanovllm/layers/linear.py",
+      "class": "LinearBase",
+      "name": "forward",
+      "kind": "method",
+      "line": 33,
+      "end_line": 34
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ReplicatedLinear::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ReplicatedLinear",
+      "name": "__init__",
+      "kind": "method",
+      "line": 39,
+      "end_line": 45
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ReplicatedLinear::weight_loader",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ReplicatedLinear",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 47,
+      "end_line": 48
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ReplicatedLinear::forward",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ReplicatedLinear",
+      "name": "forward",
+      "kind": "method",
+      "line": 50,
+      "end_line": 51
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ColumnParallelLinear::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ColumnParallelLinear",
+      "name": "__init__",
+      "kind": "method",
+      "line": 56,
+      "end_line": 63
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ColumnParallelLinear::weight_loader",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ColumnParallelLinear",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 65,
+      "end_line": 70
+    },
+    {
+      "id": "nanovllm.layers.linear.py::ColumnParallelLinear::forward",
+      "file": "nanovllm/layers/linear.py",
+      "class": "ColumnParallelLinear",
+      "name": "forward",
+      "kind": "method",
+      "line": 72,
+      "end_line": 73
+    },
+    {
+      "id": "nanovllm.layers.linear.py::MergedColumnParallelLinear::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "MergedColumnParallelLinear",
+      "name": "__init__",
+      "kind": "method",
+      "line": 78,
+      "end_line": 85
+    },
+    {
+      "id": "nanovllm.layers.linear.py::MergedColumnParallelLinear::weight_loader",
+      "file": "nanovllm/layers/linear.py",
+      "class": "MergedColumnParallelLinear",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 87,
+      "end_line": 93
+    },
+    {
+      "id": "nanovllm.layers.linear.py::QKVParallelLinear::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "QKVParallelLinear",
+      "name": "__init__",
+      "kind": "method",
+      "line": 98,
+      "end_line": 112
+    },
+    {
+      "id": "nanovllm.layers.linear.py::QKVParallelLinear::weight_loader",
+      "file": "nanovllm/layers/linear.py",
+      "class": "QKVParallelLinear",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 114,
+      "end_line": 128
+    },
+    {
+      "id": "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+      "file": "nanovllm/layers/linear.py",
+      "class": "RowParallelLinear",
+      "name": "__init__",
+      "kind": "method",
+      "line": 133,
+      "end_line": 140
+    },
+    {
+      "id": "nanovllm.layers.linear.py::RowParallelLinear::weight_loader",
+      "file": "nanovllm/layers/linear.py",
+      "class": "RowParallelLinear",
+      "name": "weight_loader",
+      "kind": "method",
+      "line": 142,
+      "end_line": 150
+    },
+    {
+      "id": "nanovllm.layers.linear.py::RowParallelLinear::forward",
+      "file": "nanovllm/layers/linear.py",
+      "class": "RowParallelLinear",
+      "name": "forward",
+      "kind": "method",
+      "line": 152,
+      "end_line": 156
+    },
+    {
+      "id": "nanovllm.layers.rotary_embedding.py::apply_rotary_emb",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "apply_rotary_emb",
+      "kind": "function",
+      "line": 6,
+      "end_line": 14
+    },
+    {
+      "id": "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::__init__",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "class": "RotaryEmbedding",
+      "name": "__init__",
+      "kind": "method",
+      "line": 19,
+      "end_line": 35
+    },
+    {
+      "id": "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::forward",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "class": "RotaryEmbedding",
+      "name": "forward",
+      "kind": "method",
+      "line": 38,
+      "end_line": 48
+    },
+    {
+      "id": "nanovllm.layers.rotary_embedding.py::get_rope",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "get_rope",
+      "kind": "function",
+      "line": 52,
+      "end_line": 59
+    },
+    {
+      "id": "nanovllm.layers.sampler.py::Sampler::forward",
+      "file": "nanovllm/layers/sampler.py",
+      "class": "Sampler",
+      "name": "forward",
+      "kind": "method",
+      "line": 8,
+      "end_line": 12
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3Attention",
+      "name": "__init__",
+      "kind": "method",
+      "line": 16,
+      "end_line": 70
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3Attention::forward",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3Attention",
+      "name": "forward",
+      "kind": "method",
+      "line": 72,
+      "end_line": 88
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3MLP::__init__",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3MLP",
+      "name": "__init__",
+      "kind": "method",
+      "line": 93,
+      "end_line": 111
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3MLP::forward",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3MLP",
+      "name": "forward",
+      "kind": "method",
+      "line": 113,
+      "end_line": 117
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3DecoderLayer",
+      "name": "__init__",
+      "kind": "method",
+      "line": 122,
+      "end_line": 144
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::forward",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3DecoderLayer",
+      "name": "forward",
+      "kind": "method",
+      "line": 146,
+      "end_line": 159
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3Model",
+      "name": "__init__",
+      "kind": "method",
+      "line": 164,
+      "end_line": 171
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3Model::forward",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3Model",
+      "name": "forward",
+      "kind": "method",
+      "line": 173,
+      "end_line": 183
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3ForCausalLM",
+      "name": "__init__",
+      "kind": "method",
+      "line": 195,
+      "end_line": 203
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::forward",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3ForCausalLM",
+      "name": "forward",
+      "kind": "method",
+      "line": 205,
+      "end_line": 210
+    },
+    {
+      "id": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::compute_logits",
+      "file": "nanovllm/models/qwen3.py",
+      "class": "Qwen3ForCausalLM",
+      "name": "compute_logits",
+      "kind": "method",
+      "line": 212,
+      "end_line": 216
+    },
+    {
+      "id": "nanovllm.sampling_params.py::SamplingParams::__post_init__",
+      "file": "nanovllm/sampling_params.py",
+      "class": "SamplingParams",
+      "name": "__post_init__",
+      "kind": "method",
+      "line": 10,
+      "end_line": 11
+    },
+    {
+      "id": "nanovllm.utils.context.py::get_context",
+      "file": "nanovllm/utils/context.py",
+      "name": "get_context",
+      "kind": "function",
+      "line": 18,
+      "end_line": 19
+    },
+    {
+      "id": "nanovllm.utils.context.py::set_context",
+      "file": "nanovllm/utils/context.py",
+      "name": "set_context",
+      "kind": "function",
+      "line": 21,
+      "end_line": 23
+    },
+    {
+      "id": "nanovllm.utils.context.py::reset_context",
+      "file": "nanovllm/utils/context.py",
+      "name": "reset_context",
+      "kind": "function",
+      "line": 25,
+      "end_line": 27
+    },
+    {
+      "id": "nanovllm.utils.loader.py::default_weight_loader",
+      "file": "nanovllm/utils/loader.py",
+      "name": "default_weight_loader",
+      "kind": "function",
+      "line": 8,
+      "end_line": 9
+    },
+    {
+      "id": "nanovllm.utils.loader.py::load_model",
+      "file": "nanovllm/utils/loader.py",
+      "name": "load_model",
+      "kind": "function",
+      "line": 12,
+      "end_line": 28
+    }
+  ],
+  "edges": [
+    {
+      "from": "nanovllm.engine.block_manager.py::BlockManager::__init__",
+      "to": "nanovllm.engine.block_manager.py::Block::__init__",
+      "type": "instantiate",
+      "line": 30
+    },
+    {
+      "from": "nanovllm.engine.block_manager.py::BlockManager::_allocate_block",
+      "to": "nanovllm.engine.sequence.py::Sequence::block",
+      "type": "call",
+      "line": 49
+    },
+    {
+      "from": "nanovllm.engine.block_manager.py::BlockManager::_allocate_block",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::add",
+      "type": "call",
+      "line": 50
+    },
+    {
+      "from": "nanovllm.engine.block_manager.py::BlockManager::allocate",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::add",
+      "type": "call",
+      "line": 88
+    },
+    {
+      "from": "nanovllm.engine.block_manager.py::BlockManager::hash_blocks",
+      "to": "nanovllm.engine.sequence.py::Sequence::block",
+      "type": "call",
+      "line": 119
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
+      "to": "nanovllm.engine.model_runner.py::ModelRunner::__init__",
+      "type": "instantiate",
+      "line": 31
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::__init__",
+      "type": "instantiate",
+      "line": 34
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::exit",
+      "to": "nanovllm.engine.model_runner.py::ModelRunner::call",
+      "type": "call",
+      "line": 38
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::add_request",
+      "to": "nanovllm.engine.sequence.py::Sequence::__init__",
+      "type": "instantiate",
+      "line": 46
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::add_request",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::add",
+      "type": "call",
+      "line": 47
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::step",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "type": "call",
+      "line": 50
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::step",
+      "to": "nanovllm.engine.model_runner.py::ModelRunner::call",
+      "type": "call",
+      "line": 52
+    },
+    {
+      "from": "nanovllm.engine.llm_engine.py::LLMEngine::step",
+      "to": "nanovllm.engine.scheduler.py::Scheduler::postprocess",
+      "type": "call",
+      "line": 53
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::__init__",
+      "to": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
+      "type": "instantiate",
+      "line": 31
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::__init__",
+      "to": "nanovllm.utils.loader.py::load_model",
+      "type": "call",
+      "line": 32
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::warmup_model",
+      "to": "nanovllm.engine.sequence.py::Sequence::__init__",
+      "type": "instantiate",
+      "line": 97
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::prepare_prefill",
+      "to": "nanovllm.utils.context.py::set_context",
+      "type": "call",
+      "line": 169
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::prepare_decode",
+      "to": "nanovllm.utils.context.py::set_context",
+      "type": "call",
+      "line": 187
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::run_model",
+      "to": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::compute_logits",
+      "type": "call",
+      "line": 198
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::run_model",
+      "to": "nanovllm.utils.context.py::get_context",
+      "type": "call",
+      "line": 201
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::run",
+      "to": "nanovllm.utils.context.py::reset_context",
+      "type": "call",
+      "line": 219
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::capture_cudagraph",
+      "to": "nanovllm.utils.context.py::set_context",
+      "type": "call",
+      "line": 240
+    },
+    {
+      "from": "nanovllm.engine.model_runner.py::ModelRunner::capture_cudagraph",
+      "to": "nanovllm.utils.context.py::reset_context",
+      "type": "call",
+      "line": 248
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::__init__",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::__init__",
+      "type": "instantiate",
+      "line": 15
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::can_allocate",
+      "type": "call",
+      "line": 36
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::allocate",
+      "type": "call",
+      "line": 45
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::can_append",
+      "type": "call",
+      "line": 60
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::schedule",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::may_append",
+      "type": "call",
+      "line": 69
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::preempt",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::deallocate",
+      "type": "call",
+      "line": 78
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::postprocess",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::hash_blocks",
+      "type": "call",
+      "line": 83
+    },
+    {
+      "from": "nanovllm.engine.scheduler.py::Scheduler::postprocess",
+      "to": "nanovllm.engine.block_manager.py::BlockManager::deallocate",
+      "type": "call",
+      "line": 91
+    },
+    {
+      "from": "nanovllm.layers.attention.py::Attention::forward",
+      "to": "nanovllm.utils.context.py::get_context",
+      "type": "call",
+      "line": 60
+    },
+    {
+      "from": "nanovllm.layers.attention.py::Attention::forward",
+      "to": "nanovllm.layers.attention.py::store_kvcache",
+      "type": "call",
+      "line": 63
+    },
+    {
+      "from": "nanovllm.layers.embed_head.py::ParallelLMHead::forward",
+      "to": "nanovllm.utils.context.py::get_context",
+      "type": "call",
+      "line": 57
+    },
+    {
+      "from": "nanovllm.layers.linear.py::ColumnParallelLinear::__init__",
+      "to": "nanovllm.layers.linear.py::divide",
+      "type": "call",
+      "line": 63
+    },
+    {
+      "from": "nanovllm.layers.linear.py::QKVParallelLinear::__init__",
+      "to": "nanovllm.layers.linear.py::divide",
+      "type": "call",
+      "line": 109
+    },
+    {
+      "from": "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+      "to": "nanovllm.layers.linear.py::divide",
+      "type": "call",
+      "line": 140
+    },
+    {
+      "from": "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::forward",
+      "to": "nanovllm.layers.rotary_embedding.py::apply_rotary_emb",
+      "type": "call",
+      "line": 46
+    },
+    {
+      "from": "nanovllm.layers.rotary_embedding.py::get_rope",
+      "to": "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::__init__",
+      "type": "instantiate",
+      "line": 58
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "to": "nanovllm.layers.linear.py::QKVParallelLinear::__init__",
+      "type": "instantiate",
+      "line": 42
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "to": "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+      "type": "instantiate",
+      "line": 49
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "to": "nanovllm.layers.rotary_embedding.py::get_rope",
+      "type": "call",
+      "line": 56
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "to": "nanovllm.layers.attention.py::Attention::__init__",
+      "type": "instantiate",
+      "line": 62
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "to": "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+      "type": "instantiate",
+      "line": 69
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3MLP::__init__",
+      "to": "nanovllm.layers.linear.py::MergedColumnParallelLinear::__init__",
+      "type": "instantiate",
+      "line": 100
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3MLP::__init__",
+      "to": "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+      "type": "instantiate",
+      "line": 105
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "to": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "type": "instantiate",
+      "line": 127
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "to": "nanovllm.models.qwen3.py::Qwen3MLP::__init__",
+      "type": "instantiate",
+      "line": 138
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "to": "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+      "type": "instantiate",
+      "line": 143
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+      "to": "nanovllm.layers.embed_head.py::VocabParallelEmbedding::__init__",
+      "type": "instantiate",
+      "line": 169
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+      "to": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "type": "instantiate",
+      "line": 170
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+      "to": "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+      "type": "instantiate",
+      "line": 171
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
+      "to": "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+      "type": "instantiate",
+      "line": 200
+    },
+    {
+      "from": "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
+      "to": "nanovllm.layers.embed_head.py::ParallelLMHead::__init__",
+      "type": "instantiate",
+      "line": 201
+    }
+  ],
+  "segments": [
+    {
+      "name": "LLMEngine Initialization",
+      "description": "Flow starting from LLMEngine.__init__",
+      "entry": "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
+      "path": [
+        "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
+        "nanovllm.engine.model_runner.py::ModelRunner::__init__",
+        "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
+        "nanovllm.models.qwen3.py::Qwen3Model::__init__",
+        "nanovllm.layers.embed_head.py::VocabParallelEmbedding::__init__"
+      ]
+    }
+  ]
+}

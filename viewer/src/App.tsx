@@ -5,12 +5,14 @@ import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree } from "./components/FileTree";
-import type { DataEntity, TabId } from "./shared-types";
+import type { DataEntity, TabId, FlowDataType } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
   string,
   { file: string; entities: DataEntity[] }
 >;
+
+declare const GLOBAL_DATA: Record<string, unknown> | undefined;
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "concept", label: "Concept" },
@@ -262,11 +264,13 @@ export function App() {
   const focusedEntity = focusedCardIdx != null ? filtered[focusedCardIdx] ?? null : null;
   const effectiveHighlight = focusedEntity ?? hoveredEntity;
 
+  const flowData = typeof GLOBAL_DATA !== "undefined" ? (GLOBAL_DATA as Record<string, unknown>).flow as FlowDataType | undefined : undefined;
+
   const tabContent = () => {
     const props = { entities: filtered, onCardClick, hoveredEntity: effectiveHighlight, onCardHover, sourceLines };
     switch (activeTab) {
       case "concept": return <ConceptTab {...props} />;
-      case "flow": return <FlowTab {...props} />;
+      case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} />;
       case "history": return <HistoryTab {...props} />;
       case "jump": return <JumpTab {...props} />;
     }

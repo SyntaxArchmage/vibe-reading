@@ -44,3 +44,33 @@ export interface EntityDetail {
   perf?: string;
   [key: string]: unknown;
 }
+
+export interface FlowNode {
+  id: string;
+  file: string;
+  class?: string;
+  name: string;
+  kind: "function" | "class" | "method";
+  line: number;
+  end_line: number;
+}
+
+export interface FlowEdge {
+  from: string;
+  to: string;
+  type: "call" | "instantiate" | "import";
+  line: number;
+}
+
+export interface FlowSegment {
+  name: string;
+  description: string;
+  entry: string;
+  path: string[];
+}
+
+export interface FlowDataType {
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+  segments: FlowSegment[];
+}

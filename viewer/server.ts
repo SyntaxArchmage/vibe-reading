@@ -24,12 +24,25 @@ function loadAnalysisData(): Record<string, unknown> {
   return data;
 }
 
-function buildHtml(data: Record<string, unknown>): string {
+function loadGlobalData(): Record<string, unknown> {
+  const globalDir = path.join(vibeDir, "global");
+  if (!fs.existsSync(globalDir)) return {};
+  const data: Record<string, unknown> = {};
+  for (const file of fs.readdirSync(globalDir)) {
+    if (!file.endsWith(".json")) continue;
+    const raw = fs.readFileSync(path.join(globalDir, file), "utf-8");
+    const key = file.replace(/\.json$/, "");
+    data[key] = JSON.parse(raw);
+  }
+  return data;
+}
+
+function buildHtml(data: Record<string, unknown>, globalData: Record<string, unknown>): string {
   const template = fs.readFileSync(
     path.join(VIEWER_DIR, "index.html"),
     "utf-8"
   );
-  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};</script>`;
+  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};\nconst GLOBAL_DATA = ${JSON.stringify(globalData)};</script>`;
   return template
     .replace("out/viewer.js", "/viewer.js")
     .replace("<div id=\"root\"></div>", `<div id="root"></div>\n  ${dataScript}`);
@@ -41,7 +54,8 @@ if (!fs.existsSync(vibeDir)) {
 }
 
 const analysisData = loadAnalysisData();
-const html = buildHtml(analysisData);
+const globalData = loadGlobalData();
+const html = buildHtml(analysisData, globalData);
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
