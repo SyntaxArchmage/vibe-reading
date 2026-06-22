@@ -173,6 +173,16 @@ The viewer will automatically display illustrations in concept cards when the fi
 
 See `docs/brainstorm-knowledge-dimensions.md` "Concept Illustrations" section for full guidance.
 
+### Step 3.6: Teaches Quality Upgrade (Safety Net)
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx upgrade-teaches.ts <target-project-root>
+```
+
+This is a **post-processing safety net** — it uses a built-in knowledge base to add `cross_lang` and `gotcha` fields to any teaches entries that are missing them. It does NOT replace the agent's judgment but fills gaps for well-known concepts (Object Pool, State Machine, CUDA Graph, etc.).
+
+Run this AFTER deep enrichment to boost coverage. It only touches teaches entries that lack `rationale`/`cross_lang`/`gotcha` and won't overwrite agent-generated content.
+
 ### Step 3.7: Flow Extraction
 
 ```bash
