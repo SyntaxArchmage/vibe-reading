@@ -177,32 +177,103 @@ Differentiator: our flow-chain segmentation + highlight is unique.
 ### Panel 3: History (Code Evolution)
 **Purpose**: Understand how code got to its current state — creation, modifications, purpose of changes.
 
-**Data source**: Git history (git log, git blame)
+**Core user questions**:
+1. "Is this code stable?" — last modification time, activity level
+2. "How did it evolve?" — key turning points, refactoring history
+3. "Who owns it?" — primary author, expertise mapping
+4. "Why was it changed so many times?" — bug-prone vs actively iterated
 
-**Per-entity information**:
-- When created (commit + date + message)
-- When last modified
-- Total modification count
-- Authors who touched it
-- Activity level (hot/cold)
-- Key changes timeline
+**Data source**: Git history (`git log --follow`, `git blame -L`, `git log --diff-filter=A`)
 
-**Interaction**: Hover on entity card → see its git timeline. Click commit → see diff for that entity.
+**Analysis tool**: `analyze-history.ts` (new CLI)
+- Input: project root + .vibe-reading entity list
+- Output: `.vibe-reading/history/<file>.json`
 
-**Value**: "This was rewritten 3 times in 2 months" tells you it's an unstable area. "Untouched for 2 years" tells you it's stable but maybe stale.
+**Per-entity data structure**:
+```json
+{
+  "name": "Scheduler",
+  "line_range": [8, 100],
+  "created": {"commit": "abc123", "author": "alice", "date": "2024-01-15", "message": "Initial scheduler"},
+  "last_modified": {"commit": "def456", "author": "bob", "date": "2024-06-20", "message": "Add preemption"},
+  "modification_count": 8,
+  "authors": ["alice", "bob"],
+  "primary_author": "alice",
+  "activity": "medium",
+  "key_changes": [
+    {"commit": "ghi789", "date": "2024-03-10", "message": "Refactor preemption", "significance": "major"}
+  ],
+  "age_days": 524,
+  "churn_rate": 0.3
+}
+```
+
+**UI elements**:
+- Timeline visualization (dots on line, each = a commit)
+- Activity indicator: 🔥 Active / ⚡ Recent / 💤 Stable
+- Author breakdown (pie or bar)
+- Key changes list with commit messages
+
+**Interactions**:
+- Click timeline dot → Monaco shows code at that commit (git show)
+- Click key change → show diff
+- Hover entity → highlight in editor (same as Concept)
+- Color coding by activity level
+
+**Value**: Quickly judge code stability, find owners, understand design evolution.
 
 ### Panel 4: Jump (Dependencies & Navigation)
-**Purpose**: Understand relationships — who imports what, who uses what, quick navigation between related code.
+**Purpose**: Understand relationships — who imports what, who uses what, and provide intelligent navigation recommendations.
 
-**Data**:
-- File-level: imports and imported-by lists
-- Entity-level: who calls this function, what does this function call
-- Module boundaries: which "modules" exist and their public APIs
+**Core user questions**:
+1. "Where is this class used?" — find all consumers
+2. "If I change this, what breaks?" — impact analysis
+3. "What does this file depend on?" — prerequisites
+4. "What related code should I read together?" — reading path
 
-**Interaction**:
-- Click entity → see callers and callees
-- Click file → see dependency tree
-- Quick-jump to related entities across files
+**Data source**: TreeSitter (imports, class inheritance, function calls, type annotations)
+
+**Analysis tool**: `analyze-deps.ts` (new CLI)
+- Input: project root + all source files
+- Output: `.vibe-reading/deps/graph.json`
+
+**Data structure**:
+```json
+{
+  "files": {
+    "scheduler.py": {
+      "imports": ["block_manager", "sequence"],
+      "imported_by": ["llm_engine"],
+      "exports": ["Scheduler"]
+    }
+  },
+  "entities": {
+    "scheduler.py::Scheduler": {
+      "uses": ["BlockManager", "Sequence"],
+      "used_by": ["LLMEngine.__init__", "LLMEngine.step"],
+      "inherits": [],
+      "inherited_by": []
+    }
+  },
+  "modules": [
+    {"name": "Engine Core", "files": ["llm_engine.py", "scheduler.py", "..."], "description": "..."}
+  ]
+}
+```
+
+**UI elements**:
+- Dependencies section (what this file imports) with [→ jump] links
+- Dependents section (who imports this file) with [→ jump] links
+- Per-entity: Uses / Used-by lists
+- "Related reading" recommendations (agent-generated reading order)
+- Impact analysis mode: "If you change X, these are affected..."
+
+**Interactions**:
+- [→ jump] links: click to navigate to that file/entity
+- Entity selection changes the Uses/Used-by view
+- Impact analysis button: shows transitive dependents
+
+**Value**: Understand code neighborhood, navigate efficiently, assess change impact, get reading order suggestions.
 
 ### Panel Design Principles
 
