@@ -105,10 +105,17 @@ Every entity MUST include these fields alongside summary/description:
 
 `teaches` entries MUST be **real programming knowledge concepts**, NOT code identifiers:
 
-✅ Good teaches:
-- `{"tag": "Object Pool", "explain": "Pre-allocate N objects, hand out on demand. Avoids allocation overhead."}`
-- `{"tag": "__slots__", "explain": "Python: replaces __dict__ with fixed tuple. Saves ~100 bytes per instance."}`
-- `{"tag": "CUDA Graph", "explain": "Record GPU ops, replay without CPU. Eliminates kernel launch overhead."}`
+✅ Good teaches (with all optional context fields):
+- `{"tag": "Object Pool", "explain": "Pre-allocate N objects, hand out on demand. Avoids allocation overhead.", "rationale": "GPU memory allocation is extremely slow. Pool amortizes this cost.", "cross_lang": "Go sync.Pool, Java ThreadPoolExecutor, Rust arena allocator", "gotcha": "Pool exhaustion under load — must handle 'no available objects' gracefully"}`
+- `{"tag": "__slots__", "explain": "Python: replaces __dict__ with fixed tuple. Saves ~100 bytes per instance.", "rationale": "Thousands of Block instances created — memory savings compound.", "cross_lang": "C struct (fixed fields by default), Java record, Rust (default behavior)"}`
+- `{"tag": "CUDA Graph", "explain": "Record GPU ops, replay without CPU. Eliminates kernel launch overhead.", "rationale": "Decode path has fixed tensor shapes, making it graphable. ~50% latency reduction.", "gotcha": "Only works with fixed shapes — dynamic prefill cannot use graphs"}`
+
+Teaches entry fields:
+- `tag` (required): Name of the concept being taught
+- `explain` (required): 1-3 sentences explaining the concept independently
+- `rationale` (encouraged): Why THIS code uses this concept. What would happen without it.
+- `cross_lang` (encouraged): Equivalent in other languages (Java, Rust, Go, TS, C++)
+- `gotcha` (optional): Common pitfall or trap related to this concept in this context
 
 ❌ Bad teaches (BANNED):
 - `"ColumnParallelLinear"` — this is a code class name, not a concept

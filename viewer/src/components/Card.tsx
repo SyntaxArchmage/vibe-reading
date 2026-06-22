@@ -141,13 +141,15 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
                       </span>
                       {expandedTeach !== null && (() => {
                         const t = (d.teaches as unknown[])[expandedTeach];
-                        const explain = typeof t === "object" && t !== null
-                          ? (t as { explain?: string }).explain
-                          : undefined;
-                        if (!explain) return null;
+                        if (typeof t !== "object" || t === null) return null;
+                        const obj = t as { explain?: string; rationale?: string; cross_lang?: string; gotcha?: string };
+                        if (!obj.explain) return null;
                         return (
                           <div className="vr-card-teach-tooltip">
-                            {explain}
+                            <p className="vr-teach-explain">{obj.explain}</p>
+                            {obj.rationale && <p className="vr-teach-rationale"><strong>Why here:</strong> {obj.rationale}</p>}
+                            {obj.cross_lang && <p className="vr-teach-crosslang"><strong>Also in:</strong> {obj.cross_lang}</p>}
+                            {obj.gotcha && <p className="vr-teach-gotcha">⚠️ {obj.gotcha}</p>}
                           </div>
                         );
                       })()}

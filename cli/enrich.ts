@@ -15,18 +15,24 @@ import type { FileAnalysis } from "./types.js";
  * detail.description are updated.
  */
 
+interface TeachEntry {
+  tag: string;
+  explain: string;
+  rationale?: string;
+  cross_lang?: string;
+  gotcha?: string;
+}
+
 interface Enrichment {
   name: string;
   summary: string;
   description: string;
   start_line?: number;
   level?: "basic" | "advanced";
-  // Basic knowledge fields
   why?: string;
   pattern?: string;
-  teaches?: (string | { tag: string; explain: string })[];
+  teaches?: (string | TeachEntry)[];
   analogy?: string;
-  // Advanced knowledge fields
   design?: string;
   convention?: string;
   smell?: string;

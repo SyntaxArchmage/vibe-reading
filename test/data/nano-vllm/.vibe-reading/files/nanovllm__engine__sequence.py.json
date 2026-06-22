@@ -16,12 +16,15 @@
         "name": "SequenceStatus",
         "body_lines": 4,
         "node_type": "class_definition",
-        "description": "WAITING (queued), RUNNING (active on GPU), FINISHED_STOPPED, FINISHED_LENGTH, FINISHED_ABORT.",
-        "why": "Explicit states prevent invalid operations — cannot free blocks of a running sequence",
+        "description": "WAITING (queued), RUNNING (active on GPU), FINISHED_STOPPED, FINISHED_LENGTH, FINISHED_ABORT. Explicit states prevent invalid operations.",
+        "why": "Without explicit states, you might accidentally free blocks of a running sequence or schedule a finished one",
         "teaches": [
           {
-            "tag": "Enum State Pattern",
-            "explain": "Use an enum to restrict valid states. Methods check state before acting. Prevents impossible combinations at compile time."
+            "tag": "Enum for State",
+            "explain": "Use an enum to define all valid states. Only declared transitions are allowed. Compiler/IDE catches illegal values.",
+            "rationale": "Boolean flags (is_running, is_finished) allow impossible combinations like running=true AND finished=true. Enum makes these impossible by construction.",
+            "cross_lang": "Rust enum (can carry data per variant), TypeScript union types, Java enum, Swift enum with associated values",
+            "gotcha": "Adding a new state later requires updating every switch/match — use exhaustive matching to catch missing cases at compile time"
           }
         ],
         "level": "basic"
@@ -36,27 +39,31 @@
         "end_col": 40
       },
       "type": "concept",
-      "summary": "Tracks generation state: tokens, sampling params, logical-physical block mapping",
+      "summary": "Full lifecycle of one generation request: prompt tokens through generation to finish",
       "detail": {
         "kind": "class",
         "name": "Sequence",
         "body_lines": 70,
         "node_type": "class_definition",
-        "description": "Full lifecycle of one generation request: from prompt tokens through generation to finish.",
+        "description": "Tracks all per-request state: token IDs, sampling params, logical block assignments, and status transitions. Persists across scheduling steps.",
         "level": "basic",
-        "why": "Each request has unique state (tokens generated, KV blocks used) that must persist across scheduling steps",
+        "why": "Each request has unique mutable state (tokens generated so far, KV cache blocks used) that must survive across many scheduling steps",
         "pattern": "State machine with token-level lifecycle",
         "teaches": [
           {
             "tag": "State Machine",
-            "explain": "Object transitions between well-defined states (WAITING→RUNNING→FINISHED). Only certain transitions allowed."
+            "explain": "Object with well-defined states and transitions. Only certain state changes are allowed. Invalid transitions raise errors.",
+            "rationale": "A Sequence moves WAITING→RUNNING→FINISHED. Without SM discipline, a bug could skip RUNNING and go straight to FINISHED, leaking allocated blocks.",
+            "cross_lang": "Rust typestate pattern (different type per state), Java State pattern (GoF), TypeScript discriminated unions"
           },
           {
             "tag": "Logical-Physical Mapping",
-            "explain": "Indirection between logical address and physical location. Enables relocation without invalidating references."
+            "explain": "Indirection layer: logical addresses map to physical locations via a table. Enables moving data without updating all references.",
+            "rationale": "Sequences use logical block indices. Physical GPU blocks can be rearranged without invalidating sequence state.",
+            "cross_lang": "OS virtual memory (page tables), database logical/physical record IDs"
           }
         ],
-        "design": "Separates token management from block management within same object for locality",
+        "design": "Separates token management from block management within same object — locality without coupling",
         "convention": "Sequence is read-only outside engine internals"
       }
     },
@@ -75,13 +82,16 @@
         "name": "__init__",
         "body_lines": 14,
         "node_type": "function_definition",
-        "description": "Creates new sequence with initial prompt tokens, assigns unique ID, allocates first logical block.",
+        "description": "Creates new sequence: assigns unique ID, stores prompt tokens, sets initial WAITING status, allocates first logical block.",
         "level": "basic",
-        "why": "Every generation starts here — establishes the baseline state before scheduling can begin",
+        "why": "Every generation starts here — establishes baseline state that scheduler and block manager will operate on",
         "teaches": [
           {
-            "tag": "Builder Initialization",
-            "explain": "Constructor sets up minimal valid state. Object is usable immediately after __init__ without extra setup calls."
+            "tag": "Minimal Valid State",
+            "explain": "Constructor creates object in simplest valid state. No multi-step initialization needed. Object is usable immediately after __init__.",
+            "rationale": "If __init__ left the object half-initialized, callers would need to remember to call .setup() — fragile and error-prone.",
+            "cross_lang": "Rust: all fields must be set in struct literal (compiler enforces). Java: constructor establishes invariants.",
+            "gotcha": "Dont do heavy I/O or allocation in __init__ unless you want slow object creation. Consider factory methods for expensive setup."
           }
         ]
       }
