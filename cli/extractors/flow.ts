@@ -344,45 +344,105 @@ export async function extractFlow(projectRoot: string): Promise<FlowData> {
     tree.delete();
   }
 
-  // Auto-segment: find entry points (nodes with no incoming edges) and trace forward
-  const incoming = new Set<string>();
-  for (const edge of edges) incoming.add(edge.to);
-  const entryPoints = allNodes.filter(n => !incoming.has(n.id));
-
-  const segments: FlowSegment[] = [];
+  // Auto-segment detection
+  const incomingMap = new Map<string, Set<string>>();
   const adjacency = new Map<string, string[]>();
   for (const edge of edges) {
     const arr = adjacency.get(edge.from) || [];
     arr.push(edge.to);
     adjacency.set(edge.from, arr);
+
+    const inc = incomingMap.get(edge.to) || new Set();
+    inc.add(edge.from);
+    incomingMap.set(edge.to, inc);
   }
 
-  function tracePath(startId: string, maxDepth = 15): string[] {
-    const path: string[] = [startId];
+  function tracePath(startId: string, maxDepth = 20): string[] {
+    const result: string[] = [startId];
     const visited = new Set<string>([startId]);
     let current = startId;
     for (let i = 0; i < maxDepth; i++) {
       const next = adjacency.get(current);
       if (!next || next.length === 0) break;
-      const nextNode = next.find(n => !visited.has(n)) || next[0];
-      if (visited.has(nextNode)) break;
+      // Prefer unvisited nodes, then pick the first
+      const nextNode = next.find(n => !visited.has(n));
+      if (!nextNode) break;
       visited.add(nextNode);
-      path.push(nextNode);
+      result.push(nextNode);
       current = nextNode;
     }
-    return path;
+    return result;
   }
 
-  for (const entry of entryPoints.slice(0, 10)) {
+  // BFS-based trace that follows ALL outgoing edges (breadth-first)
+  function traceBFS(startId: string, maxNodes = 20): string[] {
+    const result: string[] = [];
+    const visited = new Set<string>();
+    const queue = [startId];
+    visited.add(startId);
+    while (queue.length > 0 && result.length < maxNodes) {
+      const cur = queue.shift()!;
+      result.push(cur);
+      for (const next of adjacency.get(cur) || []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    return result;
+  }
+
+  const segments: FlowSegment[] = [];
+  const usedInSegment = new Set<string>();
+
+  // Strategy 1: Entry points (no incoming edges) — typically __init__ or main
+  const entryPoints = allNodes.filter(n => !incomingMap.has(n.id) || (incomingMap.get(n.id)?.size || 0) === 0);
+
+  for (const entry of entryPoints) {
     const path = tracePath(entry.id);
     if (path.length >= 3) {
       const nameHint = entry.name === "main" ? "Main Execution" :
                        entry.name === "__init__" ? `${entry.class || entry.file} Initialization` :
-                       `${entry.class ? entry.class + "." : ""}${entry.name} Flow`;
+                       `${entry.class ? entry.class + "." : ""}${entry.name}`;
+      segments.push({ name: nameHint, description: `Flow starting from ${nameHint}`, entry: entry.id, path });
+      path.forEach(p => usedInSegment.add(p));
+    }
+  }
+
+  // Strategy 2: Important methods — high fan-out or known orchestration names
+  const IMPORTANT_NAMES = new Set(["step", "generate", "run", "forward", "schedule", "execute", "process", "handle", "serve"]);
+  const importantNodes = allNodes
+    .filter(n => IMPORTANT_NAMES.has(n.name) && !usedInSegment.has(n.id))
+    .sort((a, b) => (adjacency.get(b.id)?.length || 0) - (adjacency.get(a.id)?.length || 0));
+
+  for (const node of importantNodes.slice(0, 5)) {
+    const path = traceBFS(node.id, 15);
+    if (path.length >= 3) {
+      const label = node.class ? `${node.class}.${node.name}` : node.name;
       segments.push({
-        name: nameHint,
-        description: `Flow starting from ${entry.class ? entry.class + "." : ""}${entry.name}`,
-        entry: entry.id,
+        name: `${label} Flow`,
+        description: `Execution flow of ${label}`,
+        entry: node.id,
+        path,
+      });
+      path.forEach(p => usedInSegment.add(p));
+    }
+  }
+
+  // Strategy 3: High fan-out nodes not yet covered
+  const highFanOut = allNodes
+    .filter(n => (adjacency.get(n.id)?.length || 0) >= 3 && !usedInSegment.has(n.id))
+    .sort((a, b) => (adjacency.get(b.id)?.length || 0) - (adjacency.get(a.id)?.length || 0));
+
+  for (const node of highFanOut.slice(0, 3)) {
+    const path = traceBFS(node.id, 12);
+    if (path.length >= 3) {
+      const label = node.class ? `${node.class}.${node.name}` : node.name;
+      segments.push({
+        name: `${label} Chain`,
+        description: `Call chain from ${label}`,
+        entry: node.id,
         path,
       });
     }

@@ -1290,7 +1290,7 @@
   "segments": [
     {
       "name": "LLMEngine Initialization",
-      "description": "Flow starting from LLMEngine.__init__",
+      "description": "Flow starting from LLMEngine Initialization",
       "entry": "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
       "path": [
         "nanovllm.engine.llm_engine.py::LLMEngine::__init__",
@@ -1298,6 +1298,59 @@
         "nanovllm.models.qwen3.py::Qwen3ForCausalLM::__init__",
         "nanovllm.models.qwen3.py::Qwen3Model::__init__",
         "nanovllm.layers.embed_head.py::VocabParallelEmbedding::__init__"
+      ]
+    },
+    {
+      "name": "LLMEngine.step",
+      "description": "Flow starting from LLMEngine.step",
+      "entry": "nanovllm.engine.llm_engine.py::LLMEngine::step",
+      "path": [
+        "nanovllm.engine.llm_engine.py::LLMEngine::step",
+        "nanovllm.engine.scheduler.py::Scheduler::schedule",
+        "nanovllm.engine.block_manager.py::BlockManager::can_allocate"
+      ]
+    },
+    {
+      "name": "Attention.forward Flow",
+      "description": "Execution flow of Attention.forward",
+      "entry": "nanovllm.layers.attention.py::Attention::forward",
+      "path": [
+        "nanovllm.layers.attention.py::Attention::forward",
+        "nanovllm.utils.context.py::get_context",
+        "nanovllm.layers.attention.py::store_kvcache"
+      ]
+    },
+    {
+      "name": "Qwen3Attention.__init__ Chain",
+      "description": "Call chain from Qwen3Attention.__init__",
+      "entry": "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+      "path": [
+        "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+        "nanovllm.layers.linear.py::QKVParallelLinear::__init__",
+        "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+        "nanovllm.layers.rotary_embedding.py::get_rope",
+        "nanovllm.layers.attention.py::Attention::__init__",
+        "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+        "nanovllm.layers.linear.py::divide",
+        "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::__init__"
+      ]
+    },
+    {
+      "name": "Qwen3DecoderLayer.__init__ Chain",
+      "description": "Call chain from Qwen3DecoderLayer.__init__",
+      "entry": "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+      "path": [
+        "nanovllm.models.qwen3.py::Qwen3DecoderLayer::__init__",
+        "nanovllm.models.qwen3.py::Qwen3Attention::__init__",
+        "nanovllm.models.qwen3.py::Qwen3MLP::__init__",
+        "nanovllm.layers.layernorm.py::RMSNorm::__init__",
+        "nanovllm.layers.linear.py::QKVParallelLinear::__init__",
+        "nanovllm.layers.linear.py::RowParallelLinear::__init__",
+        "nanovllm.layers.rotary_embedding.py::get_rope",
+        "nanovllm.layers.attention.py::Attention::__init__",
+        "nanovllm.layers.linear.py::MergedColumnParallelLinear::__init__",
+        "nanovllm.layers.linear.py::divide",
+        "nanovllm.layers.rotary_embedding.py::RotaryEmbedding::__init__"
       ]
     }
   ]
