@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "Rotary Position Embedding",
-            "explain": "Encode position by rotating vector pairs. Attention dot product then naturally encodes relative distance. No learned position embeddings needed."
+            "explain": "Encode position by rotating vector pairs. Attention dot product then naturally encodes relative distance. No learned position embeddings needed.",
+            "rationale": "Used here because: Transformers have no inherent position sense — RoPE injects position via rotation"
           },
           {
             "tag": "Complex Number Rotation",
-            "explain": "Treat pairs of dimensions as complex numbers. Multiply by e^(iθ) to rotate. Equivalent to 2D rotation matrix but more elegant."
+            "explain": "Treat pairs of dimensions as complex numbers. Multiply by e^(iθ) to rotate. Equivalent to 2D rotation matrix but more elegant.",
+            "rationale": "Used here because: Transformers have no inherent position sense — RoPE injects position via rotation"
           }
         ]
       }
@@ -51,7 +53,8 @@
         "teaches": [
           {
             "tag": "Frequency Precomputation",
-            "explain": "Compute expensive trig functions once at init, store as buffer. Forward pass is just a table lookup — O(1) vs O(n) per call."
+            "explain": "Compute expensive trig functions once at init, store as buffer. Forward pass is just a table lookup — O(1) vs O(n) per call.",
+            "rationale": "Computes cos/sin tables at initialization for fast lookup during forward pass"
           }
         ],
         "perf": "Precomputed tables avoid recomputing cos/sin every forward pass"
@@ -77,7 +80,8 @@
         "teaches": [
           {
             "tag": "Geometric Frequency Spacing",
-            "explain": "Lower dimensions rotate faster (high frequency), higher dimensions slower. Creates multi-scale position encoding."
+            "explain": "Lower dimensions rotate faster (high frequency), higher dimensions slower. Creates multi-scale position encoding.",
+            "rationale": "Creates geometric frequency sequence (θ_i = base^(-2i/d)) and precomputes cos/sin for max_position"
           }
         ]
       }
@@ -102,7 +106,8 @@
         "teaches": [
           {
             "tag": "Position-Indexed Lookup",
-            "explain": "Forward pass is just tensor indexing into precomputed tables. No computation — pure memory access. Maximum throughput."
+            "explain": "Forward pass is just tensor indexing into precomputed tables. No computation — pure memory access. Maximum throughput.",
+            "rationale": "Index into cos/sin tables with position indices"
           }
         ]
       }
@@ -127,7 +132,10 @@
         "teaches": [
           {
             "tag": "Factory Function",
-            "explain": "Function that creates and configures objects. Simpler than constructor when configuration comes from external sources (config dicts, files)."
+            "explain": "Function that creates and configures objects. Simpler than constructor when configuration comes from external sources (config dicts, files).",
+            "rationale": "Convenience constructor extracting rope parameters from model config dict",
+            "cross_lang": "Java static factory method, Rust ::new() convention, Go NewXxx() functions, TypeScript create functions",
+            "gotcha": "Over-abstracting with factories hides what's being created — use only when construction logic is non-trivial"
           }
         ]
       }

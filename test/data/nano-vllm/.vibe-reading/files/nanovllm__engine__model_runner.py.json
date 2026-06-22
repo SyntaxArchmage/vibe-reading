@@ -22,11 +22,15 @@
         "teaches": [
           {
             "tag": "Actor Pattern",
-            "explain": "Isolated process with own state. Communicates only via messages. No shared mutable state. Eliminates race conditions."
+            "explain": "Isolated process with own state. Communicates only via messages. No shared mutable state. Eliminates race conditions.",
+            "rationale": "Used here because: Isolates GPU execution from scheduling — avoids GIL contention",
+            "cross_lang": "Erlang/Elixir processes, Akka actors (Java/Scala), Go goroutines+channels, Rust actix",
+            "gotcha": "Unbounded mailbox/queue leads to OOM under pressure — always set capacity limits and back-pressure"
           },
           {
             "tag": "GIL Avoidance",
-            "explain": "Python GIL prevents true parallelism in threads. Separate process sidesteps GIL entirely. Required for CPU+GPU parallelism."
+            "explain": "Python GIL prevents true parallelism in threads. Separate process sidesteps GIL entirely. Required for CPU+GPU parallelism.",
+            "rationale": "Used here because: Isolates GPU execution from scheduling — avoids GIL contention"
           }
         ],
         "design": "Separate process avoids GIL; shared memory avoids serialization vs pipes",
@@ -55,7 +59,8 @@
         "teaches": [
           {
             "tag": "Heavy Initialization Pattern",
-            "explain": "Do all expensive work (model loading, GPU allocation) at startup. Runtime operations are then fast and predictable."
+            "explain": "Do all expensive work (model loading, GPU allocation) at startup. Runtime operations are then fast and predictable.",
+            "rationale": "Heavy initialization: loads checkpoint, creates model, allocates GPU buffers, connects shared memory"
           }
         ]
       }
@@ -80,7 +85,8 @@
         "teaches": [
           {
             "tag": "Cooperative Shutdown",
-            "explain": "Send termination signal, let process clean up its own resources (free GPU memory, close handles). Never force-kill if avoidable."
+            "explain": "Send termination signal, let process clean up its own resources (free GPU memory, close handles). Never force-kill if avoidable.",
+            "rationale": "Sends shutdown command via shared memory, waits for process cleanup"
           }
         ]
       }
@@ -105,7 +111,8 @@
         "teaches": [
           {
             "tag": "Event Loop Pattern",
-            "explain": "Infinite loop: poll for events → dispatch to handler → repeat. Foundation of servers, game engines, UI frameworks."
+            "explain": "Infinite loop: poll for events → dispatch to handler → repeat. Foundation of servers, game engines, UI frameworks.",
+            "rationale": "Infinite loop reading commands from shared memory"
           }
         ]
       }
@@ -130,7 +137,8 @@
         "teaches": [
           {
             "tag": "Shared Memory Protocol",
-            "explain": "Define fixed layout in shared memory: header (command type) + payload. Both processes agree on format. Zero-copy data exchange."
+            "explain": "Define fixed layout in shared memory: header (command type) + payload. Both processes agree on format. Zero-copy data exchange.",
+            "rationale": "Reads command type and payload from shared memory buffer"
           }
         ]
       }
@@ -155,7 +163,8 @@
         "teaches": [
           {
             "tag": "Zero-Copy IPC",
-            "explain": "Write directly to shared buffer. Reader accesses same physical memory. No serialization/deserialization, no copies. Fastest possible IPC."
+            "explain": "Write directly to shared buffer. Reader accesses same physical memory. No serialization/deserialization, no copies. Fastest possible IPC.",
+            "rationale": "Writes output tokens/logits to shared memory for scheduler to read"
           }
         ]
       }
@@ -180,7 +189,8 @@
         "teaches": [
           {
             "tag": "Synchronous RPC over Shared Memory",
-            "explain": "Write request → signal → wait for response. Looks like function call but executes in another process. Shared memory avoids copy overhead."
+            "explain": "Write request → signal → wait for response. Looks like function call but executes in another process. Shared memory avoids copy overhead.",
+            "rationale": "Writes command to shared memory, signals process, blocks until result ready"
           }
         ]
       }
@@ -205,7 +215,8 @@
         "teaches": [
           {
             "tag": "CUDA Warmup",
-            "explain": "First GPU operation triggers driver init, JIT compile, memory allocation. Run dummy input at startup so first real request isn not slow."
+            "explain": "First GPU operation triggers driver init, JIT compile, memory allocation. Run dummy input at startup so first real request isn not slow.",
+            "rationale": "First CUDA call is slow (context creation, JIT compilation)"
           }
         ]
       }
@@ -230,7 +241,8 @@
         "teaches": [
           {
             "tag": "GPU Memory Budgeting",
-            "explain": "Query available GPU memory, subtract model weights, divide remainder into KV cache blocks. Fixed budget prevents OOM during serving."
+            "explain": "Query available GPU memory, subtract model weights, divide remainder into KV cache blocks. Fixed budget prevents OOM during serving.",
+            "rationale": "Allocates fixed pool of GPU tensors for KV cache"
           }
         ]
       }
@@ -255,7 +267,8 @@
         "teaches": [
           {
             "tag": "Page Table Construction",
-            "explain": "Build indirection table mapping logical pages to physical addresses. Kernel uses table to find correct memory locations. Like OS page tables."
+            "explain": "Build indirection table mapping logical pages to physical addresses. Kernel uses table to find correct memory locations. Like OS page tables.",
+            "rationale": "Converts logical block indices to physical GPU addresses for paged attention kernel"
           }
         ]
       }
@@ -280,7 +293,8 @@
         "teaches": [
           {
             "tag": "Dynamic Batching with Padding",
-            "explain": "Variable-length inputs padded to max length in batch. Trades compute waste (padding) for parallelism benefit. Core inference optimization."
+            "explain": "Variable-length inputs padded to max length in batch. Trades compute waste (padding) for parallelism benefit. Core inference optimization.",
+            "rationale": "Packs variable-length prompts into one tensor with padding for batch GPU processing"
           }
         ]
       }
@@ -305,7 +319,8 @@
         "teaches": [
           {
             "tag": "Decode Batching",
-            "explain": "During generation, each sequence needs only 1 forward pass for 1 new token. Batch N sequences decode steps together for GPU efficiency."
+            "explain": "During generation, each sequence needs only 1 forward pass for 1 new token. Batch N sequences decode steps together for GPU efficiency.",
+            "rationale": "Each sequence contributes one token"
           }
         ]
       }
@@ -330,7 +345,8 @@
         "teaches": [
           {
             "tag": "Parameter Vectorization",
-            "explain": "Instead of per-item loops, collect parameters into tensors. GPU applies them in parallel across the batch."
+            "explain": "Instead of per-item loops, collect parameters into tensors. GPU applies them in parallel across the batch.",
+            "rationale": "Collects temperature and top_p values for each sequence in batch"
           }
         ]
       }
@@ -355,7 +371,8 @@
         "teaches": [
           {
             "tag": "Forward Pass Execution",
-            "explain": "Feed prepared input tensors through model. Output is logits tensor. The core computation step in each engine iteration."
+            "explain": "Feed prepared input tensors through model. Output is logits tensor. The core computation step in each engine iteration.",
+            "rationale": "Runs the actual neural network forward: embeddings → layers → logits"
           }
         ]
       }
@@ -380,7 +397,8 @@
         "teaches": [
           {
             "tag": "Inference Pipeline",
-            "explain": "prepare_inputs → model_forward → sample_tokens → return_results. Each step separated for profiling and optimization."
+            "explain": "prepare_inputs → model_forward → sample_tokens → return_results. Each step separated for profiling and optimization.",
+            "rationale": "Orchestrates one complete inference step for a batch of sequences"
           }
         ]
       }
@@ -405,7 +423,10 @@
         "teaches": [
           {
             "tag": "CUDA Graph Capture",
-            "explain": "Record sequence of GPU ops, then replay as single unit. CPU does not re-launch each kernel. Only works with fixed tensor shapes (decode, not prefill)."
+            "explain": "Record sequence of GPU ops, then replay as single unit. CPU does not re-launch each kernel. Only works with fixed tensor shapes (decode, not prefill).",
+            "rationale": "Used here because: CUDA graphs eliminate ~50% of decode latency by removing kernel launch overhead",
+            "cross_lang": "Metal command buffers (Apple), Vulkan command buffers, DirectX command lists, OpenCL command queues",
+            "gotcha": "Only works with fixed tensor shapes — dynamic shapes (variable-length prefill) cannot use graphs"
           }
         ],
         "design": "Only decode path (fixed batch size) can be graphed — prefill has variable shapes",

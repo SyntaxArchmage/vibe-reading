@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "Triton Kernel",
-            "explain": "Write GPU kernels in Python with Triton. Compiles to PTX. Easier than CUDA C but same performance for memory-bound ops."
+            "explain": "Write GPU kernels in Python with Triton. Compiles to PTX. Easier than CUDA C but same performance for memory-bound ops.",
+            "rationale": "Used here because: Custom kernel avoids Python overhead for the hottest operation in inference"
           },
           {
             "tag": "Paged KV Cache Write",
-            "explain": "Store K/V at block_table[block_idx][position]. Indirection enables non-contiguous memory without copying."
+            "explain": "Store K/V at block_table[block_idx][position]. Indirection enables non-contiguous memory without copying.",
+            "rationale": "Used here because: Custom kernel avoids Python overhead for the hottest operation in inference"
           }
         ],
         "perf": "Called every token for every layer — must be maximally optimized"
@@ -52,7 +54,8 @@
         "teaches": [
           {
             "tag": "Kernel Launch Pattern",
-            "explain": "Python sets grid/block dimensions and tensor pointers. Triton/CUDA kernel runs on GPU. Separation of orchestration from computation."
+            "explain": "Python sets grid/block dimensions and tensor pointers. Triton/CUDA kernel runs on GPU. Separation of orchestration from computation.",
+            "rationale": "Sets up grid dimensions and launches the Triton kernel with correct tensor pointers"
           }
         ]
       }
@@ -78,11 +81,15 @@
         "teaches": [
           {
             "tag": "Flash Attention",
-            "explain": "Tiled attention algorithm that never materializes full N×N attention matrix. O(N) memory instead of O(N²). Enabled by online softmax."
+            "explain": "Tiled attention algorithm that never materializes full N×N attention matrix. O(N) memory instead of O(N²). Enabled by online softmax.",
+            "rationale": "Used here because: Attention is the core operation in transformers — must handle variable-length cached KV efficiently",
+            "cross_lang": "Hardware-specific: CUDA (FlashAttention), Metal (MLX attention), no direct CPU equivalent",
+            "gotcha": "Requires specific GPU architectures (Ampere+). Custom attention masks may not be supported"
           },
           {
             "tag": "Paged KV Cache",
-            "explain": "K/V vectors stored in fixed-size blocks with indirection table. Avoids memory fragmentation for variable-length sequences."
+            "explain": "K/V vectors stored in fixed-size blocks with indirection table. Avoids memory fragmentation for variable-length sequences.",
+            "rationale": "Used here because: Attention is the core operation in transformers — must handle variable-length cached KV efficiently"
           }
         ],
         "design": "Prefill uses flash_attn (variable length); decode uses custom kernel (single query)"
@@ -108,7 +115,8 @@
         "teaches": [
           {
             "tag": "Attention Scaling",
-            "explain": "Divide QK^T by sqrt(head_dim) to prevent softmax saturation. Without scaling, dot products grow with dimension causing gradient vanishing."
+            "explain": "Divide QK^T by sqrt(head_dim) to prevent softmax saturation. Without scaling, dot products grow with dimension causing gradient vanishing.",
+            "rationale": "Sets num_heads, head_dim, scale=1/sqrt(d), and prepares for paged KV cache access"
           }
         ]
       }
@@ -133,7 +141,8 @@
         "teaches": [
           {
             "tag": "Prefill vs Decode Split",
-            "explain": "Prefill processes all prompt tokens at once (parallel). Decode generates one token at a time (sequential). Different kernels optimal for each."
+            "explain": "Prefill processes all prompt tokens at once (parallel). Decode generates one token at a time (sequential). Different kernels optimal for each.",
+            "rationale": "Writes new K/V to cache, then dispatches to flash_attn (prefill) or paged_attention (decode)"
           }
         ]
       }

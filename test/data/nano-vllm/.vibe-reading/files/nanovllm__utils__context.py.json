@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "Context Object Pattern",
-            "explain": "Bundle related state into one object passed through the call stack. Avoids threading 10+ parameters through every function."
+            "explain": "Bundle related state into one object passed through the call stack. Avoids threading 10+ parameters through every function.",
+            "rationale": "Used here because: Layers need shared state (positions, block tables) without threading it through every function signature"
           },
           {
             "tag": "Thread-Local Storage",
-            "explain": "Each thread gets its own copy of the variable. Enables per-request state in concurrent servers without locks."
+            "explain": "Each thread gets its own copy of the variable. Enables per-request state in concurrent servers without locks.",
+            "rationale": "Used here because: Layers need shared state (positions, block tables) without threading it through every function signature"
           }
         ]
       }
@@ -51,7 +53,8 @@
         "teaches": [
           {
             "tag": "Global Accessor",
-            "explain": "Module-level function returning shared state. Simpler than dependency injection for deeply nested access patterns."
+            "explain": "Module-level function returning shared state. Simpler than dependency injection for deeply nested access patterns.",
+            "rationale": "Returns the active Context object for this inference step"
           }
         ]
       }
@@ -76,7 +79,8 @@
         "teaches": [
           {
             "tag": "Context Lifecycle",
-            "explain": "Set at boundary (step start), read during processing, reset at end. Clear ownership prevents stale state bugs."
+            "explain": "Set at boundary (step start), read during processing, reset at end. Clear ownership prevents stale state bugs.",
+            "rationale": "Called at step start to establish context"
           }
         ]
       }
@@ -101,7 +105,8 @@
         "teaches": [
           {
             "tag": "Explicit Cleanup",
-            "explain": "Always reset shared state after use. Prevents one requests state from leaking into the next. Defense against subtle bugs."
+            "explain": "Always reset shared state after use. Prevents one requests state from leaking into the next. Defense against subtle bugs.",
+            "rationale": "Ensures no stale state leaks between inference steps"
           }
         ]
       }

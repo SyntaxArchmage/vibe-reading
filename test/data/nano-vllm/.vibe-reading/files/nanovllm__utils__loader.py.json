@@ -21,7 +21,10 @@
         "teaches": [
           {
             "tag": "Strategy Pattern",
-            "explain": "Define family of algorithms (weight loading strategies), make them interchangeable. Default strategy is simple copy; parallel layers override with shard logic."
+            "explain": "Define family of algorithms (weight loading strategies), make them interchangeable. Default strategy is simple copy; parallel layers override with shard logic.",
+            "rationale": "Default strategy: direct copy",
+            "cross_lang": "Java interfaces + dependency injection, Rust trait objects / generics, Go interfaces, TypeScript type parameter",
+            "gotcha": "Too many strategies with nearly identical code — consider template method or parameterization instead"
           }
         ]
       }
@@ -46,7 +49,8 @@
         "teaches": [
           {
             "tag": "Weight Loading Pipeline",
-            "explain": "Open checkpoint → iterate saved tensors → find matching parameter by name → call layer-specific loader. Decouples storage format from model structure."
+            "explain": "Open checkpoint → iterate saved tensors → find matching parameter by name → call layer-specific loader. Decouples storage format from model structure.",
+            "rationale": "Iterates checkpoint tensors, matches to model parameters, calls each layers weight_loader"
           }
         ]
       }

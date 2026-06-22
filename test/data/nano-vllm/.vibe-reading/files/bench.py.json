@@ -21,7 +21,10 @@
         "teaches": [
           {
             "tag": "Benchmarking Pattern",
-            "explain": "Warmup runs → timed runs → compute mean/std of metrics. Always warmup to avoid measuring one-time costs (JIT, cache cold starts)."
+            "explain": "Warmup runs → timed runs → compute mean/std of metrics. Always warmup to avoid measuring one-time costs (JIT, cache cold starts).",
+            "rationale": "Runs generation with timing to report tokens/second and latency metrics",
+            "cross_lang": "Rust criterion crate, Go testing.B, Java JMH, C++ Google Benchmark",
+            "gotcha": "Without warmup, JIT/cache effects make first runs artificially slow — always discard initial iterations"
           }
         ]
       }

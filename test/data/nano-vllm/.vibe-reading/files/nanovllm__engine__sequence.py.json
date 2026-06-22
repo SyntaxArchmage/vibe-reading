@@ -116,7 +116,8 @@
         "teaches": [
           {
             "tag": "__len__ Protocol",
-            "explain": "Implement __len__ to make class work with len(). Part of Python sized protocol. Enables intuitive API for collection-like objects."
+            "explain": "Implement __len__ to make class work with len(). Part of Python sized protocol. Enables intuitive API for collection-like objects.",
+            "rationale": "Enables len(sequence) syntax"
           }
         ]
       }
@@ -141,7 +142,8 @@
         "teaches": [
           {
             "tag": "__getitem__ Protocol",
-            "explain": "Implement __getitem__ for indexing syntax obj[i]. Part of sequence protocol. Can also enable iteration and slicing."
+            "explain": "Implement __getitem__ for indexing syntax obj[i]. Part of sequence protocol. Can also enable iteration and slicing.",
+            "rationale": "Enables sequence[i] syntax for token access"
           }
         ]
       }
@@ -166,7 +168,8 @@
         "teaches": [
           {
             "tag": "Predicate Method",
-            "explain": "Method returning bool that encapsulates a business-logic check. Centralizes condition rather than repeating enum checks."
+            "explain": "Method returning bool that encapsulates a business-logic check. Centralizes condition rather than repeating enum checks.",
+            "rationale": "Returns True if status is any FINISHED_ variant"
           }
         ]
       }
@@ -191,7 +194,10 @@
         "teaches": [
           {
             "tag": "Property Decorator",
-            "explain": "@property makes method accessible as attribute. Computed on access, not stored. Keeps derived values always consistent with source."
+            "explain": "@property makes method accessible as attribute. Computed on access, not stored. Keeps derived values always consistent with source.",
+            "rationale": "Computed property: total length minus prompt length",
+            "cross_lang": "C# properties (get/set), Kotlin var with custom getter, Ruby attr_accessor, Java getter/setter",
+            "gotcha": "Heavy computation in a property looks like attribute access — callers wont expect it to be slow"
           }
         ]
       }
@@ -216,7 +222,8 @@
         "teaches": [
           {
             "tag": "View vs Copy Semantics",
-            "explain": "List slicing in Python creates a copy. For large sequences, consider memoryview or numpy views to avoid copying."
+            "explain": "List slicing in Python creates a copy. For large sequences, consider memoryview or numpy views to avoid copying.",
+            "rationale": "Slice returning tokens[0:prompt_len]"
           }
         ]
       }
@@ -241,7 +248,8 @@
         "teaches": [
           {
             "tag": "Slice Notation",
-            "explain": "list[start:end] extracts sub-sequence. Omit start for 0, omit end for len. Negative indices count from end."
+            "explain": "list[start:end] extracts sub-sequence. Omit start for 0, omit end for len. Negative indices count from end.",
+            "rationale": "Slice returning tokens[prompt_len:]"
           }
         ]
       }
@@ -266,7 +274,8 @@
         "teaches": [
           {
             "tag": "Ceiling Division",
-            "explain": "-(-a // b) or math.ceil(a/b). Computes how many fixed-size blocks needed to hold variable-size content."
+            "explain": "-(-a // b) or math.ceil(a/b). Computes how many fixed-size blocks needed to hold variable-size content.",
+            "rationale": "Ceiling division of total tokens by block size"
           }
         ]
       }
@@ -291,7 +300,8 @@
         "teaches": [
           {
             "tag": "Modulo for Partial Fill",
-            "explain": "n % block_size gives fill level of last block. If 0, block is full (use block_size). Common in paged/chunked systems."
+            "explain": "n % block_size gives fill level of last block. If 0, block is full (use block_size). Common in paged/chunked systems.",
+            "rationale": "total_tokens % block_size, or block_size if exactly full"
           }
         ]
       }
@@ -316,7 +326,8 @@
         "teaches": [
           {
             "tag": "Position to Block Mapping",
-            "explain": "block_index = position // block_size. Fundamental operation in any paged/blocked memory system. O(1) mapping."
+            "explain": "block_index = position // block_size. Fundamental operation in any paged/blocked memory system. O(1) mapping.",
+            "rationale": "Maps token position to its containing block: position // block_size"
           }
         ]
       }
@@ -342,7 +353,8 @@
         "teaches": [
           {
             "tag": "Autoregressive Generation",
-            "explain": "Model generates one token per step, using all previous tokens as context. Append loop continues until stop condition."
+            "explain": "Model generates one token per step, using all previous tokens as context. Append loop continues until stop condition.",
+            "rationale": "Used here because: Token-by-token autoregressive generation — each step adds exactly one token"
           }
         ],
         "perf": "Called once per token per sequence per step — must be O(1)"
@@ -368,7 +380,8 @@
         "teaches": [
           {
             "tag": "Custom Pickling",
-            "explain": "__getstate__ controls serialization. Return dict of what to save. Exclude file handles, locks, GPU tensors that cant be pickled."
+            "explain": "__getstate__ controls serialization. Return dict of what to save. Exclude file handles, locks, GPU tensors that cant be pickled.",
+            "rationale": "Controls what gets serialized when sequence is pickled (for preemption/migration)"
           }
         ]
       }
@@ -393,7 +406,8 @@
         "teaches": [
           {
             "tag": "__setstate__ Restoration",
-            "explain": "Counterpart to __getstate__. Receives saved dict, must reconstruct full object. Re-initialize transient resources (connections, caches)."
+            "explain": "Counterpart to __getstate__. Receives saved dict, must reconstruct full object. Re-initialize transient resources (connections, caches).",
+            "rationale": "Restores sequence from pickled state, re-initializes transient fields"
           }
         ]
       }

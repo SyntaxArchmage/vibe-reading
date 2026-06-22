@@ -21,7 +21,10 @@
         "teaches": [
           {
             "tag": "Facade Pattern",
-            "explain": "Single interface wrapping complex subsystem. User calls one method; internally coordinates multiple components. Reduces coupling."
+            "explain": "Single interface wrapping complex subsystem. User calls one method; internally coordinates multiple components. Reduces coupling.",
+            "rationale": "Used here because: User needs one simple interface, not knowledge of Scheduler + ModelRunner + BlockManager internals",
+            "cross_lang": "Java Spring @Service classes, Go handler structs, TypeScript service classes, Rust public module API",
+            "gotcha": "Facade can become a God Object if it accumulates too many responsibilities — split by domain"
           }
         ],
         "design": "Synchronous generate() wraps async step loop for API simplicity",
@@ -49,7 +52,10 @@
         "teaches": [
           {
             "tag": "Composition over Inheritance",
-            "explain": "Build complex objects by composing simpler ones as fields. Each sub-component has single responsibility. Easier to test and replace."
+            "explain": "Build complex objects by composing simpler ones as fields. Each sub-component has single responsibility. Easier to test and replace.",
+            "rationale": "Creates and connects Scheduler, BlockManager, ModelRunner",
+            "cross_lang": "Go interfaces + embedding, Rust traits + composition, TypeScript interfaces + mixins, Java delegation",
+            "gotcha": "Too much composition leads to 'lasagna code' — many thin layers that are hard to trace through"
           }
         ]
       }
@@ -74,7 +80,8 @@
         "teaches": [
           {
             "tag": "Graceful Shutdown",
-            "explain": "Notify sub-processes/threads to stop, wait for completion, then release resources. Prevents zombie processes and resource leaks."
+            "explain": "Notify sub-processes/threads to stop, wait for completion, then release resources. Prevents zombie processes and resource leaks.",
+            "rationale": "Sends exit command to ModelRunner process, waits for termination"
           }
         ]
       }
@@ -99,7 +106,8 @@
         "teaches": [
           {
             "tag": "Request Queue Pattern",
-            "explain": "Decouple submission from execution. Caller submits to queue, engine processes when resources available. Enables batching and flow control."
+            "explain": "Decouple submission from execution. Caller submits to queue, engine processes when resources available. Enables batching and flow control.",
+            "rationale": "Creates Sequence from prompt tokens and sampling params, adds to scheduler queue"
           }
         ]
       }
@@ -124,7 +132,8 @@
         "teaches": [
           {
             "tag": "Step-Based Engine Loop",
-            "explain": "Break continuous processing into discrete steps. Each step: schedule, execute, update. Enables batching across requests within one step."
+            "explain": "Break continuous processing into discrete steps. Each step: schedule, execute, update. Enables batching across requests within one step.",
+            "rationale": "Schedule → prepare inputs → model forward → sample → update sequences"
           }
         ]
       }
@@ -149,7 +158,8 @@
         "teaches": [
           {
             "tag": "Completion Predicate",
-            "explain": "Poll-based completion check. Caller loops calling step() until is_finished(). Simple synchronous API over async internals."
+            "explain": "Poll-based completion check. Caller loops calling step() until is_finished(). Simple synchronous API over async internals.",
+            "rationale": "Returns True when scheduler has no waiting or running sequences"
           }
         ]
       }
@@ -174,7 +184,8 @@
         "teaches": [
           {
             "tag": "Synchronous Wrapper",
-            "explain": "Wrap async/step-based internals with blocking API. Simpler for users who dont need streaming. Hides the step loop."
+            "explain": "Wrap async/step-based internals with blocking API. Simpler for users who dont need streaming. Hides the step loop.",
+            "rationale": "Convenience API: adds request, repeatedly calls step(), returns results when finished"
           }
         ]
       }

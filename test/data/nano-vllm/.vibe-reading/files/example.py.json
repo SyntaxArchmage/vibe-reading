@@ -21,7 +21,10 @@
         "teaches": [
           {
             "tag": "Example-Driven Documentation",
-            "explain": "A working minimal example teaches more than pages of docs. Show the happy path first, explain edge cases later."
+            "explain": "A working minimal example teaches more than pages of docs. Show the happy path first, explain edge cases later.",
+            "rationale": "Shows simplest possible usage: create LLM, call generate, print result",
+            "cross_lang": "Rust doc tests (run in CI), Go Example functions, Python doctest, Java JUnit as docs",
+            "gotcha": "Examples rot when code changes — only CI-tested examples stay accurate"
           }
         ]
       }

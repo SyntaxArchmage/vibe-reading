@@ -21,11 +21,15 @@
         "teaches": [
           {
             "tag": "API Gateway Class",
-            "explain": "Simplest possible interface for end users. Hides tokenization, batching, scheduling complexity. One method: generate(prompt) → text."
+            "explain": "Simplest possible interface for end users. Hides tokenization, batching, scheduling complexity. One method: generate(prompt) → text.",
+            "rationale": "High-level interface wrapping LLMEngine"
           },
           {
             "tag": "Facade Pattern",
-            "explain": "Single entry point wrapping multiple subsystems. User doesnt need to know about Engine, Scheduler, or ModelRunner."
+            "explain": "Single entry point wrapping multiple subsystems. User doesnt need to know about Engine, Scheduler, or ModelRunner.",
+            "rationale": "High-level interface wrapping LLMEngine",
+            "cross_lang": "Java Spring @Service classes, Go handler structs, TypeScript service classes, Rust public module API",
+            "gotcha": "Facade can become a God Object if it accumulates too many responsibilities — split by domain"
           }
         ]
       }

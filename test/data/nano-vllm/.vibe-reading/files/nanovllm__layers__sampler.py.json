@@ -21,11 +21,13 @@
         "teaches": [
           {
             "tag": "Temperature Scaling",
-            "explain": "Divide logits by temperature before softmax. T<1 = sharper (more deterministic). T>1 = flatter (more random). T=0 = argmax."
+            "explain": "Divide logits by temperature before softmax. T<1 = sharper (more deterministic). T>1 = flatter (more random). T=0 = argmax.",
+            "rationale": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution"
           },
           {
             "tag": "Top-p (Nucleus) Sampling",
-            "explain": "Sort by probability, keep smallest set whose cumulative probability ≥ p. Dynamically adjusts candidate pool size."
+            "explain": "Sort by probability, keep smallest set whose cumulative probability ≥ p. Dynamically adjusts candidate pool size.",
+            "rationale": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution"
           }
         ]
       }
@@ -50,7 +52,8 @@
         "teaches": [
           {
             "tag": "Multinomial Sampling",
-            "explain": "Draw from categorical distribution defined by probabilities. torch.multinomial samples indices weighted by input probabilities."
+            "explain": "Draw from categorical distribution defined by probabilities. torch.multinomial samples indices weighted by input probabilities.",
+            "rationale": "Pipeline: logits → temperature scale → softmax → top-p mask → multinomial sample → token ID"
           }
         ]
       }

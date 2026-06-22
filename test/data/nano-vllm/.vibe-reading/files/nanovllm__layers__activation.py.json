@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "SiLU (Swish) Activation",
-            "explain": "SiLU(x) = x * sigmoid(x). Smooth, non-monotonic. Outperforms ReLU in practice. Self-gated: no separate gate needed."
+            "explain": "SiLU(x) = x * sigmoid(x). Smooth, non-monotonic. Outperforms ReLU in practice. Self-gated: no separate gate needed.",
+            "rationale": "Used here because: Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard"
           },
           {
             "tag": "Gated Linear Unit",
-            "explain": "Output = activation(Wx) * Vy. The gate branch (Wx) controls information flow. Better gradient flow than plain activation."
+            "explain": "Output = activation(Wx) * Vy. The gate branch (Wx) controls information flow. Better gradient flow than plain activation.",
+            "rationale": "Used here because: Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard"
           }
         ]
       }
@@ -51,7 +53,8 @@
         "teaches": [
           {
             "tag": "Tensor Chunking",
-            "explain": "torch.chunk splits tensor into N equal parts along a dimension. Efficient way to separate fused computations without copying."
+            "explain": "torch.chunk splits tensor into N equal parts along a dimension. Efficient way to separate fused computations without copying.",
+            "rationale": "Splits fused [gate, value] tensor along last dim, applies SiLU to gate, multiplies with value"
           }
         ]
       }

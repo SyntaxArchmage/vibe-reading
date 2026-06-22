@@ -22,11 +22,15 @@
         "teaches": [
           {
             "tag": "Continuous Batching",
-            "explain": "Add new requests to running batch mid-generation. No waiting for entire batch to finish. Maximizes GPU utilization."
+            "explain": "Add new requests to running batch mid-generation. No waiting for entire batch to finish. Maximizes GPU utilization.",
+            "rationale": "Used here because: Multiple requests compete for limited GPU memory — need policy to decide who runs",
+            "cross_lang": "No direct equivalent — LLM serving specific. Conceptually similar to OS process scheduling",
+            "gotcha": "Preemption priority must be carefully tuned — aggressive preemption wastes computed tokens"
           },
           {
             "tag": "Preemption",
-            "explain": "Forcibly pause running task to free resources for others. Preempted task re-queued. Prevents starvation."
+            "explain": "Forcibly pause running task to free resources for others. Preempted task re-queued. Prevents starvation.",
+            "rationale": "Used here because: Multiple requests compete for limited GPU memory — need policy to decide who runs"
           }
         ],
         "design": "Two deques rather than priority queue — preemption needs O(1) removal of specific sequence",
@@ -55,7 +59,8 @@
         "teaches": [
           {
             "tag": "Double-Ended Queue",
-            "explain": "O(1) append/pop from both ends. Perfect for FCFS (append right, pop left) with preemption (append left for priority re-queue)."
+            "explain": "O(1) append/pop from both ends. Perfect for FCFS (append right, pop left) with preemption (append left for priority re-queue).",
+            "rationale": "Two deques: waiting (submitted, not yet scheduled) and running (actively generating)"
           }
         ]
       }
@@ -80,7 +85,8 @@
         "teaches": [
           {
             "tag": "Drain Condition",
-            "explain": "System is done when all queues are empty. Simple but must check ALL queues — easy to miss one."
+            "explain": "System is done when all queues are empty. Simple but must check ALL queues — easy to miss one.",
+            "rationale": "True when both waiting and running deques are empty"
           }
         ]
       }
@@ -105,7 +111,8 @@
         "teaches": [
           {
             "tag": "Enqueue Pattern",
-            "explain": "Append to queue tail. Processing order determined by queue discipline (here: FCFS). Decouples arrival from execution."
+            "explain": "Append to queue tail. Processing order determined by queue discipline (here: FCFS). Decouples arrival from execution.",
+            "rationale": "Adds sequence to back of waiting queue"
           }
         ]
       }
@@ -130,7 +137,10 @@
         "teaches": [
           {
             "tag": "Greedy Scheduling",
-            "explain": "Process requests front-to-back, allocate greedily. Simple but may not be globally optimal. Good enough for latency-sensitive inference."
+            "explain": "Process requests front-to-back, allocate greedily. Simple but may not be globally optimal. Good enough for latency-sensitive inference.",
+            "rationale": "Used here because: Must decide which sequences advance this step by checking block availability",
+            "cross_lang": "OS CPU scheduler (CFS), Go goroutine scheduler, Java ForkJoinPool work stealing",
+            "gotcha": "Greedy can starve long-running requests — need fairness bounds or priority aging"
           }
         ],
         "design": "Processes waiting front-to-back for fairness; separates prefill from decode",
@@ -158,7 +168,8 @@
         "teaches": [
           {
             "tag": "Resource Reclamation",
-            "explain": "Free resources from lower-priority work to serve higher-priority or new work. The running sequence loses its KV cache and must recompute."
+            "explain": "Free resources from lower-priority work to serve higher-priority or new work. The running sequence loses its KV cache and must recompute.",
+            "rationale": "Moves sequence from running back to waiting, deallocates its blocks"
           }
         ]
       }
@@ -183,7 +194,8 @@
         "teaches": [
           {
             "tag": "Post-Processing Sweep",
-            "explain": "After main logic, sweep to clean up completed items. Separate from main loop for clarity. Common pattern in game loops and engines."
+            "explain": "After main logic, sweep to clean up completed items. Separate from main loop for clarity. Common pattern in game loops and engines.",
+            "rationale": "Cleans up completed sequences, deallocates their blocks, updates prefix cache"
           }
         ]
       }

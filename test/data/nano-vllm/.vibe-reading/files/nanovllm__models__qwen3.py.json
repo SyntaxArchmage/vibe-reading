@@ -21,11 +21,13 @@
         "teaches": [
           {
             "tag": "Multi-Head Attention",
-            "explain": "Split representation into H heads, compute attention independently per head, concatenate. Each head learns different relationship patterns."
+            "explain": "Split representation into H heads, compute attention independently per head, concatenate. Each head learns different relationship patterns.",
+            "rationale": "Core attention layer"
           },
           {
             "tag": "Grouped Query Attention",
-            "explain": "Share K/V heads across multiple Q heads (e.g., 8 Q heads per 1 KV head). Reduces KV cache size without significant quality loss."
+            "explain": "Share K/V heads across multiple Q heads (e.g., 8 Q heads per 1 KV head). Reduces KV cache size without significant quality loss.",
+            "rationale": "Core attention layer"
           }
         ]
       }
@@ -50,7 +52,8 @@
         "teaches": [
           {
             "tag": "Head Dimension",
-            "explain": "hidden_size / num_heads = head_dim. Each head operates on head_dim dimensions independently. Typical: 128."
+            "explain": "hidden_size / num_heads = head_dim. Each head operates on head_dim dimensions independently. Typical: 128.",
+            "rationale": "Creates Q/K/V projections (fused), output projection, and rotary embedding"
           }
         ]
       }
@@ -75,7 +78,8 @@
         "teaches": [
           {
             "tag": "Attention Forward Pipeline",
-            "explain": "Q,K,V = project(x) → apply RoPE to Q,K → store K,V in cache → attention(Q, cached_K, cached_V) → project output."
+            "explain": "Q,K,V = project(x) → apply RoPE to Q,K → store K,V in cache → attention(Q, cached_K, cached_V) → project output.",
+            "rationale": "QKV projection → RoPE → store KV cache → attention → output projection"
           }
         ]
       }
@@ -100,7 +104,8 @@
         "teaches": [
           {
             "tag": "SwiGLU MLP",
-            "explain": "gate = SiLU(W_gate @ x); output = (gate * W_up @ x) @ W_down. Gated activation improves over plain FFN. Standard in modern LLMs."
+            "explain": "gate = SiLU(W_gate @ x); output = (gate * W_up @ x) @ W_down. Gated activation improves over plain FFN. Standard in modern LLMs.",
+            "rationale": "Two-stage MLP: fused gate+up projection → SiLU activation with gating → down projection"
           }
         ]
       }
@@ -125,7 +130,8 @@
         "teaches": [
           {
             "tag": "MLP Parallelism Strategy",
-            "explain": "First linear: column-parallel (no communication). Activation: local. Second linear: row-parallel (all-reduce after). One all-reduce per MLP."
+            "explain": "First linear: column-parallel (no communication). Activation: local. Second linear: row-parallel (all-reduce after). One all-reduce per MLP.",
+            "rationale": "MergedColumnParallel for gate+up, RowParallel for down"
           }
         ]
       }
@@ -150,7 +156,8 @@
         "teaches": [
           {
             "tag": "Gated MLP Forward",
-            "explain": "x → merged(gate,up) → chunk → SiLU(gate)*up → down_proj. The gating controls information flow through the MLP."
+            "explain": "x → merged(gate,up) → chunk → SiLU(gate)*up → down_proj. The gating controls information flow through the MLP.",
+            "rationale": "Fused gate_up matmul, split and apply SiLU*gate, then down projection with all-reduce"
           }
         ]
       }
@@ -175,11 +182,13 @@
         "teaches": [
           {
             "tag": "Pre-Norm Architecture",
-            "explain": "Apply LayerNorm before (not after) attention/MLP. Stabilizes training. Used by GPT-2+, LLaMA, Qwen, most modern LLMs."
+            "explain": "Apply LayerNorm before (not after) attention/MLP. Stabilizes training. Used by GPT-2+, LLaMA, Qwen, most modern LLMs.",
+            "rationale": "LayerNorm → Attention → residual → LayerNorm → MLP → residual"
           },
           {
             "tag": "Residual Connection",
-            "explain": "output = layer(x) + x. Gradient flows directly through addition. Enables training of very deep networks (100+ layers)."
+            "explain": "output = layer(x) + x. Gradient flows directly through addition. Enables training of very deep networks (100+ layers).",
+            "rationale": "LayerNorm → Attention → residual → LayerNorm → MLP → residual"
           }
         ]
       }
@@ -204,7 +213,8 @@
         "teaches": [
           {
             "tag": "Module Composition",
-            "explain": "Complex layers built by composing simpler nn.Modules. Each sub-module manages its own parameters. Clean separation of concerns."
+            "explain": "Complex layers built by composing simpler nn.Modules. Each sub-module manages its own parameters. Clean separation of concerns.",
+            "rationale": "Creates self_attn, mlp, input_layernorm, post_attention_layernorm as submodules"
           }
         ]
       }
@@ -229,7 +239,8 @@
         "teaches": [
           {
             "tag": "Transformer Block Forward",
-            "explain": "h = x + attn(norm(x)); output = h + mlp(norm(h)). Two residual streams. Each sub-layer adds to the residual."
+            "explain": "h = x + attn(norm(x)); output = h + mlp(norm(h)). Two residual streams. Each sub-layer adds to the residual.",
+            "rationale": "Standard transformer block forward: norm, attend, add residual, norm, MLP, add residual"
           }
         ]
       }
@@ -254,7 +265,8 @@
         "teaches": [
           {
             "tag": "Model vs Head Separation",
-            "explain": "Model = embedding + layers + norm (reusable backbone). Head = task-specific output layer. Separation enables weight sharing and fine-tuning flexibility."
+            "explain": "Model = embedding + layers + norm (reusable backbone). Head = task-specific output layer. Separation enables weight sharing and fine-tuning flexibility.",
+            "rationale": "Composes embedding + N decoder layers + final norm"
           }
         ]
       }
@@ -279,7 +291,8 @@
         "teaches": [
           {
             "tag": "nn.ModuleList",
-            "explain": "Ordered list of modules. Unlike Python list, properly registers sub-modules for parameter tracking, serialization, and device placement."
+            "explain": "Ordered list of modules. Unlike Python list, properly registers sub-modules for parameter tracking, serialization, and device placement.",
+            "rationale": "Creates ModuleList of decoder layers, plus embedding and final RMSNorm"
           }
         ]
       }
@@ -304,7 +317,8 @@
         "teaches": [
           {
             "tag": "Sequential Layer Processing",
-            "explain": "Each layer transforms hidden state in place. Output shape identical to input. Enables arbitrary depth without architecture changes."
+            "explain": "Each layer transforms hidden state in place. Output shape identical to input. Enables arbitrary depth without architecture changes.",
+            "rationale": "tokens → embedding → layer[0] → layer[1] →"
           }
         ]
       }
@@ -329,7 +343,8 @@
         "teaches": [
           {
             "tag": "Causal Language Model",
-            "explain": "Predicts next token given all previous tokens. Unidirectional attention mask ensures each position only sees past. Foundation of GPT-style models."
+            "explain": "Predicts next token given all previous tokens. Unidirectional attention mask ensures each position only sees past. Foundation of GPT-style models.",
+            "rationale": "Wraps Qwen3Model with parallel LM head"
           }
         ]
       }
@@ -354,7 +369,8 @@
         "teaches": [
           {
             "tag": "Model Architecture Composition",
-            "explain": "CausalLM = backbone(embed + layers + norm) + head(logits). Clean two-level hierarchy."
+            "explain": "CausalLM = backbone(embed + layers + norm) + head(logits). Clean two-level hierarchy.",
+            "rationale": "Creates Qwen3Model + ParallelLMHead"
           }
         ]
       }
@@ -379,7 +395,8 @@
         "teaches": [
           {
             "tag": "Full Forward Pipeline",
-            "explain": "input_ids → backbone.forward() → hidden_states → compute_logits() → vocabulary scores. End-to-end differentiable."
+            "explain": "input_ids → backbone.forward() → hidden_states → compute_logits() → vocabulary scores. End-to-end differentiable.",
+            "rationale": "Runs backbone to get hidden states, then computes logits for sampling"
           }
         ]
       }
@@ -404,7 +421,8 @@
         "teaches": [
           {
             "tag": "Selective Logit Computation",
-            "explain": "During generation, only the last token position needs logits. Skip computing logits for cached positions. Saves one full vocab-size matmul per cached token."
+            "explain": "During generation, only the last token position needs logits. Skip computing logits for cached positions. Saves one full vocab-size matmul per cached token.",
+            "rationale": "Applies LM head to hidden states"
           }
         ]
       }

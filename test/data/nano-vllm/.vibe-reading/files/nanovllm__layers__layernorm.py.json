@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "RMSNorm vs LayerNorm",
-            "explain": "LayerNorm: subtract mean, divide by std. RMSNorm: just divide by RMS (root mean square). Saves the mean computation. Works equally well in practice."
+            "explain": "LayerNorm: subtract mean, divide by std. RMSNorm: just divide by RMS (root mean square). Saves the mean computation. Works equally well in practice.",
+            "rationale": "Used here because: RMSNorm is standard in modern LLMs (LLaMA, Qwen) — simpler and faster than full LayerNorm"
           },
           {
             "tag": "Normalization Purpose",
-            "explain": "Prevents activations from growing/shrinking across layers. Stabilizes training. Enables higher learning rates."
+            "explain": "Prevents activations from growing/shrinking across layers. Stabilizes training. Enables higher learning rates.",
+            "rationale": "Used here because: RMSNorm is standard in modern LLMs (LLaMA, Qwen) — simpler and faster than full LayerNorm"
           }
         ]
       }
@@ -51,7 +53,8 @@
         "teaches": [
           {
             "tag": "Learnable Scale",
-            "explain": "After normalizing to unit RMS, multiply by learnable weight. Allows network to undo normalization where needed. Per-dimension scaling."
+            "explain": "After normalizing to unit RMS, multiply by learnable weight. Allows network to undo normalization where needed. Per-dimension scaling.",
+            "rationale": "Creates weight parameter (scale) initialized to ones"
           }
         ]
       }
@@ -76,7 +79,8 @@
         "teaches": [
           {
             "tag": "RMS Computation",
-            "explain": "RMS = sqrt(mean(x²)). Normalize: x_norm = x / RMS. Simpler than std (no mean subtraction needed). Numerically stable with epsilon."
+            "explain": "RMS = sqrt(mean(x²)). Normalize: x_norm = x / RMS. Simpler than std (no mean subtraction needed). Numerically stable with epsilon.",
+            "rationale": "Compute x / sqrt(mean(x²) + eps) * weight"
           }
         ]
       }
@@ -101,7 +105,8 @@
         "teaches": [
           {
             "tag": "Fused Residual + Norm",
-            "explain": "Combine residual add and normalization into one kernel. Reads input once instead of twice. Saves memory bandwidth — the bottleneck for normalization ops."
+            "explain": "Combine residual add and normalization into one kernel. Reads input once instead of twice. Saves memory bandwidth — the bottleneck for normalization ops.",
+            "rationale": "Combines x = x + residual and normalization in one pass"
           }
         ],
         "perf": "Memory-bandwidth bound op — fusion halves memory traffic"
@@ -127,7 +132,8 @@
         "teaches": [
           {
             "tag": "Conditional Dispatch",
-            "explain": "Choose optimized code path based on runtime conditions. Fused kernel when possible, fallback otherwise. Common optimization strategy."
+            "explain": "Choose optimized code path based on runtime conditions. Fused kernel when possible, fallback otherwise. Common optimization strategy.",
+            "rationale": "If residual tensor provided, uses fused path"
           }
         ]
       }

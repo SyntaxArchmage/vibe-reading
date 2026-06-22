@@ -22,11 +22,13 @@
         "teaches": [
           {
             "tag": "Vocabulary Sharding",
-            "explain": "Divide vocab across GPUs. Each handles tokens in its range. All-reduce combines results. Distributes memory evenly."
+            "explain": "Divide vocab across GPUs. Each handles tokens in its range. All-reduce combines results. Distributes memory evenly.",
+            "rationale": "Used here because: Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs"
           },
           {
             "tag": "Embedding Table",
-            "explain": "Lookup table mapping discrete token IDs to dense vectors. Foundation of all NLP — converts symbolic input to continuous representation."
+            "explain": "Lookup table mapping discrete token IDs to dense vectors. Foundation of all NLP — converts symbolic input to continuous representation.",
+            "rationale": "Used here because: Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs"
           }
         ]
       }
@@ -51,7 +53,8 @@
         "teaches": [
           {
             "tag": "Range Partitioning",
-            "explain": "Divide ID space into contiguous ranges per device. Device k handles IDs [k*chunk, (k+1)*chunk). Simple and cache-friendly."
+            "explain": "Divide ID space into contiguous ranges per device. Device k handles IDs [k*chunk, (k+1)*chunk). Simple and cache-friendly.",
+            "rationale": "Calculates start/end token indices this device is responsible for"
           }
         ]
       }
@@ -76,7 +79,8 @@
         "teaches": [
           {
             "tag": "Selective Weight Loading",
-            "explain": "Only load the rows this device needs from checkpoint. Reduces peak memory during loading by num_devices×."
+            "explain": "Only load the rows this device needs from checkpoint. Reduces peak memory during loading by num_devices×.",
+            "rationale": "Extracts rows from checkpoint corresponding to this GPU token range"
           }
         ]
       }
@@ -101,7 +105,8 @@
         "teaches": [
           {
             "tag": "Masked Embedding Lookup",
-            "explain": "Set out-of-range indices to 0 before lookup (returns zero vector). After all-reduce, each token gets its correct embedding from the owning device."
+            "explain": "Set out-of-range indices to 0 before lookup (returns zero vector). After all-reduce, each token gets its correct embedding from the owning device.",
+            "rationale": "Masks tokens outside local range to 0, does embedding lookup, then all-reduce across devices"
           }
         ]
       }
@@ -126,7 +131,8 @@
         "teaches": [
           {
             "tag": "Weight Tying",
-            "explain": "Share same weight between input embedding and output projection. Halves parameters for vocabulary. Common in LLMs."
+            "explain": "Share same weight between input embedding and output projection. Halves parameters for vocabulary. Common in LLMs.",
+            "rationale": "Projects hidden states to vocabulary logits"
           }
         ]
       }
@@ -151,7 +157,8 @@
         "teaches": [
           {
             "tag": "Parameter Sharing",
-            "explain": "Multiple layers reference same nn.Parameter. Saves memory. Gradients summed during backprop."
+            "explain": "Multiple layers reference same nn.Parameter. Saves memory. Gradients summed during backprop.",
+            "rationale": "Can reuse embedding weights directly or create separate sharded weight matrix"
           }
         ]
       }
@@ -176,7 +183,8 @@
         "teaches": [
           {
             "tag": "Logits Computation",
-            "explain": "Linear projection from hidden_dim to vocab_size. Higher logit = higher probability token after softmax."
+            "explain": "Linear projection from hidden_dim to vocab_size. Higher logit = higher probability token after softmax.",
+            "rationale": "output = hidden @ embedding_weight"
           }
         ]
       }

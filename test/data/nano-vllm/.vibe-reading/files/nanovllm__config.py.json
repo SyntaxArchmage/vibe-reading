@@ -21,11 +21,17 @@
         "teaches": [
           {
             "tag": "Configuration Dataclass",
-            "explain": "@dataclass holding all hyperparameters. Single source of truth. Loaded from JSON/YAML. Passed to all components that need config."
+            "explain": "@dataclass holding all hyperparameters. Single source of truth. Loaded from JSON/YAML. Passed to all components that need config.",
+            "rationale": "Stores num_layers, hidden_size, num_heads, vocab_size etc",
+            "cross_lang": "Kotlin data class, Rust config struct with serde, Go struct with json tags, TypeScript zod schema",
+            "gotcha": "Nested mutable defaults are shared across instances — always use field(default_factory=...)"
           },
           {
             "tag": "Separation of Config from Code",
-            "explain": "Architecture defined by data (config.json), not hard-coded. Same code runs different model sizes by changing config."
+            "explain": "Architecture defined by data (config.json), not hard-coded. Same code runs different model sizes by changing config.",
+            "rationale": "Stores num_layers, hidden_size, num_heads, vocab_size etc",
+            "cross_lang": "Java Spring @ConfigurationProperties, Rust config crate, Go viper, TypeScript dotenv + zod",
+            "gotcha": "Config sprawl — too many knobs makes system impossible to understand. Provide sensible defaults"
           }
         ]
       }
