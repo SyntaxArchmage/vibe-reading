@@ -1,0 +1,35 @@
+{
+  "file": "nanovllm/llm.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/llm.py",
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 8
+      },
+      "type": "concept",
+      "summary": "User-facing API class for simple text generation",
+      "detail": {
+        "kind": "class",
+        "name": "LLM",
+        "body_lines": 2,
+        "node_type": "class_definition",
+        "description": "High-level interface wrapping LLMEngine. Handles tokenization, generation, and detokenization in one call.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "API Gateway Class",
+            "explain": "Simplest possible interface for end users. Hides tokenization, batching, scheduling complexity. One method: generate(prompt) → text."
+          },
+          {
+            "tag": "Facade Pattern",
+            "explain": "Single entry point wrapping multiple subsystems. User doesnt need to know about Engine, Scheduler, or ModelRunner."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.869Z"
+}

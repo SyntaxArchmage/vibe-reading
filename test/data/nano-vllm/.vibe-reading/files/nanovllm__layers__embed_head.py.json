@@ -1,0 +1,186 @@
+{
+  "file": "nanovllm/layers/embed_head.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 42,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Embedding table sharded across GPUs by vocabulary range",
+      "detail": {
+        "kind": "class",
+        "name": "VocabParallelEmbedding",
+        "body_lines": 34,
+        "node_type": "class_definition",
+        "description": "Each GPU holds embeddings for a slice of the vocabulary. Tokens outside local range return zeros, then all-reduce.",
+        "level": "advanced",
+        "why": "Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs",
+        "teaches": [
+          {
+            "tag": "Vocabulary Sharding",
+            "explain": "Divide vocab across GPUs. Each handles tokens in its range. All-reduce combines results. Distributes memory evenly."
+          },
+          {
+            "tag": "Embedding Table",
+            "explain": "Lookup table mapping discrete token IDs to dense vectors. Foundation of all NLP — converts symbolic input to continuous representation."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 11,
+        "start_col": 4,
+        "end_line": 25,
+        "end_col": 54
+      },
+      "type": "concept",
+      "summary": "Compute local vocabulary range for this GPU shard",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 15,
+        "node_type": "function_definition",
+        "description": "Calculates start/end token indices this device is responsible for. Allocates only local portion.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Range Partitioning",
+            "explain": "Divide ID space into contiguous ranges per device. Device k handles IDs [k*chunk, (k+1)*chunk). Simple and cache-friendly."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 27,
+        "start_col": 4,
+        "end_line": 32,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load embedding weights for this device vocabulary slice",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Extracts rows from checkpoint corresponding to this GPU token range.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Selective Weight Loading",
+            "explain": "Only load the rows this device needs from checkpoint. Reduces peak memory during loading by num_devices×."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 34,
+        "start_col": 4,
+        "end_line": 42,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Lookup embeddings with masked out-of-range tokens",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 9,
+        "node_type": "function_definition",
+        "description": "Masks tokens outside local range to 0, does embedding lookup, then all-reduce across devices.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Masked Embedding Lookup",
+            "explain": "Set out-of-range indices to 0 before lookup (returns zero vector). After all-reduce, each token gets its correct embedding from the owning device."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 45,
+        "start_col": 0,
+        "end_line": 66,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Output projection (logits) sharded to match embedding parallelism",
+      "detail": {
+        "kind": "class",
+        "name": "ParallelLMHead",
+        "body_lines": 22,
+        "node_type": "class_definition",
+        "description": "Projects hidden states to vocabulary logits. Sharded identically to embedding for weight tying.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Weight Tying",
+            "explain": "Share same weight between input embedding and output projection. Halves parameters for vocabulary. Common in LLMs."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 47,
+        "start_col": 4,
+        "end_line": 54,
+        "end_col": 55
+      },
+      "type": "concept",
+      "summary": "Initialize output head with optional weight tying to embedding",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Can reuse embedding weights directly or create separate sharded weight matrix.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Parameter Sharing",
+            "explain": "Multiple layers reference same nn.Parameter. Saves memory. Gradients summed during backprop."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 56,
+        "start_col": 4,
+        "end_line": 66,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Compute logits via matmul with (possibly shared) embedding weights",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 11,
+        "node_type": "function_definition",
+        "description": "output = hidden @ embedding_weight.T — produces raw vocabulary scores.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Logits Computation",
+            "explain": "Linear projection from hidden_dim to vocab_size. Higher logit = higher probability token after softmax."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.881Z"
+}

@@ -71,6 +71,7 @@ export function App() {
     endLine: number;
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [knowledgeLevel, setKnowledgeLevel] = useState<"all" | "basic" | "advanced">("all");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
@@ -191,7 +192,12 @@ export function App() {
     }
   }, []);
 
-  const filtered = entities.filter((e) => e.type === activeTab);
+  const filtered = entities.filter((e) => {
+    if (e.type !== activeTab) return false;
+    if (knowledgeLevel === "all") return true;
+    const level = (e.detail as { level?: string }).level || "basic";
+    return level === knowledgeLevel;
+  });
 
   // Reset focused card when file or tab changes
   useEffect(() => { setFocusedCardIdx(null); }, [currentFile, activeTab]);
@@ -320,6 +326,28 @@ export function App() {
                 );
               })}
             </nav>
+            {activeTab === "concept" && (
+              <div className="vr-level-toggle">
+                <button
+                  className={`vr-level-btn ${knowledgeLevel === "all" ? "vr-level-btn--active" : ""}`}
+                  onClick={() => setKnowledgeLevel("all")}
+                >
+                  All
+                </button>
+                <button
+                  className={`vr-level-btn ${knowledgeLevel === "basic" ? "vr-level-btn--active" : ""}`}
+                  onClick={() => setKnowledgeLevel("basic")}
+                >
+                  Basic
+                </button>
+                <button
+                  className={`vr-level-btn ${knowledgeLevel === "advanced" ? "vr-level-btn--active" : ""}`}
+                  onClick={() => setKnowledgeLevel("advanced")}
+                >
+                  Advanced
+                </button>
+              </div>
+            )}
             <div className="vr-content">{tabContent()}</div>
           </>
         )}
@@ -732,6 +760,35 @@ const sidebarStyles = `
     line-height: 16px;
   }
 
+  .vr-level-toggle {
+    display: flex;
+    gap: 2px;
+    padding: 0 8px 6px;
+    flex-shrink: 0;
+  }
+
+  .vr-level-btn {
+    flex: 1;
+    padding: 3px 4px;
+    background: none;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    color: #888;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .vr-level-btn:hover { color: #ccc; border-color: #555; }
+
+  .vr-level-btn--active {
+    color: #ccc;
+    background: rgba(0, 122, 204, 0.15);
+    border-color: #007acc;
+  }
+
   .vr-content {
     flex: 1;
     overflow-y: auto;
@@ -852,50 +909,6 @@ const sidebarStyles = `
     word-break: break-word;
   }
 
-  .vr-card-code-preview {
-    margin: 6px 0;
-    border-radius: 4px;
-    overflow: hidden;
-    background: #1a1a1a;
-    border: 1px solid #333;
-  }
-
-  .vr-card-code {
-    margin: 0;
-    padding: 6px 0;
-    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
-    font-size: 11px;
-    line-height: 1.5;
-    overflow-x: auto;
-  }
-
-  .vr-card-code::-webkit-scrollbar { height: 4px; }
-  .vr-card-code::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
-
-  .vr-card-code-line {
-    display: flex;
-    padding: 0 8px 0 0;
-    white-space: pre;
-  }
-
-  .vr-card-code-num {
-    color: #555;
-    text-align: right;
-    width: 32px;
-    padding-right: 8px;
-    flex-shrink: 0;
-    user-select: none;
-  }
-
-  .vr-card-code-text {
-    color: #ccc;
-  }
-
-  .vr-card-code-more {
-    color: #666;
-    font-style: italic;
-  }
-
   .vr-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
 
   .vr-card-chip {
@@ -912,6 +925,176 @@ const sidebarStyles = `
     padding: 32px 20px;
     color: #8b8b8b;
     font-size: 12px;
+  }
+
+  /* Knowledge sections */
+  .vr-card-knowledge {
+    margin: 8px 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .vr-card-knowledge--basic {
+    border-left: 2px solid #4ec9b044;
+    padding-left: 8px;
+  }
+
+  .vr-card-knowledge--advanced {
+    border-left: 2px solid #c586c044;
+    padding-left: 8px;
+    margin-top: 6px;
+  }
+
+  .vr-card-krow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .vr-card-klabel {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #4ec9b0;
+    min-width: 52px;
+  }
+
+  .vr-card-klabel--adv {
+    color: #c586c0;
+  }
+
+  .vr-card-ktext {
+    color: #b0b0b0;
+  }
+
+  .vr-card-ktext--analogy {
+    font-style: italic;
+    color: #9cdcfe;
+  }
+
+  .vr-card-kteaches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .vr-card-teach-chip {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(78, 201, 176, 0.12);
+    color: #4ec9b0;
+    border: 1px solid rgba(78, 201, 176, 0.2);
+    font-family: 'Cascadia Code', Consolas, monospace;
+  }
+
+  .vr-card-teach-chip--clickable {
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .vr-card-teach-chip--clickable:hover {
+    background: rgba(78, 201, 176, 0.25);
+    border-color: #4ec9b0;
+  }
+
+  .vr-card-teach-chip--active {
+    background: rgba(78, 201, 176, 0.3);
+    border-color: #4ec9b0;
+  }
+
+  .vr-card-krow--teaches {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vr-card-kteaches-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .vr-card-teach-tooltip {
+    background: #1a2a2a;
+    border: 1px solid rgba(78, 201, 176, 0.3);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #b0d0c8;
+    margin-top: 2px;
+  }
+
+  .vr-teach-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(78, 201, 176, 0.08);
+    border-bottom: 1px solid rgba(78, 201, 176, 0.2);
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+
+  .vr-teach-filter-label {
+    color: #888;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .vr-teach-filter-tag {
+    color: #4ec9b0;
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-weight: 600;
+  }
+
+  .vr-teach-filter-clear {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  .vr-teach-filter-clear:hover { color: #e88; }
+
+  .vr-teach-filter-count {
+    margin-left: auto;
+    color: #666;
+    font-size: 10px;
+  }
+
+  .vr-card-advanced-toggle {
+    background: none;
+    border: none;
+    color: #c586c0;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 3px 0;
+    text-align: left;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+
+  .vr-card-advanced-toggle:hover { opacity: 1; }
+
+  .vr-card-advanced-toggle--collapse {
+    margin-bottom: 4px;
+  }
+
+  .vr-card-krow--analogy {
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top: 1px solid #3c3c3c;
   }
 `;
 

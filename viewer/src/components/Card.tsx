@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 
@@ -27,24 +27,20 @@ function kindLabel(kind: string): string {
 
 export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: CardProps) {
   const [manualExpanded, setManualExpanded] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [expandedTeach, setExpandedTeach] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const kind = (entity.detail.kind as string) || "";
-  const name = (entity.detail.name as string) || "";
+  const d = entity.detail;
+  const kind = (d.kind as string) || "";
+  const name = (d.name as string) || "";
   const lines = entity.anchor.end_line - entity.anchor.start_line + 1;
   const loc = `L${entity.anchor.start_line}–${entity.anchor.end_line}`;
   const badgeColor = KIND_COLORS[kind] || "#b5cea8";
 
   const expanded = manualExpanded || !!isHighlighted;
 
-  const codePreview = useMemo(() => {
-    if (!sourceLines || sourceLines.length === 0) return null;
-    const start = entity.anchor.start_line - 1;
-    const maxPreviewLines = 4;
-    const end = Math.min(start + maxPreviewLines, entity.anchor.end_line, sourceLines.length);
-    const snippet = sourceLines.slice(start, end);
-    const hasMore = entity.anchor.end_line > end;
-    return { snippet, startLine: entity.anchor.start_line, hasMore };
-  }, [sourceLines, entity.anchor.start_line, entity.anchor.end_line]);
+  const hasBasic = d.why || d.pattern || (d.teaches && (d.teaches as string[]).length > 0) || d.analogy;
+  const hasAdvanced = d.design || d.convention || d.smell || d.edge_cases || d.perf;
 
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
@@ -90,7 +86,7 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
       </div>
 
       <AnimatePresence>
-        {expanded && entity.detail && (
+        {expanded && (
           <motion.div
             className="vr-card-detail"
             initial={{ height: 0, opacity: 0 }}
@@ -98,36 +94,126 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.22, 0.1, 0.36, 1] }}
           >
-            {typeof entity.detail.description === "string" ? (
-              <p className="vr-card-desc">{entity.detail.description}</p>
-            ) : (
-              <pre className="vr-card-raw">{JSON.stringify(entity.detail, null, 2)}</pre>
+            {/* Description */}
+            {typeof d.description === "string" && (
+              <p className="vr-card-desc">{d.description}</p>
             )}
-            {codePreview && (
-              <div className="vr-card-code-preview">
-                <pre className="vr-card-code">
-                  {codePreview.snippet.map((line, i) => (
-                    <div key={i} className="vr-card-code-line">
-                      <span className="vr-card-code-num">{codePreview.startLine + i}</span>
-                      <span className="vr-card-code-text">{line || " "}</span>
-                    </div>
-                  ))}
-                  {codePreview.hasMore && (
-                    <div className="vr-card-code-line vr-card-code-more">
-                      <span className="vr-card-code-num">...</span>
-                      <span className="vr-card-code-text">
-                        {lines - codePreview.snippet.length} more lines
+
+            {/* Basic Knowledge Section */}
+            {hasBasic && (
+              <div className="vr-card-knowledge vr-card-knowledge--basic">
+                {d.why && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel">Why</span>
+                    <span className="vr-card-ktext">{d.why as string}</span>
+                  </div>
+                )}
+                {d.pattern && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel">Pattern</span>
+                    <span className="vr-card-ktext">{d.pattern as string}</span>
+                  </div>
+                )}
+                {d.teaches && (d.teaches as unknown[]).length > 0 && (
+                  <div className="vr-card-krow vr-card-krow--teaches">
+                    <span className="vr-card-klabel">Teaches</span>
+                    <div className="vr-card-kteaches-wrap">
+                      <span className="vr-card-kteaches">
+                        {(d.teaches as unknown[]).map((t, i) => {
+                          const isObj = typeof t === "object" && t !== null;
+                          const tag = isObj ? (t as { tag: string }).tag : String(t);
+                          const explain = isObj ? (t as { explain?: string }).explain : undefined;
+                          const isOpen = expandedTeach === i;
+                          if (!explain) {
+                            return <span key={i} className="vr-card-teach-chip">{tag}</span>;
+                          }
+                          return (
+                            <span
+                              key={i}
+                              className={`vr-card-teach-chip vr-card-teach-chip--clickable${isOpen ? " vr-card-teach-chip--active" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedTeach(isOpen ? null : i);
+                              }}
+                            >{tag}</span>
+                          );
+                        })}
                       </span>
+                      {expandedTeach !== null && (() => {
+                        const t = (d.teaches as unknown[])[expandedTeach];
+                        const explain = typeof t === "object" && t !== null
+                          ? (t as { explain?: string }).explain
+                          : undefined;
+                        if (!explain) return null;
+                        return (
+                          <div className="vr-card-teach-tooltip">
+                            {explain}
+                          </div>
+                        );
+                      })()}
                     </div>
-                  )}
-                </pre>
+                  </div>
+                )}
+                {d.analogy && (
+                  <div className="vr-card-krow vr-card-krow--analogy">
+                    <span className="vr-card-klabel">Analogy</span>
+                    <span className="vr-card-ktext vr-card-ktext--analogy">{d.analogy as string}</span>
+                  </div>
+                )}
               </div>
             )}
-            <div className="vr-card-chips">
-              {kind && <span className="vr-card-chip">{kindLabel(kind)}</span>}
-              <span className="vr-card-chip">{lines} lines</span>
-              <span className="vr-card-chip">{loc}</span>
-            </div>
+
+            {/* Advanced Toggle */}
+            {hasAdvanced && !showAdvanced && (
+              <button
+                className="vr-card-advanced-toggle"
+                onClick={(e) => { e.stopPropagation(); setShowAdvanced(true); }}
+              >
+                Advanced &darr;
+              </button>
+            )}
+
+            {/* Advanced Knowledge Section */}
+            {hasAdvanced && showAdvanced && (
+              <div className="vr-card-knowledge vr-card-knowledge--advanced">
+                <button
+                  className="vr-card-advanced-toggle vr-card-advanced-toggle--collapse"
+                  onClick={(e) => { e.stopPropagation(); setShowAdvanced(false); }}
+                >
+                  Advanced &uarr;
+                </button>
+                {d.design && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel vr-card-klabel--adv">Design</span>
+                    <span className="vr-card-ktext">{d.design as string}</span>
+                  </div>
+                )}
+                {d.convention && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel vr-card-klabel--adv">Convention</span>
+                    <span className="vr-card-ktext">{d.convention as string}</span>
+                  </div>
+                )}
+                {d.smell && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel vr-card-klabel--adv">Smell</span>
+                    <span className="vr-card-ktext">{d.smell as string}</span>
+                  </div>
+                )}
+                {d.edge_cases && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel vr-card-klabel--adv">Edge&nbsp;Cases</span>
+                    <span className="vr-card-ktext">{d.edge_cases as string}</span>
+                  </div>
+                )}
+                {d.perf && (
+                  <div className="vr-card-krow">
+                    <span className="vr-card-klabel vr-card-klabel--adv">Perf</span>
+                    <span className="vr-card-ktext">{d.perf as string}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

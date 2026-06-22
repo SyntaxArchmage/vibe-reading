@@ -1,0 +1,405 @@
+{
+  "file": "nanovllm/engine/block_manager.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 23,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Single KV cache block with hash-based prefix caching identity",
+      "detail": {
+        "kind": "class",
+        "name": "Block",
+        "body_lines": 16,
+        "node_type": "class_definition",
+        "description": "Represents one fixed-size slot in the paged KV cache pool. Tracks reference count, content hash for prefix matching, and token IDs stored.",
+        "why": "GPU memory for KV cache must be managed in fixed-size pages to avoid fragmentation",
+        "pattern": "Reference-counted resource with content-addressable hashing",
+        "teaches": [
+          {
+            "tag": "__slots__",
+            "explain": "Python: replaces __dict__ with fixed tuple of attribute names. Saves ~100 bytes per instance. Use in data-heavy classes."
+          },
+          {
+            "tag": "Reference Counting",
+            "explain": "Track how many owners share a resource. When count drops to 0, resource is freed. Used in Python GC and GPU memory."
+          },
+          {
+            "tag": "Content-Addressable Storage",
+            "explain": "Store by content hash, not location. Identical items map to same key. Enables deduplication."
+          }
+        ],
+        "design": "Slots dataclass for minimal memory — thousands of blocks in pool",
+        "smell": "Token_ids is mutable but hash computed once — stale if tokens appended after hashing",
+        "perf": "O(1) allocation/deallocation via free list"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 10,
+        "start_col": 4,
+        "end_line": 14,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Initialize block with empty state and zero refcount",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Creates block with no tokens, hash=0, and refcount=0. Ready for allocation.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Zero-State Initialization",
+            "explain": "Initialize to neutral values (0, empty). Object is valid but inactive until explicitly filled. Simplifies pool reuse."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 16,
+        "start_col": 4,
+        "end_line": 18,
+        "end_col": 34
+      },
+      "type": "concept",
+      "summary": "Record token IDs stored in this block and compute content hash",
+      "detail": {
+        "kind": "function",
+        "name": "update",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Sets block token content and computes hash for prefix caching lookup.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Content Hashing",
+            "explain": "Hash of block contents enables O(1) lookup for duplicate blocks. Same tokens → same hash → reuse existing cached KV."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 20,
+        "start_col": 4,
+        "end_line": 23,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Return block to empty state for reuse",
+      "detail": {
+        "kind": "function",
+        "name": "reset",
+        "body_lines": 4,
+        "node_type": "function_definition",
+        "description": "Clears tokens, hash, and refcount. Block returns to free pool.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Object Recycling",
+            "explain": "Reset object to initial state instead of deallocating/reallocating. Avoids GC pressure and allocation cost."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 26,
+        "start_col": 0,
+        "end_line": 120,
+        "end_col": 53
+      },
+      "type": "concept",
+      "summary": "Paged KV cache pool allocator with prefix caching",
+      "detail": {
+        "kind": "class",
+        "name": "BlockManager",
+        "body_lines": 95,
+        "node_type": "class_definition",
+        "description": "Centralizes KV cache memory allocation. Sequences request blocks, manager allocates from pool with hash-based prefix reuse.",
+        "why": "Multiple sequences compete for limited GPU memory — need centralized allocation with deduplication",
+        "pattern": "Pool allocator with prefix-cache (hash-based block reuse)",
+        "teaches": [
+          {
+            "tag": "Object Pool",
+            "explain": "Pre-allocate N objects at startup, hand out on demand, reclaim when done. Avoids allocation overhead in hot paths."
+          },
+          {
+            "tag": "Content-Addressable Storage",
+            "explain": "Store by content hash. Two blocks with identical tokens get same hash, enabling deduplication."
+          },
+          {
+            "tag": "Paged Memory",
+            "explain": "Divide memory into fixed-size blocks. Allocate non-contiguously with page table for indirection. Eliminates fragmentation."
+          }
+        ],
+        "design": "Hash table maps content hash to existing block for O(1) prefix lookup; separate free_blocks avoids scanning",
+        "convention": "All allocation through can_allocate/allocate pairs — never allocate without checking",
+        "perf": "Hot path every scheduling step; free_blocks deque gives O(1) pop"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 28,
+        "start_col": 4,
+        "end_line": 33,
+        "end_col": 45
+      },
+      "type": "concept",
+      "summary": "Create pool of N blocks and initialize free list",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Pre-allocates all blocks upfront. Free list tracks available blocks.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Pre-allocation",
+            "explain": "Allocate all resources at startup. Avoids runtime allocation latency and fragmentation. Fixed memory footprint."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 35,
+        "start_col": 4,
+        "end_line": 41,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Compute content hash for a sequence of token IDs",
+      "detail": {
+        "kind": "function",
+        "name": "compute_hash",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Deterministic hash of token sequence for prefix cache lookup.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Deterministic Hashing",
+            "explain": "Same input always produces same hash. Required for content-addressable storage. Python hash() is NOT deterministic across runs — use hashlib."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 43,
+        "start_col": 4,
+        "end_line": 51,
+        "end_col": 23
+      },
+      "type": "concept",
+      "summary": "Pop a free block from pool and increment its refcount",
+      "detail": {
+        "kind": "function",
+        "name": "_allocate_block",
+        "body_lines": 9,
+        "node_type": "function_definition",
+        "description": "O(1) allocation from free list. Block transitions from free→allocated.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Free List Allocation",
+            "explain": "Maintain list of available items. Allocate = pop from list (O(1)). Deallocate = push back. No fragmentation."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 53,
+        "start_col": 4,
+        "end_line": 56,
+        "end_col": 44
+      },
+      "type": "concept",
+      "summary": "Decrement refcount, return block to free pool if zero",
+      "detail": {
+        "kind": "function",
+        "name": "_deallocate_block",
+        "body_lines": 4,
+        "node_type": "function_definition",
+        "description": "Reference-counted deallocation. Block only freed when no sequence references it.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Reference Counting",
+            "explain": "Track number of owners. Decrement on release. Only free when count reaches zero. Enables safe sharing."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 58,
+        "start_col": 4,
+        "end_line": 73,
+        "end_col": 32
+      },
+      "type": "concept",
+      "summary": "Check if enough free blocks exist for a sequence",
+      "detail": {
+        "kind": "function",
+        "name": "can_allocate",
+        "body_lines": 16,
+        "node_type": "function_definition",
+        "description": "Predicate: sufficient free blocks for sequence needs. Called before schedule decision.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Try-Before-Act Pattern",
+            "explain": "Check feasibility before attempting operation. Avoids partial failures and complex rollback. can_allocate → allocate."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 75,
+        "start_col": 4,
+        "end_line": 92,
+        "end_col": 67
+      },
+      "type": "concept",
+      "summary": "Assign blocks to sequence, reusing cached blocks when possible",
+      "detail": {
+        "kind": "function",
+        "name": "allocate",
+        "body_lines": 18,
+        "node_type": "function_definition",
+        "description": "Attempts prefix cache hit for each block. Falls back to fresh allocation if no cached match.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Prefix Caching",
+            "explain": "If sequence prefix matches previously computed KV, reuse those blocks. Avoids redundant computation for shared prefixes (system prompts)."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 94,
+        "start_col": 4,
+        "end_line": 101,
+        "end_col": 31
+      },
+      "type": "concept",
+      "summary": "Release all blocks held by a finished sequence",
+      "detail": {
+        "kind": "function",
+        "name": "deallocate",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Decrements refcount for each block. Blocks return to free pool when refcount hits zero.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Batch Deallocation",
+            "explain": "Release all resources of a completed unit at once. Simpler than incremental release, fewer error states."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 103,
+        "start_col": 4,
+        "end_line": 104,
+        "end_col": 76
+      },
+      "type": "concept",
+      "summary": "Check if sequence can grow by one more token",
+      "detail": {
+        "kind": "function",
+        "name": "can_append",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Returns true if current block has space or a free block is available.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Capacity Check",
+            "explain": "Before growing, verify space exists. Prevents buffer overflow in fixed-size block systems."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 106,
+        "start_col": 4,
+        "end_line": 108,
+        "end_col": 58
+      },
+      "type": "concept",
+      "summary": "Allocate new block if current block is full",
+      "detail": {
+        "kind": "function",
+        "name": "may_append",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Lazy allocation: only allocates new block when current one fills up.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Lazy Allocation",
+            "explain": "Defer allocation until actually needed. Reduces waste when actual size < max size. Common in dynamic data structures."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 110,
+        "start_col": 4,
+        "end_line": 120,
+        "end_col": 53
+      },
+      "type": "concept",
+      "summary": "Compute and store content hashes for all blocks of a sequence",
+      "detail": {
+        "kind": "function",
+        "name": "hash_blocks",
+        "body_lines": 11,
+        "node_type": "function_definition",
+        "description": "Updates hash table for prefix caching after sequence content changes.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Index Maintenance",
+            "explain": "Keep lookup structures (hash tables) updated as content changes. Enables O(1) prefix lookup at cost of O(blocks) update."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.893Z"
+}

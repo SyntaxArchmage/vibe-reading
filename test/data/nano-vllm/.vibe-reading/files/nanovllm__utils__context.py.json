@@ -1,0 +1,111 @@
+{
+  "file": "nanovllm/utils/context.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 14,
+        "end_col": 44
+      },
+      "type": "concept",
+      "summary": "Global inference context storing shared state across layers",
+      "detail": {
+        "kind": "class",
+        "name": "Context",
+        "body_lines": 10,
+        "node_type": "class_definition",
+        "description": "Singleton-like context holding block tables, positions, and other per-step state needed by all layers.",
+        "level": "basic",
+        "why": "Layers need shared state (positions, block tables) without threading it through every function signature",
+        "teaches": [
+          {
+            "tag": "Context Object Pattern",
+            "explain": "Bundle related state into one object passed through the call stack. Avoids threading 10+ parameters through every function."
+          },
+          {
+            "tag": "Thread-Local Storage",
+            "explain": "Each thread gets its own copy of the variable. Enables per-request state in concurrent servers without locks."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 18,
+        "start_col": 0,
+        "end_line": 19,
+        "end_col": 19
+      },
+      "type": "concept",
+      "summary": "Retrieve the current inference context",
+      "detail": {
+        "kind": "function",
+        "name": "get_context",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Returns the active Context object for this inference step.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Global Accessor",
+            "explain": "Module-level function returning shared state. Simpler than dependency injection for deeply nested access patterns."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 21,
+        "start_col": 0,
+        "end_line": 23,
+        "end_col": 132
+      },
+      "type": "concept",
+      "summary": "Set the inference context for current step",
+      "detail": {
+        "kind": "function",
+        "name": "set_context",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Called at step start to establish context. All layers read from this during forward pass.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Context Lifecycle",
+            "explain": "Set at boundary (step start), read during processing, reset at end. Clear ownership prevents stale state bugs."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 25,
+        "start_col": 0,
+        "end_line": 27,
+        "end_col": 24
+      },
+      "type": "concept",
+      "summary": "Clear context after step completion",
+      "detail": {
+        "kind": "function",
+        "name": "reset_context",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Ensures no stale state leaks between inference steps.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Explicit Cleanup",
+            "explain": "Always reset shared state after use. Prevents one requests state from leaking into the next. Defense against subtle bugs."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.872Z"
+}

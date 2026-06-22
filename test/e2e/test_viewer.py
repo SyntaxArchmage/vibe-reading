@@ -3,16 +3,21 @@ Vibe Reading — E2E tests for the web viewer.
 Run: python3 test/e2e/test_viewer.py
 
 Prerequisites:
-  - Viewer server running: PORT=3461 npx tsx viewer/server.ts test/fixture
+  - Viewer server running: PORT=3460 tsx viewer/server.ts test/data/nano-vllm
   - Python playwright installed: pip install playwright
-  - Chromium browser: playwright install chromium
+  - Browser: playwright install firefox  (or chromium)
+
+Environment variables:
+  VIEWER_URL  — override server URL (default: http://localhost:3460)
+  BROWSER     — "firefox" (default) or "chromium"
 """
 
 import sys
 import os
 from playwright.sync_api import sync_playwright, expect
 
-VIEWER_URL = os.environ.get("VIEWER_URL", "http://localhost:3461")
+VIEWER_URL = os.environ.get("VIEWER_URL", "http://localhost:3460")
+BROWSER = os.environ.get("BROWSER", "firefox")
 SCREENSHOT_DIR = os.path.join(os.path.dirname(__file__), "screenshots")
 
 passed = 0
@@ -205,7 +210,13 @@ def main():
     global passed, failed
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        if BROWSER == "chromium":
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"],
+            )
+        else:
+            browser = p.firefox.launch(headless=True)
         context = browser.new_context(viewport={"width": 1400, "height": 900})
         page = context.new_page()
 

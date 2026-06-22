@@ -1,0 +1,61 @@
+{
+  "file": "nanovllm/layers/activation.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/layers/activation.py",
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Fused SiLU activation with gating multiplication",
+      "detail": {
+        "kind": "class",
+        "name": "SiluAndMul",
+        "body_lines": 6,
+        "node_type": "class_definition",
+        "description": "Applies SiLU(x) * y in one operation. Used in gated MLPs where gate and value are computed together.",
+        "level": "basic",
+        "why": "Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard",
+        "teaches": [
+          {
+            "tag": "SiLU (Swish) Activation",
+            "explain": "SiLU(x) = x * sigmoid(x). Smooth, non-monotonic. Outperforms ReLU in practice. Self-gated: no separate gate needed."
+          },
+          {
+            "tag": "Gated Linear Unit",
+            "explain": "Output = activation(Wx) * Vy. The gate branch (Wx) controls information flow. Better gradient flow than plain activation."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/activation.py",
+        "start_line": 8,
+        "start_col": 4,
+        "end_line": 11,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Split input tensor and apply SiLU gating",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 4,
+        "node_type": "function_definition",
+        "description": "Splits fused [gate, value] tensor along last dim, applies SiLU to gate, multiplies with value.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Tensor Chunking",
+            "explain": "torch.chunk splits tensor into N equal parts along a dimension. Efficient way to separate fused computations without copying."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.883Z"
+}

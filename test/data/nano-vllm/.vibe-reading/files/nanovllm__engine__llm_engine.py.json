@@ -1,0 +1,184 @@
+{
+  "file": "nanovllm/engine/llm_engine.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 15,
+        "start_col": 0,
+        "end_line": 90,
+        "end_col": 22
+      },
+      "type": "concept",
+      "summary": "Orchestrates inference pipeline: scheduler + model runner + API",
+      "detail": {
+        "kind": "class",
+        "name": "LLMEngine",
+        "body_lines": 76,
+        "node_type": "class_definition",
+        "description": "Facade coordinating Scheduler, ModelRunner, and user-facing API. Single entry point for all inference.",
+        "why": "User needs one simple interface, not knowledge of Scheduler + ModelRunner + BlockManager internals",
+        "teaches": [
+          {
+            "tag": "Facade Pattern",
+            "explain": "Single interface wrapping complex subsystem. User calls one method; internally coordinates multiple components. Reduces coupling."
+          }
+        ],
+        "design": "Synchronous generate() wraps async step loop for API simplicity",
+        "convention": "External code only interacts with LLMEngine — never directly with Scheduler or ModelRunner",
+        "level": "basic"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 17,
+        "start_col": 4,
+        "end_line": 35,
+        "end_col": 34
+      },
+      "type": "concept",
+      "summary": "Initialize all engine subsystems: scheduler, block manager, model runner",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 19,
+        "node_type": "function_definition",
+        "description": "Creates and connects Scheduler, BlockManager, ModelRunner. Starts model runner process.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Composition over Inheritance",
+            "explain": "Build complex objects by composing simpler ones as fields. Each sub-component has single responsibility. Easier to test and replace."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 37,
+        "start_col": 4,
+        "end_line": 41,
+        "end_col": 20
+      },
+      "type": "concept",
+      "summary": "Graceful shutdown: stop model runner process and free resources",
+      "detail": {
+        "kind": "function",
+        "name": "exit",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Sends exit command to ModelRunner process, waits for termination.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Graceful Shutdown",
+            "explain": "Notify sub-processes/threads to stop, wait for completion, then release resources. Prevents zombie processes and resource leaks."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 43,
+        "start_col": 4,
+        "end_line": 47,
+        "end_col": 31
+      },
+      "type": "concept",
+      "summary": "Submit new generation request to the engine",
+      "detail": {
+        "kind": "function",
+        "name": "add_request",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Creates Sequence from prompt tokens and sampling params, adds to scheduler queue.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Request Queue Pattern",
+            "explain": "Decouple submission from execution. Caller submits to queue, engine processes when resources available. Enables batching and flow control."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 49,
+        "start_col": 4,
+        "end_line": 55,
+        "end_col": 34
+      },
+      "type": "concept",
+      "summary": "Execute one scheduling + inference cycle",
+      "detail": {
+        "kind": "function",
+        "name": "step",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Schedule → prepare inputs → model forward → sample → update sequences. The core engine loop body.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Step-Based Engine Loop",
+            "explain": "Break continuous processing into discrete steps. Each step: schedule, execute, update. Enables batching across requests within one step."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 57,
+        "start_col": 4,
+        "end_line": 58,
+        "end_col": 43
+      },
+      "type": "concept",
+      "summary": "Check if all submitted requests have completed generation",
+      "detail": {
+        "kind": "function",
+        "name": "is_finished",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Returns True when scheduler has no waiting or running sequences.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Completion Predicate",
+            "explain": "Poll-based completion check. Caller loops calling step() until is_finished(). Simple synchronous API over async internals."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 60,
+        "start_col": 4,
+        "end_line": 90,
+        "end_col": 22
+      },
+      "type": "concept",
+      "summary": "Synchronous generation: submit request and loop until complete",
+      "detail": {
+        "kind": "function",
+        "name": "generate",
+        "body_lines": 31,
+        "node_type": "function_definition",
+        "description": "Convenience API: adds request, repeatedly calls step(), returns results when finished.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Synchronous Wrapper",
+            "explain": "Wrap async/step-based internals with blocking API. Simpler for users who dont need streaming. Hides the step loop."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.892Z"
+}

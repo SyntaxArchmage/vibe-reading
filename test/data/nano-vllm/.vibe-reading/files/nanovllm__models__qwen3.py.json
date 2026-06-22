@@ -1,0 +1,414 @@
+{
+  "file": "nanovllm/models/qwen3.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 14,
+        "start_col": 0,
+        "end_line": 88,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Multi-head attention module with GQA, RoPE, and paged KV cache",
+      "detail": {
+        "kind": "class",
+        "name": "Qwen3Attention",
+        "body_lines": 75,
+        "node_type": "class_definition",
+        "description": "Core attention layer. Implements grouped-query attention with rotary embeddings and paged KV cache for efficient inference.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Multi-Head Attention",
+            "explain": "Split representation into H heads, compute attention independently per head, concatenate. Each head learns different relationship patterns."
+          },
+          {
+            "tag": "Grouped Query Attention",
+            "explain": "Share K/V heads across multiple Q heads (e.g., 8 Q heads per 1 KV head). Reduces KV cache size without significant quality loss."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 16,
+        "start_col": 4,
+        "end_line": 70,
+        "end_col": 66
+      },
+      "type": "concept",
+      "summary": "Configure attention heads, projections, and RoPE parameters",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 55,
+        "node_type": "function_definition",
+        "description": "Creates Q/K/V projections (fused), output projection, and rotary embedding. Handles GQA head ratios.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Head Dimension",
+            "explain": "hidden_size / num_heads = head_dim. Each head operates on head_dim dimensions independently. Typical: 128."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 72,
+        "start_col": 4,
+        "end_line": 88,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Full attention forward: project, rotate, cache, attend, project back",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 17,
+        "node_type": "function_definition",
+        "description": "QKV projection → RoPE → store KV cache → attention → output projection.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Attention Forward Pipeline",
+            "explain": "Q,K,V = project(x) → apply RoPE to Q,K → store K,V in cache → attention(Q, cached_K, cached_V) → project output."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 91,
+        "start_col": 0,
+        "end_line": 117,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "SwiGLU MLP block with tensor-parallel gate/up/down projections",
+      "detail": {
+        "kind": "class",
+        "name": "Qwen3MLP",
+        "body_lines": 27,
+        "node_type": "class_definition",
+        "description": "Two-stage MLP: fused gate+up projection → SiLU activation with gating → down projection.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "SwiGLU MLP",
+            "explain": "gate = SiLU(W_gate @ x); output = (gate * W_up @ x) @ W_down. Gated activation improves over plain FFN. Standard in modern LLMs."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 93,
+        "start_col": 4,
+        "end_line": 111,
+        "end_col": 34
+      },
+      "type": "concept",
+      "summary": "Create gate/up (merged) and down projection layers",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 19,
+        "node_type": "function_definition",
+        "description": "MergedColumnParallel for gate+up, RowParallel for down. Parallelism is transparent to forward pass.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "MLP Parallelism Strategy",
+            "explain": "First linear: column-parallel (no communication). Activation: local. Second linear: row-parallel (all-reduce after). One all-reduce per MLP."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 113,
+        "start_col": 4,
+        "end_line": 117,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Gate+up projection → SiLU gating → down projection",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Fused gate_up matmul, split and apply SiLU*gate, then down projection with all-reduce.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Gated MLP Forward",
+            "explain": "x → merged(gate,up) → chunk → SiLU(gate)*up → down_proj. The gating controls information flow through the MLP."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 120,
+        "start_col": 0,
+        "end_line": 159,
+        "end_col": 38
+      },
+      "type": "concept",
+      "summary": "Single transformer block: attention + MLP with residual connections",
+      "detail": {
+        "kind": "class",
+        "name": "Qwen3DecoderLayer",
+        "body_lines": 40,
+        "node_type": "class_definition",
+        "description": "LayerNorm → Attention → residual → LayerNorm → MLP → residual. Repeated N times in the model.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Pre-Norm Architecture",
+            "explain": "Apply LayerNorm before (not after) attention/MLP. Stabilizes training. Used by GPT-2+, LLaMA, Qwen, most modern LLMs."
+          },
+          {
+            "tag": "Residual Connection",
+            "explain": "output = layer(x) + x. Gradient flows directly through addition. Enables training of very deep networks (100+ layers)."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 122,
+        "start_col": 4,
+        "end_line": 144,
+        "end_col": 92
+      },
+      "type": "concept",
+      "summary": "Compose attention, MLP, and layer norms into one transformer block",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 23,
+        "node_type": "function_definition",
+        "description": "Creates self_attn, mlp, input_layernorm, post_attention_layernorm as submodules.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Module Composition",
+            "explain": "Complex layers built by composing simpler nn.Modules. Each sub-module manages its own parameters. Clean separation of concerns."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 146,
+        "start_col": 4,
+        "end_line": 159,
+        "end_col": 38
+      },
+      "type": "concept",
+      "summary": "Pre-norm attention → residual → pre-norm MLP → residual",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 14,
+        "node_type": "function_definition",
+        "description": "Standard transformer block forward: norm, attend, add residual, norm, MLP, add residual.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Transformer Block Forward",
+            "explain": "h = x + attn(norm(x)); output = h + mlp(norm(h)). Two residual streams. Each sub-layer adds to the residual."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 162,
+        "start_col": 0,
+        "end_line": 183,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Stack of transformer decoder layers with embeddings",
+      "detail": {
+        "kind": "class",
+        "name": "Qwen3Model",
+        "body_lines": 22,
+        "node_type": "class_definition",
+        "description": "Composes embedding + N decoder layers + final norm. The backbone without the language model head.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Model vs Head Separation",
+            "explain": "Model = embedding + layers + norm (reusable backbone). Head = task-specific output layer. Separation enables weight sharing and fine-tuning flexibility."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 164,
+        "start_col": 4,
+        "end_line": 171,
+        "end_col": 72
+      },
+      "type": "concept",
+      "summary": "Instantiate embedding, all decoder layers, and final normalization",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Creates ModuleList of decoder layers, plus embedding and final RMSNorm.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "nn.ModuleList",
+            "explain": "Ordered list of modules. Unlike Python list, properly registers sub-modules for parameter tracking, serialization, and device placement."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 173,
+        "start_col": 4,
+        "end_line": 183,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Embed tokens then pass through all transformer layers sequentially",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 11,
+        "node_type": "function_definition",
+        "description": "tokens → embedding → layer[0] → layer[1] → ... → layer[N] → final_norm → hidden_states.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Sequential Layer Processing",
+            "explain": "Each layer transforms hidden state in place. Output shape identical to input. Enables arbitrary depth without architecture changes."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 186,
+        "start_col": 0,
+        "end_line": 216,
+        "end_col": 42
+      },
+      "type": "concept",
+      "summary": "Complete causal language model: backbone + LM head for next-token prediction",
+      "detail": {
+        "kind": "class",
+        "name": "Qwen3ForCausalLM",
+        "body_lines": 31,
+        "node_type": "class_definition",
+        "description": "Wraps Qwen3Model with parallel LM head. The full model used for text generation.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Causal Language Model",
+            "explain": "Predicts next token given all previous tokens. Unidirectional attention mask ensures each position only sees past. Foundation of GPT-style models."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 195,
+        "start_col": 4,
+        "end_line": 203,
+        "end_col": 74
+      },
+      "type": "concept",
+      "summary": "Combine backbone model with output language model head",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 9,
+        "node_type": "function_definition",
+        "description": "Creates Qwen3Model + ParallelLMHead. Optionally ties embedding weights.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Model Architecture Composition",
+            "explain": "CausalLM = backbone(embed + layers + norm) + head(logits). Clean two-level hierarchy."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 205,
+        "start_col": 4,
+        "end_line": 210,
+        "end_col": 47
+      },
+      "type": "concept",
+      "summary": "Full forward pass: embed → decode → logits",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Runs backbone to get hidden states, then computes logits for sampling.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Full Forward Pipeline",
+            "explain": "input_ids → backbone.forward() → hidden_states → compute_logits() → vocabulary scores. End-to-end differentiable."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 212,
+        "start_col": 4,
+        "end_line": 216,
+        "end_col": 42
+      },
+      "type": "concept",
+      "summary": "Project final hidden states to vocabulary logits",
+      "detail": {
+        "kind": "function",
+        "name": "compute_logits",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Applies LM head to hidden states. Only computes logits for positions that need sampling (optimization).",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Selective Logit Computation",
+            "explain": "During generation, only the last token position needs logits. Skip computing logits for cached positions. Saves one full vocab-size matmul per cached token."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.876Z"
+}

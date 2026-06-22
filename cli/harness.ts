@@ -43,6 +43,122 @@ function validateEntity(entity: unknown, idx: number): string[] {
   return errors;
 }
 
+// --- Knowledge Fields Gate ---
+
+interface KnowledgeReport {
+  total: number;
+  withKnowledge: number;
+  missing: { file: string; name: string; line: number }[];
+}
+
+function assessKnowledgeFields(projectRoot: string): KnowledgeReport {
+  const filesDir = path.join(projectRoot, ".vibe-reading", "files");
+  const report: KnowledgeReport = { total: 0, withKnowledge: 0, missing: [] };
+
+  if (!fs.existsSync(filesDir)) return report;
+
+  for (const f of fs.readdirSync(filesDir).filter((x) => x.endsWith(".json"))) {
+    let data: FileAnalysis;
+    try {
+      data = JSON.parse(fs.readFileSync(path.join(filesDir, f), "utf-8"));
+    } catch {
+      continue;
+    }
+
+    if (!Array.isArray(data.entities)) continue;
+    for (const entity of data.entities) {
+      report.total++;
+      const d = (entity?.detail ?? {}) as Record<string, unknown>;
+      const hasLevel = typeof d.level === "string" && (d.level === "basic" || d.level === "advanced");
+      const hasWhy = typeof d.why === "string" && (d.why as string).length > 10;
+      const teaches = d.teaches as unknown[] | undefined;
+      const hasTeaches = Array.isArray(teaches) && teaches.length > 0;
+      // At least one teaches entry should have explain (not all plain strings)
+      const hasExplainedTeach = hasTeaches && teaches!.some(
+        (t) => typeof t === "object" && t !== null && "explain" in (t as Record<string, unknown>)
+      );
+
+      if (hasLevel && (hasWhy || hasExplainedTeach)) {
+        report.withKnowledge++;
+      } else {
+        report.missing.push({
+          file: data.file,
+          name: (d.name as string) || "",
+          line: entity.anchor.start_line,
+        });
+      }
+    }
+  }
+
+  return report;
+}
+
+// --- Enrichment Quality Gate ---
+
+interface EnrichmentReport {
+  total: number;
+  deep: number;
+  shallow: number;
+  shallowEntities: { file: string; name: string; line: number; summary: string }[];
+}
+
+const SHALLOW_PATTERNS = [
+  /^Defined in .+ \(.*\)\.?\s*(Class|Function)?\s*(spanning \d+ lines)?\.?$/,
+  /^(class|function|interface|type|enum|module|struct|trait|impl):?\s/i,
+];
+
+function isShallowDescription(desc: string): boolean {
+  if (!desc || desc.length < 30) return true;
+  return SHALLOW_PATTERNS.some((p) => p.test(desc.trim()));
+}
+
+function isShallowSummary(summary: string, name: string): boolean {
+  if (!summary) return true;
+  const s = summary.toLowerCase().trim();
+  const n = (name || "").toLowerCase();
+  if (s === n) return true;
+  if (s === `${n} class` || s === `${n} function`) return true;
+  if (s.length < 8) return true;
+  return false;
+}
+
+function assessEnrichmentQuality(projectRoot: string): EnrichmentReport {
+  const filesDir = path.join(projectRoot, ".vibe-reading", "files");
+  const report: EnrichmentReport = { total: 0, deep: 0, shallow: 0, shallowEntities: [] };
+
+  if (!fs.existsSync(filesDir)) return report;
+
+  for (const f of fs.readdirSync(filesDir).filter((x) => x.endsWith(".json"))) {
+    let data: FileAnalysis;
+    try {
+      data = JSON.parse(fs.readFileSync(path.join(filesDir, f), "utf-8"));
+    } catch {
+      continue;
+    }
+
+    for (const entity of data.entities) {
+      report.total++;
+      const name = (entity.detail?.name as string) || "";
+      const desc = (entity.detail?.description as string) || "";
+      const summary = entity.summary || "";
+
+      if (isShallowDescription(desc) || isShallowSummary(summary, name)) {
+        report.shallow++;
+        report.shallowEntities.push({
+          file: data.file,
+          name,
+          line: entity.anchor.start_line,
+          summary,
+        });
+      } else {
+        report.deep++;
+      }
+    }
+  }
+
+  return report;
+}
+
 function validateFileAnalysis(data: unknown, filePath: string): string[] {
   const errors: string[] = [];
   if (!data || typeof data !== "object") return [`${filePath}: not a JSON object`];
@@ -116,15 +232,71 @@ function main() {
     }
   }
 
+  // --- Enrichment Quality Gate ---
+  const enrichReport = assessEnrichmentQuality(projectRoot);
+  const deepRatio = enrichReport.total > 0
+    ? enrichReport.deep / enrichReport.total
+    : 0;
+
+  console.log(`\n[harness] Enrichment quality:`);
+  console.log(`  Total entities: ${enrichReport.total}`);
+  console.log(`  Deeply enriched: ${enrichReport.deep} (${(deepRatio * 100).toFixed(0)}%)`);
+  console.log(`  Shallow/template: ${enrichReport.shallow}`);
+
+  const qualityThreshold = parseFloat(process.env.ENRICH_THRESHOLD || "0");
+  const qualityPass = deepRatio >= qualityThreshold;
+
+  if (!qualityPass && enrichReport.shallowEntities.length > 0) {
+    const showMax = Math.min(enrichReport.shallowEntities.length, 15);
+    console.log(`\n[harness] Shallow entities (showing ${showMax}/${enrichReport.shallow}):`);
+    for (const e of enrichReport.shallowEntities.slice(0, showMax)) {
+      console.log(`  ⚠ ${e.file}:${e.line} [${e.name}] — "${e.summary}"`);
+    }
+    console.log(`\n[harness] ✗ Enrichment quality ${(deepRatio * 100).toFixed(0)}% < threshold ${(qualityThreshold * 100).toFixed(0)}%.`);
+    console.log(`  Run deep enrichment on the above entities before viewing.`);
+  }
+
+  // --- Knowledge Fields Gate ---
+  const knowledgeReport = assessKnowledgeFields(projectRoot);
+  const knowledgeRatio = knowledgeReport.total > 0
+    ? knowledgeReport.withKnowledge / knowledgeReport.total
+    : 0;
+
+  const knowledgeThreshold = parseFloat(process.env.KNOWLEDGE_THRESHOLD || "0");
+  const knowledgePass = knowledgeRatio >= knowledgeThreshold;
+
+  console.log(`\n[harness] Knowledge fields:`);
+  console.log(`  With knowledge (level + why/teaches): ${knowledgeReport.withKnowledge}/${knowledgeReport.total} (${(knowledgeRatio * 100).toFixed(0)}%)`);
+
+  if (!knowledgePass && knowledgeReport.missing.length > 0) {
+    const showMax = Math.min(knowledgeReport.missing.length, 15);
+    console.log(`  Missing knowledge (showing ${showMax}/${knowledgeReport.missing.length}):`);
+    for (const e of knowledgeReport.missing.slice(0, showMax)) {
+      console.log(`    ⚠ ${e.file}:${e.line} [${e.name}]`);
+    }
+    console.log(`  ✗ Knowledge coverage ${(knowledgeRatio * 100).toFixed(0)}% < threshold ${(knowledgeThreshold * 100).toFixed(0)}%.`);
+  }
+
   const totalErrors = failedFiles.length + missingCount + schemaErrors.length;
-  if (totalErrors === 0 && manifest.coverage === 1) {
-    console.log("\n[harness] ✓ All files analyzed. Schema valid. 100% coverage.");
+  const structurePass = totalErrors === 0 && manifest.coverage === 1;
+  const fullPass = structurePass && qualityPass && knowledgePass;
+
+  if (fullPass) {
+    console.log("\n[harness] ✓ All checks passed. Schema valid. Coverage. Enrichment + Knowledge gates passed.");
     process.exit(0);
   } else {
-    console.log(
-      `\n[harness] ✗ ${failedFiles.length} failed, ${missingCount} missing, ` +
-      `${schemaErrors.length} schema errors.`
-    );
+    if (!structurePass) {
+      console.log(
+        `\n[harness] ✗ Structure: ${failedFiles.length} failed, ${missingCount} missing, ` +
+        `${schemaErrors.length} schema errors.`
+      );
+    }
+    if (!qualityPass) {
+      console.log(`[harness] ✗ Enrichment quality FAILED: ${(deepRatio * 100).toFixed(0)}% < ${(qualityThreshold * 100).toFixed(0)}% threshold.`);
+    }
+    if (!knowledgePass) {
+      console.log(`[harness] ✗ Knowledge gate FAILED: ${(knowledgeRatio * 100).toFixed(0)}% < ${(knowledgeThreshold * 100).toFixed(0)}% threshold.`);
+    }
     process.exit(1);
   }
 }

@@ -1,0 +1,35 @@
+{
+  "file": "nanovllm/sampling_params.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/sampling_params.py",
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 75
+      },
+      "type": "concept",
+      "summary": "Dataclass holding generation sampling parameters",
+      "detail": {
+        "kind": "class",
+        "name": "SamplingParams",
+        "body_lines": 8,
+        "node_type": "class_definition",
+        "description": "Stores temperature, top_p, max_tokens, stop tokens. Passed to Sampler to control generation behavior.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Parameter Object",
+            "explain": "Bundle related parameters into one typed object instead of passing many loose arguments. Easier to validate, extend, and document."
+          },
+          {
+            "tag": "Sampling Hyperparameters",
+            "explain": "temperature (randomness), top_p (nucleus filtering), max_tokens (length limit). Together control quality-diversity tradeoff in generation."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.869Z"
+}

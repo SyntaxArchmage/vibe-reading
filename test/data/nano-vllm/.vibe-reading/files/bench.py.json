@@ -1,0 +1,31 @@
+{
+  "file": "bench.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "bench.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 28,
+        "end_col": 89
+      },
+      "type": "concept",
+      "summary": "Benchmark script measuring inference throughput",
+      "detail": {
+        "kind": "function",
+        "name": "main",
+        "body_lines": 21,
+        "node_type": "function_definition",
+        "description": "Runs generation with timing to report tokens/second and latency metrics.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Benchmarking Pattern",
+            "explain": "Warmup runs → timed runs → compute mean/std of metrics. Always warmup to avoid measuring one-time costs (JIT, cache cold starts)."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.868Z"
+}

@@ -1,0 +1,418 @@
+{
+  "file": "nanovllm/engine/model_runner.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 15,
+        "start_col": 0,
+        "end_line": 257,
+        "end_col": 9
+      },
+      "type": "concept",
+      "summary": "GPU worker process: executes model forward passes isolated from scheduling",
+      "detail": {
+        "kind": "class",
+        "name": "ModelRunner",
+        "body_lines": 243,
+        "node_type": "class_definition",
+        "description": "Actor-pattern worker in separate process. Receives commands via shared memory, executes on GPU.",
+        "why": "Isolates GPU execution from scheduling — avoids GIL contention",
+        "pattern": "Actor with shared memory IPC",
+        "teaches": [
+          {
+            "tag": "Actor Pattern",
+            "explain": "Isolated process with own state. Communicates only via messages. No shared mutable state. Eliminates race conditions."
+          },
+          {
+            "tag": "GIL Avoidance",
+            "explain": "Python GIL prevents true parallelism in threads. Separate process sidesteps GIL entirely. Required for CPU+GPU parallelism."
+          }
+        ],
+        "design": "Separate process avoids GIL; shared memory avoids serialization vs pipes",
+        "convention": "All GPU operations exclusively inside ModelRunner — scheduler never touches CUDA",
+        "perf": "CUDA graphs eliminate kernel launch overhead for decode; prefill remains dynamic",
+        "level": "advanced"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 17,
+        "start_col": 4,
+        "end_line": 48,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Load model weights, allocate KV cache, set up shared memory",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 32,
+        "node_type": "function_definition",
+        "description": "Heavy initialization: loads checkpoint, creates model, allocates GPU buffers, connects shared memory.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Heavy Initialization Pattern",
+            "explain": "Do all expensive work (model loading, GPU allocation) at startup. Runtime operations are then fast and predictable."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 50,
+        "start_col": 4,
+        "end_line": 59,
+        "end_col": 36
+      },
+      "type": "concept",
+      "summary": "Signal model runner process to terminate",
+      "detail": {
+        "kind": "function",
+        "name": "exit",
+        "body_lines": 10,
+        "node_type": "function_definition",
+        "description": "Sends shutdown command via shared memory, waits for process cleanup.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Cooperative Shutdown",
+            "explain": "Send termination signal, let process clean up its own resources (free GPU memory, close handles). Never force-kill if avoidable."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 61,
+        "start_col": 4,
+        "end_line": 66,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Main event loop: poll for commands, dispatch to handlers",
+      "detail": {
+        "kind": "function",
+        "name": "loop",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Infinite loop reading commands from shared memory. Dispatches to warmup/run/exit handlers.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Event Loop Pattern",
+            "explain": "Infinite loop: poll for events → dispatch to handler → repeat. Foundation of servers, game engines, UI frameworks."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 68,
+        "start_col": 4,
+        "end_line": 74,
+        "end_col": 32
+      },
+      "type": "concept",
+      "summary": "Deserialize command tensor from shared memory",
+      "detail": {
+        "kind": "function",
+        "name": "read_shm",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Reads command type and payload from shared memory buffer.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Shared Memory Protocol",
+            "explain": "Define fixed layout in shared memory: header (command type) + payload. Both processes agree on format. Zero-copy data exchange."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 76,
+        "start_col": 4,
+        "end_line": 83,
+        "end_col": 23
+      },
+      "type": "concept",
+      "summary": "Serialize result tensor into shared memory for scheduler",
+      "detail": {
+        "kind": "function",
+        "name": "write_shm",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Writes output tokens/logits to shared memory for scheduler to read.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Zero-Copy IPC",
+            "explain": "Write directly to shared buffer. Reader accesses same physical memory. No serialization/deserialization, no copies. Fastest possible IPC."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 85,
+        "start_col": 4,
+        "end_line": 89,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Send command to model runner and wait for result",
+      "detail": {
+        "kind": "function",
+        "name": "call",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Writes command to shared memory, signals process, blocks until result ready.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Synchronous RPC over Shared Memory",
+            "explain": "Write request → signal → wait for response. Looks like function call but executes in another process. Shared memory avoids copy overhead."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 91,
+        "start_col": 4,
+        "end_line": 101,
+        "end_col": 32
+      },
+      "type": "concept",
+      "summary": "Run dummy forward pass to trigger CUDA lazy initialization",
+      "detail": {
+        "kind": "function",
+        "name": "warmup_model",
+        "body_lines": 11,
+        "node_type": "function_definition",
+        "description": "First CUDA call is slow (context creation, JIT compilation). Warmup pays this cost before serving.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "CUDA Warmup",
+            "explain": "First GPU operation triggers driver init, JIT compile, memory allocation. Run dummy input at startup so first real request isn not slow."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 103,
+        "start_col": 4,
+        "end_line": 121,
+        "end_col": 29
+      },
+      "type": "concept",
+      "summary": "Pre-allocate GPU memory for KV cache blocks",
+      "detail": {
+        "kind": "function",
+        "name": "allocate_kv_cache",
+        "body_lines": 19,
+        "node_type": "function_definition",
+        "description": "Allocates fixed pool of GPU tensors for KV cache. Size determined by available GPU memory.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "GPU Memory Budgeting",
+            "explain": "Query available GPU memory, subtract model weights, divide remainder into KV cache blocks. Fixed budget prevents OOM during serving."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 123,
+        "start_col": 4,
+        "end_line": 127,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Build physical block mapping tensor for attention kernel",
+      "detail": {
+        "kind": "function",
+        "name": "prepare_block_tables",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Converts logical block indices to physical GPU addresses for paged attention kernel.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Page Table Construction",
+            "explain": "Build indirection table mapping logical pages to physical addresses. Kernel uses table to find correct memory locations. Like OS page tables."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 129,
+        "start_col": 4,
+        "end_line": 170,
+        "end_col": 35
+      },
+      "type": "concept",
+      "summary": "Batch multiple prefill requests into single padded tensor",
+      "detail": {
+        "kind": "function",
+        "name": "prepare_prefill",
+        "body_lines": 42,
+        "node_type": "function_definition",
+        "description": "Packs variable-length prompts into one tensor with padding for batch GPU processing.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Dynamic Batching with Padding",
+            "explain": "Variable-length inputs padded to max length in batch. Trades compute waste (padding) for parallelism benefit. Core inference optimization."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 172,
+        "start_col": 4,
+        "end_line": 188,
+        "end_col": 35
+      },
+      "type": "concept",
+      "summary": "Batch single-token decode steps for multiple sequences",
+      "detail": {
+        "kind": "function",
+        "name": "prepare_decode",
+        "body_lines": 17,
+        "node_type": "function_definition",
+        "description": "Each sequence contributes one token. Batch together for GPU-efficient parallel decode.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Decode Batching",
+            "explain": "During generation, each sequence needs only 1 forward pass for 1 new token. Batch N sequences decode steps together for GPU efficiency."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 190,
+        "start_col": 4,
+        "end_line": 193,
+        "end_col": 27
+      },
+      "type": "concept",
+      "summary": "Prepare sampling parameters tensor for batched sampling",
+      "detail": {
+        "kind": "function",
+        "name": "prepare_sample",
+        "body_lines": 4,
+        "node_type": "function_definition",
+        "description": "Collects temperature and top_p values for each sequence in batch.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Parameter Vectorization",
+            "explain": "Instead of per-item loops, collect parameters into tensors. GPU applies them in parallel across the batch."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 195,
+        "start_col": 4,
+        "end_line": 212,
+        "end_col": 72
+      },
+      "type": "concept",
+      "summary": "Execute model forward pass on prepared batch",
+      "detail": {
+        "kind": "function",
+        "name": "run_model",
+        "body_lines": 18,
+        "node_type": "function_definition",
+        "description": "Runs the actual neural network forward: embeddings → layers → logits.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Forward Pass Execution",
+            "explain": "Feed prepared input tensors through model. Output is logits tensor. The core computation step in each engine iteration."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 214,
+        "start_col": 4,
+        "end_line": 220,
+        "end_col": 24
+      },
+      "type": "concept",
+      "summary": "Full step: prepare inputs → forward → sample → return tokens",
+      "detail": {
+        "kind": "function",
+        "name": "run",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Orchestrates one complete inference step for a batch of sequences.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Inference Pipeline",
+            "explain": "prepare_inputs → model_forward → sample_tokens → return_results. Each step separated for profiling and optimization."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 222,
+        "start_col": 4,
+        "end_line": 257,
+        "end_col": 9
+      },
+      "type": "concept",
+      "summary": "Record GPU operations into CUDA graph for zero-overhead replay",
+      "detail": {
+        "kind": "function",
+        "name": "capture_cudagraph",
+        "body_lines": 36,
+        "node_type": "function_definition",
+        "description": "Records decode forward pass into CUDA graph. Replay eliminates per-kernel CPU launch overhead.",
+        "why": "CUDA graphs eliminate ~50% of decode latency by removing kernel launch overhead",
+        "teaches": [
+          {
+            "tag": "CUDA Graph Capture",
+            "explain": "Record sequence of GPU ops, then replay as single unit. CPU does not re-launch each kernel. Only works with fixed tensor shapes (decode, not prefill)."
+          }
+        ],
+        "design": "Only decode path (fixed batch size) can be graphed — prefill has variable shapes",
+        "perf": "Most impactful single optimization in the codebase",
+        "level": "advanced"
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.890Z"
+}

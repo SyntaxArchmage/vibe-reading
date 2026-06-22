@@ -20,6 +20,18 @@ interface Enrichment {
   summary: string;
   description: string;
   start_line?: number;
+  level?: "basic" | "advanced";
+  // Basic knowledge fields
+  why?: string;
+  pattern?: string;
+  teaches?: (string | { tag: string; explain: string })[];
+  analogy?: string;
+  // Advanced knowledge fields
+  design?: string;
+  convention?: string;
+  smell?: string;
+  edge_cases?: string;
+  perf?: string;
 }
 
 function main() {
@@ -90,7 +102,18 @@ function main() {
 
     if (enrichment) {
       entity.summary = enrichment.summary;
-      (entity.detail as Record<string, unknown>).description = enrichment.description;
+      const detail = entity.detail as Record<string, unknown>;
+      detail.description = enrichment.description;
+      if (enrichment.level) detail.level = enrichment.level;
+      if (enrichment.why) detail.why = enrichment.why;
+      if (enrichment.pattern) detail.pattern = enrichment.pattern;
+      if (enrichment.teaches && enrichment.teaches.length > 0) detail.teaches = enrichment.teaches;
+      if (enrichment.analogy) detail.analogy = enrichment.analogy;
+      if (enrichment.design) detail.design = enrichment.design;
+      if (enrichment.convention) detail.convention = enrichment.convention;
+      if (enrichment.smell) detail.smell = enrichment.smell;
+      if (enrichment.edge_cases) detail.edge_cases = enrichment.edge_cases;
+      if (enrichment.perf) detail.perf = enrichment.perf;
       matched++;
     }
   }

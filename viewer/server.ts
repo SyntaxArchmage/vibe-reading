@@ -80,7 +80,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`[vibe-reading] Viewer: http://localhost:${PORT}`);
   console.log(`[vibe-reading] Project: ${projectRoot}`);
   console.log(`[vibe-reading] Loaded ${Object.keys(analysisData).length} analysis files`);

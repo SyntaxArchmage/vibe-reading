@@ -1,0 +1,393 @@
+{
+  "file": "nanovllm/engine/sequence.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 21
+      },
+      "type": "concept",
+      "summary": "Enumeration of all valid lifecycle states for a generation request",
+      "detail": {
+        "kind": "class",
+        "name": "SequenceStatus",
+        "body_lines": 4,
+        "node_type": "class_definition",
+        "description": "WAITING (queued), RUNNING (active on GPU), FINISHED_STOPPED, FINISHED_LENGTH, FINISHED_ABORT.",
+        "why": "Explicit states prevent invalid operations — cannot free blocks of a running sequence",
+        "teaches": [
+          {
+            "tag": "Enum State Pattern",
+            "explain": "Use an enum to restrict valid states. Methods check state before acting. Prevents impossible combinations at compile time."
+          }
+        ],
+        "level": "basic"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 14,
+        "start_col": 0,
+        "end_line": 83,
+        "end_col": 40
+      },
+      "type": "concept",
+      "summary": "Tracks generation state: tokens, sampling params, logical-physical block mapping",
+      "detail": {
+        "kind": "class",
+        "name": "Sequence",
+        "body_lines": 70,
+        "node_type": "class_definition",
+        "description": "Full lifecycle of one generation request: from prompt tokens through generation to finish.",
+        "level": "basic",
+        "why": "Each request has unique state (tokens generated, KV blocks used) that must persist across scheduling steps",
+        "pattern": "State machine with token-level lifecycle",
+        "teaches": [
+          {
+            "tag": "State Machine",
+            "explain": "Object transitions between well-defined states (WAITING→RUNNING→FINISHED). Only certain transitions allowed."
+          },
+          {
+            "tag": "Logical-Physical Mapping",
+            "explain": "Indirection between logical address and physical location. Enables relocation without invalidating references."
+          }
+        ],
+        "design": "Separates token management from block management within same object for locality",
+        "convention": "Sequence is read-only outside engine internals"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 18,
+        "start_col": 4,
+        "end_line": 31,
+        "end_col": 52
+      },
+      "type": "concept",
+      "summary": "Initialize sequence with prompt tokens and sampling configuration",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 14,
+        "node_type": "function_definition",
+        "description": "Creates new sequence with initial prompt tokens, assigns unique ID, allocates first logical block.",
+        "level": "basic",
+        "why": "Every generation starts here — establishes the baseline state before scheduling can begin",
+        "teaches": [
+          {
+            "tag": "Builder Initialization",
+            "explain": "Constructor sets up minimal valid state. Object is usable immediately after __init__ without extra setup calls."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 33,
+        "start_col": 4,
+        "end_line": 34,
+        "end_col": 30
+      },
+      "type": "concept",
+      "summary": "Return total number of tokens (prompt + generated)",
+      "detail": {
+        "kind": "function",
+        "name": "__len__",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Enables len(sequence) syntax. Returns prompt length + completion length.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "__len__ Protocol",
+            "explain": "Implement __len__ to make class work with len(). Part of Python sized protocol. Enables intuitive API for collection-like objects."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 36,
+        "start_col": 4,
+        "end_line": 37,
+        "end_col": 34
+      },
+      "type": "concept",
+      "summary": "Access token at position index",
+      "detail": {
+        "kind": "function",
+        "name": "__getitem__",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Enables sequence[i] syntax for token access.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "__getitem__ Protocol",
+            "explain": "Implement __getitem__ for indexing syntax obj[i]. Part of sequence protocol. Can also enable iteration and slicing."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 39,
+        "start_col": 4,
+        "end_line": 41,
+        "end_col": 53
+      },
+      "type": "concept",
+      "summary": "Predicate checking if generation has terminated",
+      "detail": {
+        "kind": "function",
+        "name": "is_finished",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Returns True if status is any FINISHED_ variant. Used by scheduler to know when to free resources.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Predicate Method",
+            "explain": "Method returning bool that encapsulates a business-logic check. Centralizes condition rather than repeating enum checks."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 43,
+        "start_col": 4,
+        "end_line": 45,
+        "end_col": 55
+      },
+      "type": "concept",
+      "summary": "Property returning count of generated tokens so far",
+      "detail": {
+        "kind": "function",
+        "name": "num_completion_tokens",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Computed property: total length minus prompt length.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Property Decorator",
+            "explain": "@property makes method accessible as attribute. Computed on access, not stored. Keeps derived values always consistent with source."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 47,
+        "start_col": 4,
+        "end_line": 49,
+        "end_col": 54
+      },
+      "type": "concept",
+      "summary": "Return the original prompt tokens",
+      "detail": {
+        "kind": "function",
+        "name": "prompt_token_ids",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Slice returning tokens[0:prompt_len].",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "View vs Copy Semantics",
+            "explain": "List slicing in Python creates a copy. For large sequences, consider memoryview or numpy views to avoid copying."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 51,
+        "start_col": 4,
+        "end_line": 53,
+        "end_col": 54
+      },
+      "type": "concept",
+      "summary": "Return only the generated tokens",
+      "detail": {
+        "kind": "function",
+        "name": "completion_token_ids",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Slice returning tokens[prompt_len:].",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Slice Notation",
+            "explain": "list[start:end] extracts sub-sequence. Omit start for 0, omit end for len. Negative indices count from end."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 55,
+        "start_col": 4,
+        "end_line": 57,
+        "end_col": 73
+      },
+      "type": "concept",
+      "summary": "Compute number of KV cache blocks used by this sequence",
+      "detail": {
+        "kind": "function",
+        "name": "num_blocks",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Ceiling division of total tokens by block size.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Ceiling Division",
+            "explain": "-(-a // b) or math.ceil(a/b). Computes how many fixed-size blocks needed to hold variable-size content."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 59,
+        "start_col": 4,
+        "end_line": 61,
+        "end_col": 72
+      },
+      "type": "concept",
+      "summary": "Count tokens in the last (potentially partial) block",
+      "detail": {
+        "kind": "function",
+        "name": "last_block_num_tokens",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "total_tokens % block_size, or block_size if exactly full.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Modulo for Partial Fill",
+            "explain": "n % block_size gives fill level of last block. If 0, block is full (use block_size). Common in paged/chunked systems."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 63,
+        "start_col": 4,
+        "end_line": 65,
+        "end_col": 71
+      },
+      "type": "concept",
+      "summary": "Get logical block index for a given token position",
+      "detail": {
+        "kind": "function",
+        "name": "block",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Maps token position to its containing block: position // block_size.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Position to Block Mapping",
+            "explain": "block_index = position // block_size. Fundamental operation in any paged/blocked memory system. O(1) mapping."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 67,
+        "start_col": 4,
+        "end_line": 70,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Extends sequence by one generated token, managing block boundaries",
+      "detail": {
+        "kind": "function",
+        "name": "append_token",
+        "body_lines": 4,
+        "node_type": "function_definition",
+        "description": "Appends new token to completion, allocates new logical block if current is full.",
+        "level": "basic",
+        "why": "Token-by-token autoregressive generation — each step adds exactly one token",
+        "teaches": [
+          {
+            "tag": "Autoregressive Generation",
+            "explain": "Model generates one token per step, using all previous tokens as context. Append loop continues until stop condition."
+          }
+        ],
+        "perf": "Called once per token per sequence per step — must be O(1)"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 72,
+        "start_col": 4,
+        "end_line": 74,
+        "end_col": 137
+      },
+      "type": "concept",
+      "summary": "Custom pickle serialization excluding non-serializable fields",
+      "detail": {
+        "kind": "function",
+        "name": "__getstate__",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Controls what gets serialized when sequence is pickled (for preemption/migration).",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Custom Pickling",
+            "explain": "__getstate__ controls serialization. Return dict of what to save. Exclude file handles, locks, GPU tensors that cant be pickled."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 76,
+        "start_col": 4,
+        "end_line": 83,
+        "end_col": 40
+      },
+      "type": "concept",
+      "summary": "Custom pickle deserialization restoring sequence state",
+      "detail": {
+        "kind": "function",
+        "name": "__setstate__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Restores sequence from pickled state, re-initializes transient fields.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "__setstate__ Restoration",
+            "explain": "Counterpart to __getstate__. Receives saved dict, must reconstruct full object. Re-initialize transient resources (connections, caches)."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.884Z"
+}

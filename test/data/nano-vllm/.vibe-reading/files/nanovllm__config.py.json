@@ -1,0 +1,35 @@
+{
+  "file": "nanovllm/config.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/config.py",
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 25,
+        "end_col": 92
+      },
+      "type": "concept",
+      "summary": "Model configuration dataclass holding architecture hyperparameters",
+      "detail": {
+        "kind": "class",
+        "name": "Config",
+        "body_lines": 20,
+        "node_type": "class_definition",
+        "description": "Stores num_layers, hidden_size, num_heads, vocab_size etc. Loaded from HuggingFace config.json.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Configuration Dataclass",
+            "explain": "@dataclass holding all hyperparameters. Single source of truth. Loaded from JSON/YAML. Passed to all components that need config."
+          },
+          {
+            "tag": "Separation of Config from Code",
+            "explain": "Architecture defined by data (config.json), not hard-coded. Same code runs different model sizes by changing config."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.870Z"
+}

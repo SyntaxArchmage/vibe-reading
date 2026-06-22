@@ -9,7 +9,9 @@ extension/webview/dist/
 viewer/out/
 cli/dist/
 *.vsix
-test/data/*/
-!test/data/SOURCES.md
+!test/data/nano-vllm/
+test/data/nano-vllm/.git/
+test/data/nano-vllm/assets/
+!test/data/nano-vllm/.vibe-reading/
 test/e2e/screenshots/
 test/e2e/diffs/

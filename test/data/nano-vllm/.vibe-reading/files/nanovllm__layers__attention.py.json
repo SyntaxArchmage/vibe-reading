@@ -1,0 +1,143 @@
+{
+  "file": "nanovllm/layers/attention.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 10,
+        "start_col": 0,
+        "end_line": 30,
+        "end_col": 48
+      },
+      "type": "concept",
+      "summary": "Triton kernel storing K/V vectors into paged cache blocks",
+      "detail": {
+        "kind": "function",
+        "name": "store_kvcache_kernel",
+        "body_lines": 21,
+        "node_type": "function_definition",
+        "description": "GPU kernel writing computed K/V pairs into pre-allocated cache blocks at correct positions.",
+        "level": "advanced",
+        "why": "Custom kernel avoids Python overhead for the hottest operation in inference",
+        "teaches": [
+          {
+            "tag": "Triton Kernel",
+            "explain": "Write GPU kernels in Python with Triton. Compiles to PTX. Easier than CUDA C but same performance for memory-bound ops."
+          },
+          {
+            "tag": "Paged KV Cache Write",
+            "explain": "Store K/V at block_table[block_idx][position]. Indirection enables non-contiguous memory without copying."
+          }
+        ],
+        "perf": "Called every token for every layer — must be maximally optimized"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 33,
+        "start_col": 0,
+        "end_line": 40,
+        "end_col": 109
+      },
+      "type": "concept",
+      "summary": "Python wrapper launching the Triton KV cache store kernel",
+      "detail": {
+        "kind": "function",
+        "name": "store_kvcache",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Sets up grid dimensions and launches the Triton kernel with correct tensor pointers.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Kernel Launch Pattern",
+            "explain": "Python sets grid/block dimensions and tensor pointers. Triton/CUDA kernel runs on GPU. Separation of orchestration from computation."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 43,
+        "start_col": 0,
+        "end_line": 75,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Multi-head attention with paged KV cache and flash attention",
+      "detail": {
+        "kind": "class",
+        "name": "Attention",
+        "body_lines": 33,
+        "node_type": "class_definition",
+        "description": "Computes scaled dot-product attention using cached K/V from paged memory. Uses flash attention for efficiency.",
+        "level": "basic",
+        "why": "Attention is the core operation in transformers — must handle variable-length cached KV efficiently",
+        "teaches": [
+          {
+            "tag": "Flash Attention",
+            "explain": "Tiled attention algorithm that never materializes full N×N attention matrix. O(N) memory instead of O(N²). Enabled by online softmax."
+          },
+          {
+            "tag": "Paged KV Cache",
+            "explain": "K/V vectors stored in fixed-size blocks with indirection table. Avoids memory fragmentation for variable-length sequences."
+          }
+        ],
+        "design": "Prefill uses flash_attn (variable length); decode uses custom kernel (single query)"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 45,
+        "start_col": 4,
+        "end_line": 57,
+        "end_col": 54
+      },
+      "type": "concept",
+      "summary": "Configure attention heads, scaling factor, and cache parameters",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 13,
+        "node_type": "function_definition",
+        "description": "Sets num_heads, head_dim, scale=1/sqrt(d), and prepares for paged KV cache access.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Attention Scaling",
+            "explain": "Divide QK^T by sqrt(head_dim) to prevent softmax saturation. Without scaling, dot products grow with dimension causing gradient vanishing."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 59,
+        "start_col": 4,
+        "end_line": 75,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Execute attention: store KV, compute QK^T, apply softmax, multiply V",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 17,
+        "node_type": "function_definition",
+        "description": "Writes new K/V to cache, then dispatches to flash_attn (prefill) or paged_attention (decode).",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Prefill vs Decode Split",
+            "explain": "Prefill processes all prompt tokens at once (parallel). Decode generates one token at a time (sequential). Different kernels optimal for each."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.883Z"
+}

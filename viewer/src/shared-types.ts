@@ -13,5 +13,28 @@ export interface DataEntity {
   anchor: LoC;
   type: EntityType;
   summary: string;
-  detail: Record<string, unknown>;
+  detail: EntityDetail;
+}
+
+export type KnowledgeLevel = "basic" | "advanced";
+
+export interface EntityDetail {
+  kind?: string;
+  name?: string;
+  body_lines?: number;
+  node_type?: string;
+  description?: string;
+  level?: KnowledgeLevel;
+  // Basic knowledge
+  why?: string;
+  pattern?: string;
+  teaches?: (string | { tag: string; explain: string })[];
+  analogy?: string;
+  // Advanced knowledge
+  design?: string;
+  convention?: string;
+  smell?: string;
+  edge_cases?: string;
+  perf?: string;
+  [key: string]: unknown;
 }

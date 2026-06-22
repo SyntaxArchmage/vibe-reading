@@ -1,0 +1,575 @@
+{
+  "file": "nanovllm/layers/linear.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 9,
+        "end_col": 35
+      },
+      "type": "concept",
+      "summary": "Integer division with ceiling, asserts divisibility",
+      "detail": {
+        "kind": "function",
+        "name": "divide",
+        "body_lines": 3,
+        "node_type": "function_definition",
+        "description": "Utility ensuring tensor dimensions divide evenly for parallel sharding.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Assertion-Based Programming",
+            "explain": "Assert preconditions at boundaries. Fail loudly on invalid input rather than silently producing wrong results."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 12,
+        "start_col": 0,
+        "end_line": 34,
+        "end_col": 33
+      },
+      "type": "concept",
+      "summary": "Abstract base for all linear layer variants",
+      "detail": {
+        "kind": "class",
+        "name": "LinearBase",
+        "body_lines": 23,
+        "node_type": "class_definition",
+        "description": "Defines interface (forward, weight_loader) that all parallel linear classes implement.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Template Method Pattern",
+            "explain": "Base class defines skeleton; subclasses override specific steps. Enforces consistent interface while allowing variation."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 14,
+        "start_col": 4,
+        "end_line": 31,
+        "end_col": 49
+      },
+      "type": "concept",
+      "summary": "Configure weight shape and parallelism parameters",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 18,
+        "node_type": "function_definition",
+        "description": "Sets up weight tensor dimensions accounting for tensor parallel world size.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Lazy Initialization",
+            "explain": "Declare shape/config in __init__, but defer heavy allocation (like CUDA tensors) to a later explicit step. Separates config from resource acquisition."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 33,
+        "start_col": 4,
+        "end_line": 34,
+        "end_col": 33
+      },
+      "type": "concept",
+      "summary": "Matrix multiply: output = input @ weight.T",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Core linear transformation. Subclasses may add all-reduce or other communication after this.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Forward Method Convention",
+            "explain": "PyTorch modules implement forward() for computation. Called implicitly via module(input). Never call forward() directly."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 37,
+        "start_col": 0,
+        "end_line": 51,
+        "end_col": 50
+      },
+      "type": "concept",
+      "summary": "Standard linear layer replicated identically on all GPUs",
+      "detail": {
+        "kind": "class",
+        "name": "ReplicatedLinear",
+        "body_lines": 15,
+        "node_type": "class_definition",
+        "description": "No sharding — every GPU has the full weight. Used when parallelism is unnecessary for small layers.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Data Replication",
+            "explain": "Every device holds identical copy. Simple but wastes memory. Use for small weights where sharding overhead exceeds benefit."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 39,
+        "start_col": 4,
+        "end_line": 45,
+        "end_col": 55
+      },
+      "type": "concept",
+      "summary": "Allocate full (un-sharded) weight tensor",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Creates weight with full input_size × output_size dimensions.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Super Delegation",
+            "explain": "Call parent __init__ to reuse base class setup. Subclass only adds what differs."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 47,
+        "start_col": 4,
+        "end_line": 48,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load pretrained weights from checkpoint into this layer",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Copy checkpoint tensor directly into module parameter. No reshaping needed for replicated weights.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Weight Loading Pattern",
+            "explain": "Separate weight loading from model construction. Model defines shapes; loader fills values from checkpoint file."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 50,
+        "start_col": 4,
+        "end_line": 51,
+        "end_col": 50
+      },
+      "type": "concept",
+      "summary": "Simple matrix multiply with no communication",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Direct matmul — no all-reduce needed since weight is fully replicated.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Method Override",
+            "explain": "Subclass replaces parent method. Here ReplicatedLinear overrides to skip communication that parallel variants would add."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 54,
+        "start_col": 0,
+        "end_line": 73,
+        "end_col": 50
+      },
+      "type": "concept",
+      "summary": "Linear layer partitioned column-wise for tensor parallelism",
+      "detail": {
+        "kind": "class",
+        "name": "ColumnParallelLinear",
+        "body_lines": 20,
+        "node_type": "class_definition",
+        "description": "Splits weight along output dimension. Each GPU holds W/N columns. Enables model parallelism across GPUs.",
+        "level": "advanced",
+        "why": "Models too large for one GPU — split weight matrices across devices",
+        "pattern": "Tensor parallel sharding (Megatron-LM column split)",
+        "teaches": [
+          {
+            "tag": "Tensor Parallelism",
+            "explain": "Split weight matrices across GPUs. Each computes partial result. Combine with all-reduce. Scales to models larger than single GPU memory."
+          },
+          {
+            "tag": "Column-wise Sharding",
+            "explain": "Divide output dimension among devices. Each computes full_input × partial_weight. No communication needed until layer boundary."
+          }
+        ],
+        "design": "Column split on first MLP linear enables fused activation without inter-GPU communication",
+        "perf": "Communication cost is one all-reduce at layer boundary, not inside the matmul"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 56,
+        "start_col": 4,
+        "end_line": 63,
+        "end_col": 75
+      },
+      "type": "concept",
+      "summary": "Compute sharded output dimension for this GPU",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Divides output_size by world_size to determine this device shard size.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Shard Size Calculation",
+            "explain": "total_size // num_devices gives per-device allocation. Must assert divisibility to avoid shape mismatches."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 65,
+        "start_col": 4,
+        "end_line": 70,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load only this GPU shard of the weight from checkpoint",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Slices the full checkpoint weight to extract columns belonging to this device.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Tensor Slicing for Sharding",
+            "explain": "checkpoint_weight[:, shard_start:shard_end] extracts this GPU portion. Avoids loading full weight into GPU memory."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 72,
+        "start_col": 4,
+        "end_line": 73,
+        "end_col": 50
+      },
+      "type": "concept",
+      "summary": "Compute column-parallel matmul (no communication needed)",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Each GPU multiplies full input by its weight shard. Output is partial — communication happens at paired RowParallel layer.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Deferred Communication",
+            "explain": "Delay inter-GPU communication until necessary. Column-parallel output needs no sync until paired with row-parallel layer."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 76,
+        "start_col": 0,
+        "end_line": 93,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Fuses multiple column-parallel projections into single GEMM",
+      "detail": {
+        "kind": "class",
+        "name": "MergedColumnParallelLinear",
+        "body_lines": 18,
+        "node_type": "class_definition",
+        "description": "Gate and up projections in MLP merged into one weight matrix. Single GEMM then split output by section.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Operator Fusion",
+            "explain": "Combine separate operations into one kernel. Reduces memory bandwidth and kernel launch overhead. Common in inference optimization."
+          }
+        ],
+        "design": "gate_proj and up_proj fused — one large GEMM is faster than two small ones on GPU"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 78,
+        "start_col": 4,
+        "end_line": 85,
+        "end_col": 61
+      },
+      "type": "concept",
+      "summary": "Configure merged column-parallel with multiple output sections",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Stores output_sizes list to know where to split after the fused GEMM.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Fused Projection Config",
+            "explain": "Store section boundaries so fused output can be split back into logical parts (gate, up) after single matmul."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 87,
+        "start_col": 4,
+        "end_line": 93,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load weight shards for each merged section",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 7,
+        "node_type": "function_definition",
+        "description": "Handles loading gate_proj and up_proj weights into correct positions of the fused weight matrix.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Packed Weight Layout",
+            "explain": "Multiple logical weights stored contiguously in one tensor. Loader must compute correct offset for each section."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 96,
+        "start_col": 0,
+        "end_line": 128,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Fused Q/K/V projection with per-head tensor-parallel sharding",
+      "detail": {
+        "kind": "class",
+        "name": "QKVParallelLinear",
+        "body_lines": 33,
+        "node_type": "class_definition",
+        "description": "Single matrix produces concatenated Q,K,V. Sharded so each GPU gets complete attention heads.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Per-Head Sharding",
+            "explain": "Distribute complete attention heads across GPUs. Each GPU computes full attention for its heads without cross-device communication."
+          },
+          {
+            "tag": "Operator Fusion",
+            "explain": "Three separate linear projections (Q,K,V) fused into one GEMM for better GPU utilization."
+          }
+        ],
+        "perf": "One large GEMM vs three small: better occupancy, fewer kernel launches"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 98,
+        "start_col": 4,
+        "end_line": 112,
+        "end_col": 56
+      },
+      "type": "concept",
+      "summary": "Configure Q/K/V dimensions accounting for GQA head counts",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 15,
+        "node_type": "function_definition",
+        "description": "Handles different num_heads for Q vs K/V (grouped-query attention) when computing shard sizes.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Grouped Query Attention",
+            "explain": "K/V have fewer heads than Q. Reduces KV cache size by head_ratio×. Each K/V head shared across multiple Q heads."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 114,
+        "start_col": 4,
+        "end_line": 128,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load Q, K, V weight shards into fused matrix",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 15,
+        "node_type": "function_definition",
+        "description": "Three-section loader: places Q, K, V weights at correct offsets in the merged weight tensor.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Multi-Section Weight Loading",
+            "explain": "Fused weight has Q|K|V sections. Loader computes offset per section, handles different shard sizes for GQA."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 131,
+        "start_col": 0,
+        "end_line": 156,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Linear layer partitioned row-wise for tensor parallelism",
+      "detail": {
+        "kind": "class",
+        "name": "RowParallelLinear",
+        "body_lines": 26,
+        "node_type": "class_definition",
+        "description": "Splits weight along input dimension. Each GPU computes partial output, then all-reduce to sum.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "All-Reduce",
+            "explain": "Collective operation: every device contributes partial result, all receive the global sum. O(data_size) per device regardless of device count."
+          },
+          {
+            "tag": "Row-wise Sharding",
+            "explain": "Divide input dimension. Each device multiplies partial_input × partial_weight. Results summed via all-reduce."
+          }
+        ],
+        "design": "Paired with ColumnParallel: Column→activation→Row minimizes total communication"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 133,
+        "start_col": 4,
+        "end_line": 140,
+        "end_col": 75
+      },
+      "type": "concept",
+      "summary": "Configure row-parallel with sharded input dimension",
+      "detail": {
+        "kind": "function",
+        "name": "__init__",
+        "body_lines": 8,
+        "node_type": "function_definition",
+        "description": "Divides input_size by world_size for this device row shard.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Input Sharding",
+            "explain": "Divide along input dimension. Each device holds weight[:, shard_start:shard_end] and receives corresponding input slice."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 142,
+        "start_col": 4,
+        "end_line": 150,
+        "end_col": 39
+      },
+      "type": "concept",
+      "summary": "Load row-sharded weight from checkpoint",
+      "detail": {
+        "kind": "function",
+        "name": "weight_loader",
+        "body_lines": 9,
+        "node_type": "function_definition",
+        "description": "Extracts rows belonging to this device from the full checkpoint weight.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "Row Extraction",
+            "explain": "For row-parallel: slice along dim=1 of checkpoint. Each GPU holds different rows of the weight matrix."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/linear.py",
+        "start_line": 152,
+        "start_col": 4,
+        "end_line": 156,
+        "end_col": 16
+      },
+      "type": "concept",
+      "summary": "Row-parallel matmul followed by all-reduce",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 5,
+        "node_type": "function_definition",
+        "description": "Computes partial output from this device row shard, then all-reduce sums across all devices.",
+        "level": "advanced",
+        "teaches": [
+          {
+            "tag": "All-Reduce Synchronization",
+            "explain": "After each device computes partial matmul, all-reduce sums results so every device has the complete output. Required for row-parallel."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.880Z"
+}

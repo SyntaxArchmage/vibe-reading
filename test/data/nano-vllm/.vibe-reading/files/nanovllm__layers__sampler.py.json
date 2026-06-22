@@ -1,0 +1,60 @@
+{
+  "file": "nanovllm/layers/sampler.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/layers/sampler.py",
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Converts logits to token IDs via temperature and top-p sampling",
+      "detail": {
+        "kind": "class",
+        "name": "Sampler",
+        "body_lines": 8,
+        "node_type": "class_definition",
+        "description": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Temperature Scaling",
+            "explain": "Divide logits by temperature before softmax. T<1 = sharper (more deterministic). T>1 = flatter (more random). T=0 = argmax."
+          },
+          {
+            "tag": "Top-p (Nucleus) Sampling",
+            "explain": "Sort by probability, keep smallest set whose cumulative probability ≥ p. Dynamically adjusts candidate pool size."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/sampler.py",
+        "start_line": 7,
+        "start_col": 4,
+        "end_line": 12,
+        "end_col": 28
+      },
+      "type": "concept",
+      "summary": "Apply temperature, top-p filter, then sample token from distribution",
+      "detail": {
+        "kind": "function",
+        "name": "forward",
+        "body_lines": 6,
+        "node_type": "function_definition",
+        "description": "Pipeline: logits → temperature scale → softmax → top-p mask → multinomial sample → token ID.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Multinomial Sampling",
+            "explain": "Draw from categorical distribution defined by probabilities. torch.multinomial samples indices weighted by input probabilities."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.877Z"
+}

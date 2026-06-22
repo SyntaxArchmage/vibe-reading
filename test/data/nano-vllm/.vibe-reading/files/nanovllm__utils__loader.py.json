@@ -1,0 +1,56 @@
+{
+  "file": "nanovllm/utils/loader.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/utils/loader.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 9,
+        "end_col": 35
+      },
+      "type": "concept",
+      "summary": "Simple weight copy from checkpoint tensor to model parameter",
+      "detail": {
+        "kind": "function",
+        "name": "default_weight_loader",
+        "body_lines": 2,
+        "node_type": "function_definition",
+        "description": "Default strategy: direct copy. Specialized loaders override for sharding/merging.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Strategy Pattern",
+            "explain": "Define family of algorithms (weight loading strategies), make them interchangeable. Default strategy is simple copy; parallel layers override with shard logic."
+          }
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/loader.py",
+        "start_line": 12,
+        "start_col": 0,
+        "end_line": 28,
+        "end_col": 67
+      },
+      "type": "concept",
+      "summary": "Load all model weights from checkpoint file into model",
+      "detail": {
+        "kind": "function",
+        "name": "load_model",
+        "body_lines": 17,
+        "node_type": "function_definition",
+        "description": "Iterates checkpoint tensors, matches to model parameters, calls each layers weight_loader.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Weight Loading Pipeline",
+            "explain": "Open checkpoint → iterate saved tensors → find matching parameter by name → call layer-specific loader. Decouples storage format from model structure."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.871Z"
+}

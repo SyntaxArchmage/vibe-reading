@@ -26,7 +26,8 @@ function cleanOutput() {
 }
 
 function run(cmd: string): string {
-  return execSync(cmd, { cwd: CLI_DIR, encoding: "utf-8" });
+  const fixed = cmd.replace(/\bnpx tsx\b/g, path.join(CLI_DIR, "node_modules", ".bin", "tsx"));
+  return execSync(fixed, { cwd: CLI_DIR, encoding: "utf-8" });
 }
 
 // === Test 1: analyze creates correct output structure ===
@@ -116,7 +117,7 @@ assert(manifest.files.every((f: { status: string }) => f.status === "analyzed"),
 // === Test 8: Harness passes ===
 console.log("\nTest 8: Harness verification");
 const harnessOut = run(`npx tsx harness.ts ${FIXTURE_DIR}`);
-assert(harnessOut.includes("100% coverage"), "Harness reports 100% coverage");
+assert(harnessOut.includes("Coverage: 100.0%"), "Harness reports 100% coverage");
 assert(harnessOut.includes("✓"), "Harness passes with checkmark");
 
 // === Test 9: Enrich tool updates entity data ===

@@ -1,0 +1,31 @@
+{
+  "file": "example.py",
+  "entities": [
+    {
+      "anchor": {
+        "file": "example.py",
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 29,
+        "end_col": 48
+      },
+      "type": "concept",
+      "summary": "Minimal usage example demonstrating the LLM API",
+      "detail": {
+        "kind": "function",
+        "name": "main",
+        "body_lines": 24,
+        "node_type": "function_definition",
+        "description": "Shows simplest possible usage: create LLM, call generate, print result.",
+        "level": "basic",
+        "teaches": [
+          {
+            "tag": "Example-Driven Documentation",
+            "explain": "A working minimal example teaches more than pages of docs. Show the happy path first, explain edge cases later."
+          }
+        ]
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-22T06:04:34.867Z"
+}
