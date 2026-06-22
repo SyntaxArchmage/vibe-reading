@@ -172,6 +172,41 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
     ctx.translate(offset.x, offset.y);
     ctx.scale(zoom, zoom);
 
+    // Draw file group backgrounds
+    const fileGroups = new Map<string, LayoutNode[]>();
+    for (const ln of layoutNodes) {
+      const group = fileGroups.get(ln.node.file) || [];
+      group.push(ln);
+      fileGroups.set(ln.node.file, group);
+    }
+
+    for (const [file, nodes] of fileGroups) {
+      if (nodes.length < 2) continue;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const n of nodes) {
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + n.width);
+        maxY = Math.max(maxY, n.y + n.height);
+      }
+      const pad = 12;
+      ctx.beginPath();
+      ctx.roundRect(minX - pad, minY - pad, maxX - minX + pad * 2, maxY - minY + pad * 2, 8);
+      ctx.fillStyle = file === currentFile ? "rgba(0, 122, 204, 0.04)" : "rgba(255, 255, 255, 0.015)";
+      ctx.strokeStyle = file === currentFile ? "rgba(0, 122, 204, 0.15)" : "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.stroke();
+
+      // File label
+      const shortName = file.split("/").pop() || file;
+      ctx.font = "9px -apple-system, sans-serif";
+      ctx.fillStyle = file === currentFile ? "rgba(0, 122, 204, 0.5)" : "rgba(255, 255, 255, 0.2)";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(shortName, minX - pad + 4, minY - pad + 3);
+    }
+
     // Draw edges
     for (const { from, to, edge } of layoutEdges) {
       const fromX = from.x + from.width;
