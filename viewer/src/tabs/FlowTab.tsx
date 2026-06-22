@@ -9,6 +9,7 @@ interface Props {
   sourceLines?: string[];
   flowData?: FlowDataType;
   currentFile?: string | null;
+  onNodeClick?: (node: FlowNode) => void;
 }
 
 interface LayoutNode {
@@ -127,7 +128,7 @@ function layoutGraph(
   return { layoutNodes, layoutEdges };
 }
 
-export function FlowTab({ flowData, currentFile }: Props) {
+export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -285,6 +286,9 @@ export function FlowTab({ flowData, currentFile }: Props) {
       }
     }
     setHoveredNode(found);
+    if (containerRef.current) {
+      containerRef.current.style.cursor = found ? "pointer" : "grab";
+    }
   }, [layoutNodes, offset, zoom]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -334,8 +338,18 @@ export function FlowTab({ flowData, currentFile }: Props) {
       <div
         ref={containerRef}
         className="vr-flow-canvas-wrap"
-        onMouseDown={(e) => { dragging.current = true; dragStart.current = { x: e.clientX, y: e.clientY }; }}
-        onMouseUp={() => { dragging.current = false; }}
+        onMouseDown={(e) => {
+          dragging.current = true;
+          dragStart.current = { x: e.clientX, y: e.clientY };
+        }}
+        onMouseUp={(e) => {
+          const moved = Math.abs(e.clientX - dragStart.current.x) + Math.abs(e.clientY - dragStart.current.y);
+          dragging.current = false;
+          if (moved < 5 && hoveredNode && onNodeClick) {
+            const ln = layoutNodes.find(n => n.id === hoveredNode);
+            if (ln) onNodeClick(ln.node);
+          }
+        }}
         onMouseLeave={() => { dragging.current = false; }}
         onMouseMove={handleMouseMove}
         onWheel={handleWheel}

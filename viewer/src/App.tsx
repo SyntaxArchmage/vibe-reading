@@ -5,7 +5,7 @@ import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree } from "./components/FileTree";
-import type { DataEntity, TabId, FlowDataType } from "./shared-types";
+import type { DataEntity, TabId, FlowDataType, FlowNode } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
   string,
@@ -133,6 +133,19 @@ export function App() {
       endLine: entity.anchor.end_line || entity.anchor.start_line,
     });
   }, []);
+
+  const onFlowNodeClick = useCallback((node: FlowNode) => {
+    if (node.file === currentFile) {
+      setHighlightRange({ startLine: node.line, endLine: node.end_line });
+    } else {
+      const key = Object.keys(PREVIEW_DATA).find(k => PREVIEW_DATA[k].file === node.file);
+      if (key) {
+        selectFile(key).then(() => {
+          setTimeout(() => setHighlightRange({ startLine: node.line, endLine: node.end_line }), 100);
+        });
+      }
+    }
+  }, [currentFile, selectFile]);
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -270,7 +283,7 @@ export function App() {
     const props = { entities: filtered, onCardClick, hoveredEntity: effectiveHighlight, onCardHover, sourceLines };
     switch (activeTab) {
       case "concept": return <ConceptTab {...props} />;
-      case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} />;
+      case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} onNodeClick={onFlowNodeClick} />;
       case "history": return <HistoryTab {...props} />;
       case "jump": return <JumpTab {...props} />;
     }
