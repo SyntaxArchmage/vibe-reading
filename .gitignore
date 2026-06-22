@@ -8,3 +8,7 @@ extension/out/
 viewer/out/
 cli/dist/
 *.vsix
+test/data/*/
+!test/data/SOURCES.md
+test/e2e/screenshots/
+test/e2e/diffs/

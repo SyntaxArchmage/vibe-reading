@@ -19,7 +19,7 @@ function validateEntity(entity: unknown, fileLabel: string, idx: number): string
   if (typeof e.summary !== "string" || e.summary.length === 0) {
     errors.push(`${prefix}: missing or empty summary`);
   }
-  if (typeof e.detail !== "object" || e.detail === null) {
+  if (typeof e.detail !== "object" || e.detail === null || Array.isArray(e.detail)) {
     errors.push(`${prefix}: missing detail object`);
   }
 
@@ -30,7 +30,12 @@ function validateEntity(entity: unknown, fileLabel: string, idx: number): string
     if (typeof a.file !== "string" || a.file.length === 0) {
       errors.push(`${prefix}: anchor.file missing`);
     }
-    if (typeof a.start_line !== "number" || a.start_line < 1) {
+    for (const field of ["start_line", "start_col", "end_line"] as const) {
+      if (typeof a[field] !== "number" || !Number.isInteger(a[field] as number)) {
+        errors.push(`${prefix}: anchor.${field} must be an integer`);
+      }
+    }
+    if (typeof a.start_line === "number" && a.start_line < 1) {
       errors.push(`${prefix}: anchor.start_line must be ≥ 1`);
     }
     if (typeof a.start_col !== "number" || a.start_col < 0) {

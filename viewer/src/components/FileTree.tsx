@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
 interface FileTreeProps {
   files: { key: string; file: string; count: number; commits: number }[];
@@ -86,18 +86,32 @@ function heatColor(commits: number, maxCommits: number): string | null {
   return "#f44747";
 }
 
+function highlightMatch(text: string, query: string): React.ReactElement {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="vr-tree-match">{text.slice(idx, idx + query.length)}</span>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 function DirNode({
   node,
   currentFile,
   onSelect,
   depth,
   maxCommits,
+  filterQuery,
 }: {
   node: TreeNode;
   currentFile: string | null;
   onSelect: (key: string) => void;
   depth: number;
   maxCommits: number;
+  filterQuery?: string;
 }) {
   const containsCurrent = currentFile ? currentFile.startsWith(node.path + "/") || currentFile === node.path : false;
   const [open, setOpen] = useState(depth < 2 || containsCurrent);
@@ -129,7 +143,9 @@ function DirNode({
           <span className={`vr-tree-arrow ${open ? "vr-tree-arrow--open" : ""}`}>
             &#x25B8;
           </span>
-          <span className="vr-tree-dir-name">{node.name}</span>
+          <span className="vr-tree-dir-name">
+            {filterQuery ? highlightMatch(node.name, filterQuery) : node.name}
+          </span>
           {node.count > 0 && <span className="vr-tree-dir-count">{node.count}</span>}
         </div>
       )}
@@ -143,6 +159,7 @@ function DirNode({
               onSelect={onSelect}
               depth={node.name ? depth + 1 : depth}
               maxCommits={maxCommits}
+              filterQuery={filterQuery}
             />
           ))}
           {fileNodes.map((f) => {
@@ -161,7 +178,9 @@ function DirNode({
                 <span style={{ fontSize: 10, color: "#666", flexShrink: 0, width: 14, textAlign: "center" }}>
                   {extIcon(f.name)}
                 </span>
-                <span className="vr-tree-file-name">{f.name}</span>
+                <span className="vr-tree-file-name">
+                  {filterQuery ? highlightMatch(f.name, filterQuery) : f.name}
+                </span>
                 {f.count > 0 && (
                   <span className="vr-tree-file-count">{f.count}</span>
                 )}
@@ -180,6 +199,7 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   const [filter, setFilter] = useState("");
   const [collapseKey, setCollapseKey] = useState(0);
   const [sortMode, setSortMode] = useState<SortMode>("name");
+  const filterRef = useRef<HTMLInputElement>(null);
   const sorted = useMemo(() => {
     const arr = [...files];
     switch (sortMode) {
@@ -196,6 +216,18 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   }, [sorted, filter]);
   const tree = useMemo(() => collapseRoot(buildTree(filtered)), [filtered]);
   const maxCommits = useMemo(() => Math.max(...files.map(f => f.commits), 1), [files]);
+  const filterQuery = filter.trim() || undefined;
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === "E") {
+        e.preventDefault();
+        filterRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   return (
     <div className="vr-tree">
@@ -220,15 +252,26 @@ export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
       </div>
       <div className="vr-tree-filter">
         <input
+          ref={filterRef}
           type="text"
           placeholder="Filter files..."
           value={filter}
           onChange={e => setFilter(e.target.value)}
           className="vr-tree-filter-input"
         />
+        {filter && (
+          <button
+            className="vr-tree-filter-clear"
+            onClick={() => setFilter("")}
+          >×</button>
+        )}
       </div>
       <div className="vr-tree-list" key={collapseKey}>
-        <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} />
+        {filtered.length === 0 && filter.trim() ? (
+          <div className="vr-tree-empty">No files match "{filter}"</div>
+        ) : (
+          <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} filterQuery={filterQuery} />
+        )}
       </div>
     </div>
   );
@@ -278,6 +321,9 @@ export const fileTreeStyles = `
     padding: 4px 8px;
     border-bottom: 1px solid #3c3c3c;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .vr-tree-filter-input {
@@ -293,6 +339,30 @@ export const fileTreeStyles = `
   }
 
   .vr-tree-filter-input:focus { border-color: #007acc; }
+
+  .vr-tree-filter-clear {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .vr-tree-filter-clear:hover { color: #ccc; }
+
+  .vr-tree-match {
+    background: rgba(220, 220, 170, 0.25);
+    border-radius: 2px;
+  }
+
+  .vr-tree-empty {
+    padding: 12px;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+  }
 
   .vr-tree-list {
     flex: 1;

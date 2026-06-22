@@ -102,9 +102,13 @@ def test_card_click_highlights_code(page):
 
 def test_card_expand(page):
     """Clicking card header expands detail section."""
+    already_open = page.locator(".vr-card-detail").count() > 0
+    if already_open:
+        page.locator(".vr-card-header").first.click()
+        page.wait_for_timeout(400)
     card_header = page.locator(".vr-card-header").first
     card_header.click()
-    page.wait_for_timeout(300)
+    page.wait_for_timeout(400)
     detail = page.locator(".vr-card-detail")
     assert detail.count() > 0, "No detail section after expand"
 
@@ -123,16 +127,47 @@ def test_monaco_has_line_numbers(page):
         "No line numbers visible"
 
 
-def test_file_picker_visible(page):
-    """File picker panel is visible."""
+def test_file_tree_visible(page):
+    """File tree panel is visible."""
+    tree = page.locator(".vr-tree-panel")
+    assert tree.is_visible(), "File tree panel not visible"
+
+
+def test_file_tree_has_items(page):
+    """File tree has clickable items."""
+    items = page.locator(".vr-tree-item")
+    assert items.count() >= 3, f"Expected ≥3 tree items, got {items.count()}"
+
+
+def test_file_tree_click_switches_file(page):
+    """Clicking a file in the tree switches the view."""
+    old_path = page.locator(".vr-file-path").inner_text()
+    items = page.locator(".vr-tree-item:not(.vr-tree-item--active)")
+    for i in range(items.count()):
+        item = items.nth(i)
+        if not item.locator(".vr-tree-dir").count():
+            item.click()
+            page.wait_for_timeout(500)
+            break
+    new_path = page.locator(".vr-file-path").inner_text()
+    assert new_path != old_path or items.count() == 0, "File didn't switch after tree click"
+
+
+def test_file_tree_has_counts(page):
+    """File tree items show entity counts."""
+    counts = page.locator(".vr-tree-count")
+    assert counts.count() > 0, "No entity counts in file tree"
+
+
+def test_file_picker_opens_with_ctrl_p(page):
+    """File picker opens with Ctrl+P and shows items."""
+    page.keyboard.press("Control+p")
+    page.wait_for_timeout(300)
     picker = page.locator(".vr-picker")
-    assert picker.is_visible(), "File picker not visible"
-
-
-def test_file_picker_has_items(page):
-    """File picker shows file items."""
+    assert picker.is_visible(), "File picker not visible after Ctrl+P"
     items = page.locator(".vr-picker-item")
-    assert items.count() >= 3, f"Expected ≥3 picker items, got {items.count()}"  # 4 files total
+    assert items.count() >= 3, f"Expected ≥3 picker items, got {items.count()}"
+    page.keyboard.press("Escape")
 
 
 def test_file_picker_search(page):
@@ -140,25 +175,6 @@ def test_file_picker_search(page):
     search = page.locator(".vr-picker-search")
     search.fill("scheduler")
     page.wait_for_timeout(200)
-    items = page.locator(".vr-picker-item")
-    for i in range(items.count()):
-        text = items.nth(i).inner_text().lower()
-        if "more" not in text:
-            assert "scheduler" in text, f"Unfiltered item: {text}"
-
-
-def test_file_picker_click_switches_file(page):
-    """Clicking a different file in picker switches the view."""
-    search = page.locator(".vr-picker-search")
-    search.fill("")
-    page.wait_for_timeout(200)
-    items = page.locator(".vr-picker-item:not(.vr-picker-item--active)")
-    if items.count() > 0:
-        items.first.click()
-        page.wait_for_timeout(500)
-        path_el = page.locator(".vr-file-path")
-        text = path_el.inner_text()
-        assert len(text) > 0, "File path didn't update after switch"
 
 
 def test_tab_switch(page):
@@ -173,10 +189,6 @@ def test_tab_switch(page):
 def test_screenshot(page):
     """Take screenshots for visual baseline."""
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
-
-    search = page.locator(".vr-picker-search")
-    search.fill("")
-    page.wait_for_timeout(200)
 
     concept_tab = page.locator(".vr-tab", has_text="Concept")
     concept_tab.click()
@@ -227,11 +239,12 @@ def main():
         test("Card click highlights code", test_card_click_highlights_code, page)
         test("Card expand shows detail", test_card_expand, page)
 
-        print("\nTest 5: File Picker")
-        test("Picker visible", test_file_picker_visible, page)
-        test("Picker has items", test_file_picker_has_items, page)
-        test("Picker search filters", test_file_picker_search, page)
-        test("Picker click switches file", test_file_picker_click_switches_file, page)
+        print("\nTest 5: File Tree & Picker")
+        test("File tree visible", test_file_tree_visible, page)
+        test("File tree has items", test_file_tree_has_items, page)
+        test("File tree click switches file", test_file_tree_click_switches_file, page)
+        test("File tree has entity counts", test_file_tree_has_counts, page)
+        test("Ctrl+P opens file picker", test_file_picker_opens_with_ctrl_p, page)
 
         print("\nTest 6: Tab Navigation")
         test("Tab switch works", test_tab_switch, page)

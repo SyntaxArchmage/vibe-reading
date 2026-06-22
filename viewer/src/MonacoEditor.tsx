@@ -30,6 +30,8 @@ interface MonacoEditorProps {
   onCursorLine?: (line: number) => void;
   onVisibleRange?: (startLine: number, endLine: number) => void;
   hoverInfos?: HoverInfo[];
+  hoverRange?: { startLine: number; endLine: number } | null;
+  onHoverLine?: (line: number | null) => void;
 }
 
 function detectLanguage(filePath: string): string {
@@ -74,11 +76,12 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos, hoverRange, onHoverLine }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
   const markerDecorationsRef = useRef<string[]>([]);
+  const hoverDecorationsRef = useRef<string[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -236,6 +239,34 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
       decorations
     );
   }, [entityMarkers, ready]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !ready) return;
+    if (!hoverRange) {
+      if (hoverDecorationsRef.current.length > 0) {
+        hoverDecorationsRef.current = editor.deltaDecorations(hoverDecorationsRef.current, []);
+      }
+      return;
+    }
+    hoverDecorationsRef.current = editor.deltaDecorations(hoverDecorationsRef.current, [
+      {
+        range: new window.monaco.Range(hoverRange.startLine, 1, hoverRange.endLine, 1),
+        options: { isWholeLine: true, className: "vr-monaco-hover-range" },
+      },
+    ]);
+  }, [hoverRange, ready]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !ready || !onHoverLine) return;
+    const disposable = editor.onMouseMove((e: any) => {
+      const line = e.target?.position?.lineNumber ?? null;
+      onHoverLine(line);
+    });
+    const leaveDisposable = editor.onMouseLeave(() => onHoverLine(null));
+    return () => { disposable.dispose(); leaveDisposable.dispose(); };
+  }, [ready, onHoverLine]);
 
   return (
     <div style={{ width: "100%", height: "100%", overflow: "hidden", position: "relative" }}>
