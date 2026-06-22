@@ -138,10 +138,12 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
   const dragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
+  const [showGlobal, setShowGlobal] = useState(false);
+
   const { layoutNodes, layoutEdges } = useMemo(() => {
     if (!flowData) return { layoutNodes: [], layoutEdges: [] };
-    return layoutGraph(flowData.nodes, flowData.edges, currentFile);
-  }, [flowData, currentFile]);
+    return layoutGraph(flowData.nodes, flowData.edges, showGlobal ? null : currentFile);
+  }, [flowData, currentFile, showGlobal]);
 
   const segmentPath = useMemo(() => {
     if (!flowData || flowData.segments.length === 0) return new Set<string>();
@@ -312,27 +314,33 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
     <div className="vr-flow-panel">
       <style>{flowStyles}</style>
 
-      {/* Segment selector */}
-      {flowData.segments.length > 0 && (
-        <div className="vr-flow-segments">
-          {flowData.segments.map((seg, i) => (
-            <button
-              key={i}
-              className={`vr-flow-seg-btn ${i === selectedSegment ? "vr-flow-seg-btn--active" : ""}`}
-              onClick={() => setSelectedSegment(i)}
-              title={seg.description}
-            >
-              {seg.name}
-            </button>
-          ))}
+      {/* Controls bar */}
+      <div className="vr-flow-segments">
+        {flowData.segments.map((seg, i) => (
           <button
-            className={`vr-flow-seg-btn ${selectedSegment === -1 ? "vr-flow-seg-btn--active" : ""}`}
-            onClick={() => setSelectedSegment(-1)}
+            key={i}
+            className={`vr-flow-seg-btn ${i === selectedSegment ? "vr-flow-seg-btn--active" : ""}`}
+            onClick={() => setSelectedSegment(i)}
+            title={seg.description}
           >
-            All
+            {seg.name}
           </button>
-        </div>
-      )}
+        ))}
+        <button
+          className={`vr-flow-seg-btn ${selectedSegment === -1 ? "vr-flow-seg-btn--active" : ""}`}
+          onClick={() => setSelectedSegment(-1)}
+        >
+          None
+        </button>
+        <span className="vr-flow-sep" />
+        <button
+          className={`vr-flow-scope-btn ${showGlobal ? "vr-flow-scope-btn--active" : ""}`}
+          onClick={() => setShowGlobal(!showGlobal)}
+          title={showGlobal ? "Show file-local + neighbors" : "Show full project graph"}
+        >
+          {showGlobal ? "🌐 Global" : "📄 File"}
+        </button>
+      </div>
 
       {/* Canvas */}
       <div
@@ -412,6 +420,37 @@ const flowStyles = `
     color: #4ec9b0;
     border-color: #4ec9b0;
     background: rgba(78, 201, 176, 0.12);
+  }
+
+  .vr-flow-sep {
+    width: 1px;
+    height: 16px;
+    background: #3c3c3c;
+    align-self: center;
+    margin: 0 4px;
+  }
+
+  .vr-flow-scope-btn {
+    padding: 3px 10px;
+    background: rgba(156, 220, 254, 0.06);
+    border: 1px solid #3c3c3c;
+    border-radius: 12px;
+    color: #888;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .vr-flow-scope-btn:hover {
+    color: #ccc;
+    border-color: #555;
+  }
+
+  .vr-flow-scope-btn--active {
+    color: #9cdcfe;
+    border-color: #9cdcfe;
+    background: rgba(156, 220, 254, 0.12);
   }
 
   .vr-flow-canvas-wrap {
