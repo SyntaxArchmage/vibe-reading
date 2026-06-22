@@ -125,12 +125,44 @@ Categories of valid teaches:
 
 Each `explain` should be 1-3 sentences that teach the concept **independently of the code**. A reader should understand the concept even without seeing the source.
 
+#### Knowledge Exploration Dimensions (MANDATORY)
+
+When enriching entities, the agent MUST explore ALL applicable dimensions from the knowledge taxonomy. See `docs/brainstorm-knowledge-dimensions.md` for the full reference. Key dimensions to check for EVERY entity:
+
+1. **Language features**: Does this code demonstrate a language-specific feature (dunder methods, decorators, type hints, context managers, slots, enums)? If yes → teaches it with cross-language equivalents.
+2. **Design patterns**: Is there a recognizable pattern (Facade, Object Pool, Actor, Strategy, Factory, State Machine, Composition)? If yes → explain the pattern with name origin, when to use, and anti-patterns.
+3. **Data structures**: Does it use a specific data structure choice (deque, dict, set, priority queue)? If yes → explain what it is + complexity.
+4. **Engineering practices**: Is there a notable practice (graceful shutdown, idempotency, warmup, benchmarking, config-driven)? If yes → explain why.
+5. **Domain concepts**: Are there domain-specific concepts (KV Cache, Flash Attention, Tensor Parallelism)? If yes → explain for newcomers.
+6. **Gotchas/Pitfalls**: Is there a non-obvious bug trap in this code (mutability + caching, thread safety, stale state)? If yes → embed as ⚠️ warning.
+7. **Cross-language**: ALWAYS mention equivalent concepts in other mainstream languages (Java, Rust, Go, TypeScript, C++) to help polyglot users connect.
+
+**Teaches must include RATIONALE**: Not just "what is X" but "why X is used HERE, what happens if NOT used, when NOT to use it."
+
 #### Writing Good Concept Cards
 
 - **Summary**: Action-oriented, max 80 chars. "Parse config and validate fields", not "This function parses config".
 - **Description**: 2-4 sentences for someone reading code for the first time. Mention design patterns, performance characteristics, non-obvious behavior.
 - **Don't repeat the name**: If the function is `parseConfig`, don't say "Parses the configuration". Say what it actually does.
 - **Mention architecture role**: "Entry point for the HTTP handler chain", "Called by the scheduler on tick".
+
+### Step 3.5: Illustration Generation (Optional but Encouraged)
+
+For concepts that are significantly clearer with a diagram, generate illustrations:
+
+**When to generate**: Matrix operations, memory layouts, communication topologies, state transitions, architecture diagrams, algorithm visualizations.
+
+**When NOT to generate**: Simple one-liner concepts, pure text patterns, trivial data structures.
+
+**Tool selection** (agent decides based on complexity):
+- **Simple** (boxes + arrows, state machines): Node.js SVG script → `.svg`
+- **Complex** (matrix ops, data flow, tiling): Manim Python scene → `.png`/`.svg`
+
+**Output location**: `<target-project-root>/.vibe-reading/illustrations/<file-path>__<entity-name>.svg`
+
+The viewer will automatically display illustrations in concept cards when the file exists.
+
+See `docs/brainstorm-knowledge-dimensions.md` "Concept Illustrations" section for full guidance.
 
 ### Step 4: Verify Coverage, Quality, AND Knowledge
 
