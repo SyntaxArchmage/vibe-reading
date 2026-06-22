@@ -797,23 +797,25 @@ const sidebarStyles = `
 
   .vr-card {
     background: #1e1e1e;
-    border: 1px solid #3c3c3c;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-bottom: 8px;
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.25s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.15s ease;
   }
 
   .vr-card:hover {
-    border-color: #007acc;
-    box-shadow: 0 0 0 1px rgba(0,122,204,0.15);
+    border-color: #4a4a4a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
   }
 
   .vr-card--highlighted {
     border-color: #007acc;
-    box-shadow: 0 0 12px rgba(0,122,204,0.3), 0 0 0 1px rgba(0,122,204,0.4);
+    box-shadow: 0 0 16px rgba(0,122,204,0.25), 0 4px 12px rgba(0, 0, 0, 0.3);
     background: #1a2332;
+    transform: translateY(-1px);
   }
 
   .vr-card-header {
@@ -891,15 +893,20 @@ const sidebarStyles = `
   .vr-card-chevron--open { transform: rotate(90deg); }
 
   .vr-card-detail {
-    padding: 8px 10px 10px;
+    padding: 10px 12px 12px;
     font-size: 12px;
     line-height: 1.6;
     color: #8b8b8b;
-    border-top: 1px solid #3c3c3c;
+    border-top: 1px solid #333;
     overflow: hidden;
+    background: rgba(0, 0, 0, 0.1);
   }
 
-  .vr-card-desc { margin: 4px 0 8px; }
+  .vr-card-desc {
+    margin: 2px 0 10px;
+    color: #999;
+    line-height: 1.55;
+  }
 
   .vr-card-raw {
     margin: 4px 0 8px;
@@ -929,21 +936,27 @@ const sidebarStyles = `
 
   /* Knowledge sections */
   .vr-card-knowledge {
-    margin: 8px 0 4px;
+    margin: 10px 0 4px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
   }
 
   .vr-card-knowledge--basic {
-    border-left: 2px solid #4ec9b044;
-    padding-left: 8px;
+    border-left: 2px solid #4ec9b055;
+    padding-left: 10px;
+    background: rgba(78, 201, 176, 0.02);
+    border-radius: 0 4px 4px 0;
+    padding: 8px 10px 8px 10px;
   }
 
   .vr-card-knowledge--advanced {
-    border-left: 2px solid #c586c044;
-    padding-left: 8px;
-    margin-top: 6px;
+    border-left: 2px solid #c586c055;
+    padding-left: 10px;
+    margin-top: 8px;
+    background: rgba(197, 134, 192, 0.02);
+    border-radius: 0 4px 4px 0;
+    padding: 8px 10px 8px 10px;
   }
 
   .vr-card-krow {
@@ -951,7 +964,7 @@ const sidebarStyles = `
     align-items: baseline;
     gap: 8px;
     font-size: 11.5px;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
   .vr-card-klabel {
@@ -959,9 +972,10 @@ const sidebarStyles = `
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     color: #4ec9b0;
-    min-width: 52px;
+    min-width: 54px;
+    opacity: 0.9;
   }
 
   .vr-card-klabel--adv {
@@ -969,12 +983,13 @@ const sidebarStyles = `
   }
 
   .vr-card-ktext {
-    color: #b0b0b0;
+    color: #b8b8b8;
   }
 
   .vr-card-ktext--analogy {
     font-style: italic;
     color: #9cdcfe;
+    opacity: 0.9;
   }
 
   .vr-card-kteaches {
@@ -984,28 +999,54 @@ const sidebarStyles = `
   }
 
   .vr-card-teach-chip {
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    background: rgba(78, 201, 176, 0.12);
-    color: #4ec9b0;
-    border: 1px solid rgba(78, 201, 176, 0.2);
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(78, 201, 176, 0.08);
+    color: #6db5a6;
+    border: 1px solid rgba(78, 201, 176, 0.15);
     font-family: 'Cascadia Code', Consolas, monospace;
+    line-height: 1.4;
   }
 
   .vr-card-teach-chip--clickable {
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: all 0.2s ease;
+    position: relative;
+    color: #4ec9b0;
+    border-color: rgba(78, 201, 176, 0.3);
+    background: rgba(78, 201, 176, 0.1);
+  }
+
+  .vr-card-teach-chip--clickable::after {
+    content: '↗';
+    font-size: 8px;
+    margin-left: 3px;
+    opacity: 0.5;
+    transition: opacity 0.15s;
   }
 
   .vr-card-teach-chip--clickable:hover {
-    background: rgba(78, 201, 176, 0.25);
+    background: rgba(78, 201, 176, 0.22);
     border-color: #4ec9b0;
+    box-shadow: 0 0 8px rgba(78, 201, 176, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .vr-card-teach-chip--clickable:hover::after {
+    opacity: 1;
   }
 
   .vr-card-teach-chip--active {
-    background: rgba(78, 201, 176, 0.3);
+    background: rgba(78, 201, 176, 0.28);
     border-color: #4ec9b0;
+    color: #7eecd8;
+    box-shadow: 0 0 12px rgba(78, 201, 176, 0.2);
+  }
+
+  .vr-card-teach-chip--active::after {
+    content: '▾';
+    opacity: 1;
   }
 
   .vr-card-krow--teaches {
@@ -1022,13 +1063,69 @@ const sidebarStyles = `
 
   .vr-card-teach-tooltip {
     background: #1a2a2a;
-    border: 1px solid rgba(78, 201, 176, 0.3);
+    border: 1px solid rgba(78, 201, 176, 0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #c8e0d8;
+    margin-top: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: tooltipFadeIn 0.15s ease-out;
+  }
+
+  @keyframes tooltipFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .vr-teach-explain {
+    margin: 0 0 8px;
+    color: #d4e8e0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .vr-teach-rationale {
+    margin: 0 0 6px;
+    padding: 5px 8px;
+    background: rgba(78, 201, 176, 0.06);
     border-radius: 4px;
-    padding: 6px 10px;
+    color: #9cc;
     font-size: 11px;
-    line-height: 1.5;
-    color: #b0d0c8;
-    margin-top: 2px;
+  }
+
+  .vr-teach-rationale strong {
+    color: #4ec9b0;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .vr-teach-crosslang {
+    margin: 0 0 6px;
+    padding: 5px 8px;
+    background: rgba(156, 220, 254, 0.06);
+    border-radius: 4px;
+    color: #9cc8e8;
+    font-size: 11px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+  }
+
+  .vr-teach-crosslang strong {
+    color: #9cdcfe;
+    font-weight: 600;
+    margin-right: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .vr-teach-gotcha {
+    margin: 0;
+    padding: 5px 8px;
+    background: rgba(206, 145, 120, 0.08);
+    border-left: 2px solid rgba(206, 145, 120, 0.4);
+    border-radius: 0 4px 4px 0;
+    color: #e8c0a8;
+    font-size: 11px;
   }
 
   .vr-teach-filter-bar {
@@ -1074,21 +1171,28 @@ const sidebarStyles = `
   }
 
   .vr-card-advanced-toggle {
-    background: none;
-    border: none;
+    background: rgba(197, 134, 192, 0.06);
+    border: 1px solid rgba(197, 134, 192, 0.2);
+    border-radius: 4px;
     color: #c586c0;
     font-size: 10px;
     cursor: pointer;
-    padding: 3px 0;
+    padding: 4px 10px;
     text-align: left;
-    opacity: 0.7;
-    transition: opacity 0.15s;
+    opacity: 0.8;
+    transition: all 0.15s;
+    margin-top: 6px;
   }
 
-  .vr-card-advanced-toggle:hover { opacity: 1; }
+  .vr-card-advanced-toggle:hover {
+    opacity: 1;
+    background: rgba(197, 134, 192, 0.12);
+    border-color: rgba(197, 134, 192, 0.4);
+  }
 
   .vr-card-advanced-toggle--collapse {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    margin-top: 0;
   }
 
   .vr-card-krow--analogy {
