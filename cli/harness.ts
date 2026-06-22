@@ -277,6 +277,39 @@ function main() {
     console.log(`  ✗ Knowledge coverage ${(knowledgeRatio * 100).toFixed(0)}% < threshold ${(knowledgeThreshold * 100).toFixed(0)}%.`);
   }
 
+  // --- Teaches Quality Report (informational) ---
+  let totalTeaches = 0;
+  let withRationale = 0;
+  let withCrossLang = 0;
+  const tFilesDir = path.join(projectRoot, ".vibe-reading", "files");
+  if (fs.existsSync(tFilesDir)) {
+    for (const f of fs.readdirSync(tFilesDir).filter(x => x.endsWith(".json"))) {
+      try {
+        const data: FileAnalysis = JSON.parse(fs.readFileSync(path.join(tFilesDir, f), "utf-8"));
+        if (!Array.isArray(data.entities)) continue;
+        for (const entity of data.entities) {
+          const teaches = (entity?.detail as Record<string, unknown>)?.teaches;
+          if (!Array.isArray(teaches)) continue;
+          for (const t of teaches) {
+            if (typeof t === "object" && t !== null && "explain" in (t as Record<string, unknown>)) {
+              totalTeaches++;
+              const obj = t as Record<string, unknown>;
+              if (obj.rationale && typeof obj.rationale === "string") withRationale++;
+              if (obj.cross_lang && typeof obj.cross_lang === "string") withCrossLang++;
+            }
+          }
+        }
+      } catch { continue; }
+    }
+  }
+
+  if (totalTeaches > 0) {
+    console.log(`\n[harness] Teaches quality:`);
+    console.log(`  Total teaches entries: ${totalTeaches}`);
+    console.log(`  With rationale: ${withRationale}/${totalTeaches} (${(100 * withRationale / totalTeaches).toFixed(0)}%)`);
+    console.log(`  With cross_lang: ${withCrossLang}/${totalTeaches} (${(100 * withCrossLang / totalTeaches).toFixed(0)}%)`);
+  }
+
   const totalErrors = failedFiles.length + missingCount + schemaErrors.length;
   const structurePass = totalErrors === 0 && manifest.coverage === 1;
   const fullPass = structurePass && qualityPass && knowledgePass;
