@@ -58,9 +58,64 @@ async function loadSourceContent(file: string): Promise<string> {
   return `// Source file not found: ${file}`;
 }
 
-const DEFAULT_FILE_KEY = (() => {
+function moduleImportKeys(file: string): Set<string> {
+  const withoutExt = file.replace(/\.[^./]+$/, "");
+  const parts = withoutExt.split("/");
+  const keys = new Set<string>();
+  for (let i = 1; i <= parts.length; i++) {
+    keys.add(parts.slice(0, i).join("."));
+  }
+  if (parts[parts.length - 1] === "__init__") {
+    keys.add(parts.slice(0, -1).join("."));
+  }
+  return keys;
+}
+
+function countProjectFanIn(file: string): number {
+  if (!CALL_GRAPH?.files) return 0;
+  const keys = moduleImportKeys(file);
+  let fanIn = 0;
+  for (const entry of CALL_GRAPH.files) {
+    if (entry.file === file) continue;
+    const importsProject = entry.imports.some((imp) => {
+      const source = imp.source;
+      return keys.has(source) || [...keys].some((k) => k.endsWith(`.${source}`) || k === source);
+    });
+    if (importsProject) fanIn++;
+  }
+  return fanIn;
+}
+
+function scoreDefaultEntry(key: string, data: { file: string; entities: DataEntity[] }): number {
+  const file = data.file;
+  const base = file.split("/").pop() || file;
+  const depth = file.split("/").length;
+  let score = countProjectFanIn(file) * 25;
+
+  if (/^(llm|app|server|main|index|api|cli)\./i.test(base)) score += 45;
+  if (/(?:^|\/)llm_engine\.py$/.test(file) || /(?:^|\/)engine\.py$/.test(file)) score += 35;
+  if (/(?:^|\/)llm\.py$/.test(file)) score += 40;
+
+  for (const entity of data.entities) {
+    if (entity.type !== "concept") continue;
+    const name = String(entity.detail.name || "");
+    const kind = String(entity.detail.kind || "");
+    if (kind === "class" && /^(LLM|LLMEngine|Application|App|Server)$/i.test(name)) score += 55;
+    if (kind === "function" && name === "main") score += 5;
+  }
+
+  if (/^(example|demo|bench|test|tests|conftest|mock|run_)/i.test(base)) score -= 90;
+  if (base === "__init__.py") score += 5;
+  if (depth >= 5) score -= 15;
+  score += Math.min(data.entities.length, 40) * 0.25;
+
+  return score;
+}
+
+function pickDefaultFileKey(): string | null {
   const entries = Object.entries(PREVIEW_DATA);
   if (entries.length === 0) return null;
+
   try {
     const last = localStorage.getItem("vr-last-file");
     if (last) {
@@ -68,8 +123,15 @@ const DEFAULT_FILE_KEY = (() => {
       if (hit) return hit[0];
     }
   } catch {}
-  return entries.sort((a, b) => b[1].entities.length - a[1].entities.length)[0][0];
-})();
+
+  const ranked = entries
+    .map(([key, data]) => ({ key, score: scoreDefaultEntry(key, data) }))
+    .sort((a, b) => b.score - a.score || PREVIEW_DATA[b.key].entities.length - PREVIEW_DATA[a.key].entities.length);
+
+  return ranked[0]?.key ?? null;
+}
+
+const DEFAULT_FILE_KEY = pickDefaultFileKey();
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "concept", label: "Concept" },
