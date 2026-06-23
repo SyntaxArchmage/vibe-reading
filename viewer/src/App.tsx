@@ -278,13 +278,14 @@ export function App() {
   const effectiveHighlight = focusedEntity ?? hoveredEntity;
 
   const flowData = typeof GLOBAL_DATA !== "undefined" ? (GLOBAL_DATA as Record<string, unknown>).flow as FlowDataType | undefined : undefined;
+  const historyData = typeof GLOBAL_DATA !== "undefined" ? (GLOBAL_DATA as Record<string, unknown>).history as unknown : undefined;
 
   const tabContent = () => {
     const props = { entities: filtered, onCardClick, hoveredEntity: effectiveHighlight, onCardHover, sourceLines };
     switch (activeTab) {
       case "concept": return <ConceptTab {...props} />;
       case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} onNodeClick={onFlowNodeClick} />;
-      case "history": return <HistoryTab {...props} />;
+      case "history": return <HistoryTab {...props} historyData={historyData as any} currentFile={currentFile} />;
       case "jump": return <JumpTab {...props} />;
     }
   };

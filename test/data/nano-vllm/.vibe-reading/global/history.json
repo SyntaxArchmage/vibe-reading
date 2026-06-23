@@ -1,0 +1,4899 @@
+{
+  "entities": [
+    {
+      "id": "bench.py::main::8",
+      "file": "bench.py",
+      "name": "main",
+      "line_range": [
+        8,
+        28
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "example.py::main::6",
+      "file": "example.py",
+      "name": "main",
+      "line_range": [
+        6,
+        29
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/config.py::Config::6",
+      "file": "nanovllm/config.py",
+      "name": "Config",
+      "line_range": [
+        6,
+        25
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::Block::8",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "Block",
+      "line_range": [
+        8,
+        23
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::__init__::10",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "__init__",
+      "line_range": [
+        10,
+        14
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::update::16",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "update",
+      "line_range": [
+        16,
+        18
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::reset::20",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "reset",
+      "line_range": [
+        20,
+        23
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::BlockManager::26",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "BlockManager",
+      "line_range": [
+        26,
+        120
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::__init__::28",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "__init__",
+      "line_range": [
+        28,
+        33
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::compute_hash::35",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "compute_hash",
+      "line_range": [
+        35,
+        41
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::_allocate_block::43",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "_allocate_block",
+      "line_range": [
+        43,
+        51
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::_deallocate_block::53",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "_deallocate_block",
+      "line_range": [
+        53,
+        56
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::can_allocate::58",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "can_allocate",
+      "line_range": [
+        58,
+        73
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::allocate::75",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "allocate",
+      "line_range": [
+        75,
+        92
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::deallocate::94",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "deallocate",
+      "line_range": [
+        94,
+        101
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::can_append::103",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "can_append",
+      "line_range": [
+        103,
+        104
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::may_append::106",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "may_append",
+      "line_range": [
+        106,
+        108
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/block_manager.py::hash_blocks::110",
+      "file": "nanovllm/engine/block_manager.py",
+      "name": "hash_blocks",
+      "line_range": [
+        110,
+        120
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::LLMEngine::15",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "LLMEngine",
+      "line_range": [
+        15,
+        90
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::__init__::17",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "__init__",
+      "line_range": [
+        17,
+        35
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::exit::37",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "exit",
+      "line_range": [
+        37,
+        41
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::add_request::43",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "add_request",
+      "line_range": [
+        43,
+        47
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::step::49",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "step",
+      "line_range": [
+        49,
+        55
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::is_finished::57",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "is_finished",
+      "line_range": [
+        57,
+        58
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/llm_engine.py::generate::60",
+      "file": "nanovllm/engine/llm_engine.py",
+      "name": "generate",
+      "line_range": [
+        60,
+        90
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::ModelRunner::15",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "ModelRunner",
+      "line_range": [
+        15,
+        257
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::__init__::17",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "__init__",
+      "line_range": [
+        17,
+        48
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::exit::50",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "exit",
+      "line_range": [
+        50,
+        59
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::loop::61",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "loop",
+      "line_range": [
+        61,
+        66
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::read_shm::68",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "read_shm",
+      "line_range": [
+        68,
+        74
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::write_shm::76",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "write_shm",
+      "line_range": [
+        76,
+        83
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::call::85",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "call",
+      "line_range": [
+        85,
+        89
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::warmup_model::91",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "warmup_model",
+      "line_range": [
+        91,
+        101
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::allocate_kv_cache::103",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "allocate_kv_cache",
+      "line_range": [
+        103,
+        121
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::prepare_block_tables::123",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "prepare_block_tables",
+      "line_range": [
+        123,
+        127
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::prepare_prefill::129",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "prepare_prefill",
+      "line_range": [
+        129,
+        170
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::prepare_decode::172",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "prepare_decode",
+      "line_range": [
+        172,
+        188
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::prepare_sample::190",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "prepare_sample",
+      "line_range": [
+        190,
+        193
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::run_model::195",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "run_model",
+      "line_range": [
+        195,
+        212
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::run::214",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "run",
+      "line_range": [
+        214,
+        220
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/model_runner.py::capture_cudagraph::222",
+      "file": "nanovllm/engine/model_runner.py",
+      "name": "capture_cudagraph",
+      "line_range": [
+        222,
+        257
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::Scheduler::8",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "Scheduler",
+      "line_range": [
+        8,
+        92
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::__init__::10",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "__init__",
+      "line_range": [
+        10,
+        17
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::is_finished::19",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "is_finished",
+      "line_range": [
+        19,
+        20
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::add::22",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "add",
+      "line_range": [
+        22,
+        23
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::schedule::25",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "schedule",
+      "line_range": [
+        25,
+        73
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::preempt::75",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "preempt",
+      "line_range": [
+        75,
+        79
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/scheduler.py::postprocess::81",
+      "file": "nanovllm/engine/scheduler.py",
+      "name": "postprocess",
+      "line_range": [
+        81,
+        92
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::SequenceStatus::8",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "SequenceStatus",
+      "line_range": [
+        8,
+        11
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::Sequence::14",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "Sequence",
+      "line_range": [
+        14,
+        83
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::__init__::18",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "__init__",
+      "line_range": [
+        18,
+        31
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::__len__::33",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "__len__",
+      "line_range": [
+        33,
+        34
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::__getitem__::36",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "__getitem__",
+      "line_range": [
+        36,
+        37
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::is_finished::39",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "is_finished",
+      "line_range": [
+        39,
+        41
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::num_completion_tokens::43",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "num_completion_tokens",
+      "line_range": [
+        43,
+        45
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::prompt_token_ids::47",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "prompt_token_ids",
+      "line_range": [
+        47,
+        49
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::completion_token_ids::51",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "completion_token_ids",
+      "line_range": [
+        51,
+        53
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::num_blocks::55",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "num_blocks",
+      "line_range": [
+        55,
+        57
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::last_block_num_tokens::59",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "last_block_num_tokens",
+      "line_range": [
+        59,
+        61
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::block::63",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "block",
+      "line_range": [
+        63,
+        65
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::append_token::67",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "append_token",
+      "line_range": [
+        67,
+        70
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::__getstate__::72",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "__getstate__",
+      "line_range": [
+        72,
+        74
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/engine/sequence.py::__setstate__::76",
+      "file": "nanovllm/engine/sequence.py",
+      "name": "__setstate__",
+      "line_range": [
+        76,
+        83
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/activation.py::SiluAndMul::6",
+      "file": "nanovllm/layers/activation.py",
+      "name": "SiluAndMul",
+      "line_range": [
+        6,
+        11
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/activation.py::forward::8",
+      "file": "nanovllm/layers/activation.py",
+      "name": "forward",
+      "line_range": [
+        8,
+        11
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/attention.py::store_kvcache_kernel::10",
+      "file": "nanovllm/layers/attention.py",
+      "name": "store_kvcache_kernel",
+      "line_range": [
+        10,
+        30
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/attention.py::store_kvcache::33",
+      "file": "nanovllm/layers/attention.py",
+      "name": "store_kvcache",
+      "line_range": [
+        33,
+        40
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/attention.py::Attention::43",
+      "file": "nanovllm/layers/attention.py",
+      "name": "Attention",
+      "line_range": [
+        43,
+        75
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/attention.py::__init__::45",
+      "file": "nanovllm/layers/attention.py",
+      "name": "__init__",
+      "line_range": [
+        45,
+        57
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/attention.py::forward::59",
+      "file": "nanovllm/layers/attention.py",
+      "name": "forward",
+      "line_range": [
+        59,
+        75
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::VocabParallelEmbedding::9",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "VocabParallelEmbedding",
+      "line_range": [
+        9,
+        42
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::__init__::11",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "__init__",
+      "line_range": [
+        11,
+        25
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::weight_loader::27",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "weight_loader",
+      "line_range": [
+        27,
+        32
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::forward::34",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "forward",
+      "line_range": [
+        34,
+        42
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::ParallelLMHead::45",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "ParallelLMHead",
+      "line_range": [
+        45,
+        66
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::__init__::47",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "__init__",
+      "line_range": [
+        47,
+        54
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/embed_head.py::forward::56",
+      "file": "nanovllm/layers/embed_head.py",
+      "name": "forward",
+      "line_range": [
+        56,
+        66
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/layernorm.py::RMSNorm::5",
+      "file": "nanovllm/layers/layernorm.py",
+      "name": "RMSNorm",
+      "line_range": [
+        5,
+        50
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/layernorm.py::__init__::7",
+      "file": "nanovllm/layers/layernorm.py",
+      "name": "__init__",
+      "line_range": [
+        7,
+        14
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/layernorm.py::rms_forward::16",
+      "file": "nanovllm/layers/layernorm.py",
+      "name": "rms_forward",
+      "line_range": [
+        16,
+        26
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/layernorm.py::add_rms_forward::28",
+      "file": "nanovllm/layers/layernorm.py",
+      "name": "add_rms_forward",
+      "line_range": [
+        28,
+        40
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/layernorm.py::forward::42",
+      "file": "nanovllm/layers/layernorm.py",
+      "name": "forward",
+      "line_range": [
+        42,
+        50
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::divide::7",
+      "file": "nanovllm/layers/linear.py",
+      "name": "divide",
+      "line_range": [
+        7,
+        9
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::LinearBase::12",
+      "file": "nanovllm/layers/linear.py",
+      "name": "LinearBase",
+      "line_range": [
+        12,
+        34
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::14",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        14,
+        31
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::forward::33",
+      "file": "nanovllm/layers/linear.py",
+      "name": "forward",
+      "line_range": [
+        33,
+        34
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::ReplicatedLinear::37",
+      "file": "nanovllm/layers/linear.py",
+      "name": "ReplicatedLinear",
+      "line_range": [
+        37,
+        51
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::39",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        39,
+        45
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::weight_loader::47",
+      "file": "nanovllm/layers/linear.py",
+      "name": "weight_loader",
+      "line_range": [
+        47,
+        48
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::forward::50",
+      "file": "nanovllm/layers/linear.py",
+      "name": "forward",
+      "line_range": [
+        50,
+        51
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::ColumnParallelLinear::54",
+      "file": "nanovllm/layers/linear.py",
+      "name": "ColumnParallelLinear",
+      "line_range": [
+        54,
+        73
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::56",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        56,
+        63
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::weight_loader::65",
+      "file": "nanovllm/layers/linear.py",
+      "name": "weight_loader",
+      "line_range": [
+        65,
+        70
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::forward::72",
+      "file": "nanovllm/layers/linear.py",
+      "name": "forward",
+      "line_range": [
+        72,
+        73
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::MergedColumnParallelLinear::76",
+      "file": "nanovllm/layers/linear.py",
+      "name": "MergedColumnParallelLinear",
+      "line_range": [
+        76,
+        93
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::78",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        78,
+        85
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::weight_loader::87",
+      "file": "nanovllm/layers/linear.py",
+      "name": "weight_loader",
+      "line_range": [
+        87,
+        93
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::QKVParallelLinear::96",
+      "file": "nanovllm/layers/linear.py",
+      "name": "QKVParallelLinear",
+      "line_range": [
+        96,
+        128
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::98",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        98,
+        112
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::weight_loader::114",
+      "file": "nanovllm/layers/linear.py",
+      "name": "weight_loader",
+      "line_range": [
+        114,
+        128
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::RowParallelLinear::131",
+      "file": "nanovllm/layers/linear.py",
+      "name": "RowParallelLinear",
+      "line_range": [
+        131,
+        156
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::__init__::133",
+      "file": "nanovllm/layers/linear.py",
+      "name": "__init__",
+      "line_range": [
+        133,
+        140
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::weight_loader::142",
+      "file": "nanovllm/layers/linear.py",
+      "name": "weight_loader",
+      "line_range": [
+        142,
+        150
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/linear.py::forward::152",
+      "file": "nanovllm/layers/linear.py",
+      "name": "forward",
+      "line_range": [
+        152,
+        156
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/rotary_embedding.py::apply_rotary_emb::6",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "apply_rotary_emb",
+      "line_range": [
+        6,
+        14
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/rotary_embedding.py::RotaryEmbedding::17",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "RotaryEmbedding",
+      "line_range": [
+        17,
+        48
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/rotary_embedding.py::__init__::19",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "__init__",
+      "line_range": [
+        19,
+        35
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/rotary_embedding.py::forward::37",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "forward",
+      "line_range": [
+        37,
+        48
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/rotary_embedding.py::get_rope::51",
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "name": "get_rope",
+      "line_range": [
+        51,
+        59
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/sampler.py::Sampler::5",
+      "file": "nanovllm/layers/sampler.py",
+      "name": "Sampler",
+      "line_range": [
+        5,
+        12
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/layers/sampler.py::forward::7",
+      "file": "nanovllm/layers/sampler.py",
+      "name": "forward",
+      "line_range": [
+        7,
+        12
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/llm.py::LLM::4",
+      "file": "nanovllm/llm.py",
+      "name": "LLM",
+      "line_range": [
+        4,
+        5
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::Qwen3Attention::14",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "Qwen3Attention",
+      "line_range": [
+        14,
+        88
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::__init__::16",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "__init__",
+      "line_range": [
+        16,
+        70
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::forward::72",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "forward",
+      "line_range": [
+        72,
+        88
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::Qwen3MLP::91",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "Qwen3MLP",
+      "line_range": [
+        91,
+        117
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::__init__::93",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "__init__",
+      "line_range": [
+        93,
+        111
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::forward::113",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "forward",
+      "line_range": [
+        113,
+        117
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::Qwen3DecoderLayer::120",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "Qwen3DecoderLayer",
+      "line_range": [
+        120,
+        159
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::__init__::122",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "__init__",
+      "line_range": [
+        122,
+        144
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::forward::146",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "forward",
+      "line_range": [
+        146,
+        159
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::Qwen3Model::162",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "Qwen3Model",
+      "line_range": [
+        162,
+        183
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::__init__::164",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "__init__",
+      "line_range": [
+        164,
+        171
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::forward::173",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "forward",
+      "line_range": [
+        173,
+        183
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::Qwen3ForCausalLM::186",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "Qwen3ForCausalLM",
+      "line_range": [
+        186,
+        216
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::__init__::195",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "__init__",
+      "line_range": [
+        195,
+        203
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::forward::205",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "forward",
+      "line_range": [
+        205,
+        210
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/models/qwen3.py::compute_logits::212",
+      "file": "nanovllm/models/qwen3.py",
+      "name": "compute_logits",
+      "line_range": [
+        212,
+        216
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/sampling_params.py::SamplingParams::4",
+      "file": "nanovllm/sampling_params.py",
+      "name": "SamplingParams",
+      "line_range": [
+        4,
+        11
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/context.py::Context::5",
+      "file": "nanovllm/utils/context.py",
+      "name": "Context",
+      "line_range": [
+        5,
+        14
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/context.py::get_context::18",
+      "file": "nanovllm/utils/context.py",
+      "name": "get_context",
+      "line_range": [
+        18,
+        19
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/context.py::set_context::21",
+      "file": "nanovllm/utils/context.py",
+      "name": "set_context",
+      "line_range": [
+        21,
+        23
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/context.py::reset_context::25",
+      "file": "nanovllm/utils/context.py",
+      "name": "reset_context",
+      "line_range": [
+        25,
+        27
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/loader.py::default_weight_loader::8",
+      "file": "nanovllm/utils/loader.py",
+      "name": "default_weight_loader",
+      "line_range": [
+        8,
+        9
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    },
+    {
+      "id": "nanovllm/utils/loader.py::load_model::12",
+      "file": "nanovllm/utils/loader.py",
+      "name": "load_model",
+      "line_range": [
+        12,
+        28
+      ],
+      "created": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "last_modified": {
+        "commit": "227b739f1f7e8b9dadde36b3df58e81eb566de29",
+        "author": "heng shi",
+        "date": "2026-06-22",
+        "message": "feat: knowledge-rich concept cards with structured teaches and quality gates"
+      },
+      "modification_count": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "primary_author": "heng shi",
+      "age_days": 0,
+      "key_changes": [
+        {
+          "commit": "227b739",
+          "date": "2026-06-22",
+          "message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+          "author": "heng shi"
+        }
+      ]
+    }
+  ],
+  "file_stats": {
+    "bench.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "example.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/__init__.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/config.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/engine/block_manager.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/engine/llm_engine.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/engine/model_runner.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/engine/scheduler.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/engine/sequence.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/activation.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/attention.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/embed_head.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/layernorm.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/linear.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/rotary_embedding.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/layers/sampler.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/llm.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/models/qwen3.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/sampling_params.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/utils/context.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    },
+    "nanovllm/utils/loader.py": {
+      "commits": 1,
+      "authors": [
+        "heng shi"
+      ],
+      "first_commit": "2026-06-22",
+      "last_commit": "2026-06-22"
+    }
+  }
+}

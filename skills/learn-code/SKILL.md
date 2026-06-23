@@ -262,6 +262,9 @@ cd ~/workspace/vibe-reading/cli && npx tsx enrich.ts ~/workspace/my-project src/
 # Step 3.7: Extract call graph for Flow panel
 cd ~/workspace/vibe-reading/cli && npx tsx extract-flow.ts ~/workspace/my-project
 
+# Step 3.8: Extract git history for History panel
+cd ~/workspace/vibe-reading/cli && npx tsx extract-history.ts ~/workspace/my-project
+
 # Step 4: Verify (must pass ALL quality gates)
 ENRICH_THRESHOLD=0.9 KNOWLEDGE_THRESHOLD=0.9 npx tsx harness.ts ~/workspace/my-project
 # → Must show ✓ with ≥90% deep enrichment + knowledge
