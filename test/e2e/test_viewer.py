@@ -173,6 +173,12 @@ def test_file_picker_opens_with_ctrl_p(page):
     items = page.locator(".vr-picker-item")
     assert items.count() >= 3, f"Expected ≥3 picker items, got {items.count()}"
     page.keyboard.press("Escape")
+
+
+def test_file_picker_search(page):
+    """File picker search filters results."""
+    search = page.locator(".vr-picker-search")
+    search.fill("scheduler")
     page.wait_for_timeout(200)
 
 

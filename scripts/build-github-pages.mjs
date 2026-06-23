@@ -3,7 +3,7 @@
  * Build a static GitHub Pages site showcasing the nano-vllm learning results.
  *
  * Output: pages/
- *   index.html       — viewer shell + embedded PREVIEW_DATA / GLOBAL_DATA
+ *   index.html       — viewer shell + embedded PREVIEW_DATA / CALL_GRAPH
  *   viewer.js        — bundled React app
  *   source/*.json    — source files for Monaco editor
  *   .nojekyll
@@ -48,17 +48,13 @@ function loadAnalysisData() {
   return data;
 }
 
-function loadGlobalData() {
-  const globalDir = path.join(VIBE_DIR, "global");
-  if (!fs.existsSync(globalDir)) return {};
-  const data = {};
-  for (const file of fs.readdirSync(globalDir)) {
-    if (!file.endsWith(".json")) continue;
-    data[file.replace(/\.json$/, "")] = JSON.parse(
-      fs.readFileSync(path.join(globalDir, file), "utf-8")
-    );
+function loadCallGraph() {
+  const cgPath = path.join(VIBE_DIR, "global", "call-graph.json");
+  if (!fs.existsSync(cgPath)) {
+    console.warn("[pages] Warning: call-graph.json missing — Flow/Jump tabs will be limited");
+    return null;
   }
-  return data;
+  return JSON.parse(fs.readFileSync(cgPath, "utf-8"));
 }
 
 function collectSourceFiles(analysisData) {
@@ -74,7 +70,7 @@ function main() {
   execSync("node build.mjs", { cwd: VIEWER_DIR, stdio: "inherit" });
 
   const analysisData = loadAnalysisData();
-  const globalData = loadGlobalData();
+  const callGraph = loadCallGraph();
   const sourceFiles = collectSourceFiles(analysisData);
 
   console.log(`[pages] Analysis files: ${Object.keys(analysisData).length}`);
@@ -100,7 +96,7 @@ function main() {
   const template = fs.readFileSync(path.join(VIEWER_DIR, "index.html"), "utf-8");
   const dataScript = `<script>
 const PREVIEW_DATA = ${safeJson(analysisData)};
-const GLOBAL_DATA = ${safeJson(globalData)};
+const CALL_GRAPH = ${safeJson(callGraph)};
 </script>`;
 
   const html = template

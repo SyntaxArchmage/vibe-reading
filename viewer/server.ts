@@ -1,6 +1,7 @@
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
+import { execSync } from "child_process";
 
 const PORT = parseInt(process.env.PORT || "3457");
 const VIEWER_DIR = path.dirname(new URL(import.meta.url).pathname);
@@ -18,31 +19,41 @@ function loadAnalysisData(): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   for (const file of fs.readdirSync(filesDir)) {
     if (!file.endsWith(".json")) continue;
-    const raw = fs.readFileSync(path.join(filesDir, file), "utf-8");
-    data[file] = JSON.parse(raw);
+    try {
+      const raw = fs.readFileSync(path.join(filesDir, file), "utf-8");
+      data[file] = JSON.parse(raw);
+    } catch (e) {
+      console.warn(`[vibe-reading] Skipping malformed JSON: ${file}`);
+    }
   }
   return data;
 }
 
-function loadGlobalData(): Record<string, unknown> {
-  const globalDir = path.join(vibeDir, "global");
-  if (!fs.existsSync(globalDir)) return {};
-  const data: Record<string, unknown> = {};
-  for (const file of fs.readdirSync(globalDir)) {
-    if (!file.endsWith(".json")) continue;
-    const raw = fs.readFileSync(path.join(globalDir, file), "utf-8");
-    const key = file.replace(/\.json$/, "");
-    data[key] = JSON.parse(raw);
+function loadCallGraph(): unknown {
+  const cgPath = path.join(vibeDir, "global", "call-graph.json");
+  if (!fs.existsSync(cgPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(cgPath, "utf-8"));
+  } catch {
+    return null;
   }
-  return data;
 }
 
-function buildHtml(data: Record<string, unknown>, globalData: Record<string, unknown>): string {
+function buildHtml(data: Record<string, unknown>, callGraph: unknown): string {
   const template = fs.readFileSync(
     path.join(VIEWER_DIR, "index.html"),
     "utf-8"
   );
-  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};\nconst GLOBAL_DATA = ${JSON.stringify(globalData)};</script>`;
+  const liveReload = `<script>
+if (typeof EventSource !== 'undefined') {
+  const es = new EventSource('/api/events');
+  es.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'reload') location.reload();
+  };
+}
+</script>`;
+  const dataScript = `<script>const PREVIEW_DATA = ${JSON.stringify(data)};const CALL_GRAPH = ${JSON.stringify(callGraph)};</script>${liveReload}`;
   return template
     .replace("out/viewer.js", "/viewer.js")
     .replace("<div id=\"root\"></div>", `<div id="root"></div>\n  ${dataScript}`);
@@ -53,12 +64,63 @@ if (!fs.existsSync(vibeDir)) {
   process.exit(1);
 }
 
-const analysisData = loadAnalysisData();
-const globalData = loadGlobalData();
-const html = buildHtml(analysisData, globalData);
+let analysisData = loadAnalysisData();
+let callGraph = loadCallGraph();
+let html = buildHtml(analysisData, callGraph);
+
+const sseClients = new Set<http.ServerResponse>();
+
+const vibeFilesDir = path.join(vibeDir, "files");
+if (fs.existsSync(vibeFilesDir)) {
+  let reloadTimer: ReturnType<typeof setTimeout> | null = null;
+  fs.watch(vibeFilesDir, { persistent: false }, () => {
+    if (reloadTimer) clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(() => {
+      analysisData = loadAnalysisData();
+      callGraph = loadCallGraph();
+      html = buildHtml(analysisData, callGraph);
+      const count = Object.keys(analysisData).length;
+      console.log(`[vibe-reading] Reloaded ${count} analysis files`);
+      for (const client of sseClients) {
+        try { client.write(`data: ${JSON.stringify({ type: "reload", files: count })}\n\n`); }
+        catch { sseClients.delete(client); }
+      }
+    }, 300);
+  });
+}
 
 const server = http.createServer((req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
+
+  if (url.pathname === "/api/events") {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    });
+    res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+    sseClients.add(res);
+    req.on("close", () => sseClients.delete(res));
+    return;
+  }
+
+  if (url.pathname === "/api/health") {
+    const totalEntities = Object.values(analysisData).reduce((s, d: any) => s + (d?.entities?.length || 0), 0);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      status: "ok",
+      project: path.basename(projectRoot),
+      files: Object.keys(analysisData).length,
+      entities: totalEntities,
+      uptime_ms: process.uptime() * 1000 | 0,
+      sse_clients: sseClients.size,
+    }));
+    return;
+  }
 
   if (url.pathname === "/" || url.pathname === "/index.html") {
     res.writeHead(200, { "Content-Type": "text/html" });
@@ -79,8 +141,8 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({ error: "missing ?file= param" }));
       return;
     }
-    const absPath = path.join(projectRoot, filePath);
-    if (!absPath.startsWith(projectRoot) || !fs.existsSync(absPath)) {
+    const absPath = path.resolve(projectRoot, filePath);
+    if (!absPath.startsWith(projectRoot + path.sep) || !fs.existsSync(absPath)) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "file not found" }));
       return;
@@ -88,13 +150,139 @@ const server = http.createServer((req, res) => {
     const content = fs.readFileSync(absPath, "utf-8");
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ file: filePath, content }));
+  } else if (url.pathname === "/api/entities") {
+    const filePath = url.searchParams.get("file");
+    if (filePath) {
+      const jsonName = filePath.replace(/[/\\]/g, "__") + ".json";
+      const fileData = analysisData[jsonName];
+      if (fileData) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(fileData));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "no analysis data for file" }));
+      }
+    } else {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({
+        files: Object.entries(analysisData).map(([key, data]: [string, any]) => ({
+          key,
+          file: data.file,
+          entity_count: data.entities.length,
+        })),
+      }));
+    }
+  } else if (url.pathname === "/api/stats") {
+    const fileCount = Object.keys(analysisData).length;
+    let totalEntities = 0;
+    const typeCounts: Record<string, number> = {};
+    for (const [, data] of Object.entries(analysisData) as [string, any][]) {
+      totalEntities += data.entities.length;
+      for (const e of data.entities) {
+        typeCounts[e.type] = (typeCounts[e.type] || 0) + 1;
+      }
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      project: path.basename(projectRoot),
+      files: fileCount,
+      total_entities: totalEntities,
+      types: typeCounts,
+      call_graph_files: callGraph ? (callGraph as any).files?.length ?? 0 : 0,
+    }));
+  } else if (url.pathname === "/api/export") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="${path.basename(projectRoot)}-vibe-reading.json"`,
+    });
+    res.end(JSON.stringify({
+      project: path.basename(projectRoot),
+      exported_at: new Date().toISOString(),
+      files: analysisData,
+      call_graph: callGraph,
+    }));
+  } else if (url.pathname === "/api/search") {
+    const query = (url.searchParams.get("q") || "").toLowerCase().trim();
+    const typeFilter = url.searchParams.get("type") || null;
+    const limit = Math.min(parseInt(url.searchParams.get("limit") || "50"), 200);
+    if (!query && !typeFilter) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "missing ?q= or ?type= param" }));
+      return;
+    }
+    const results: Array<{ file: string; name: string; type: string; kind: string; line: number; summary: string }> = [];
+    for (const [, data] of Object.entries(analysisData) as [string, any][]) {
+      for (const e of data.entities) {
+        if (typeFilter && e.type !== typeFilter) continue;
+        const name = (e.detail?.name || "").toLowerCase();
+        const summary = (e.summary || "").toLowerCase();
+        if (query && !name.includes(query) && !summary.includes(query)) continue;
+        results.push({
+          file: data.file,
+          name: e.detail?.name || e.summary,
+          type: e.type,
+          kind: e.detail?.kind || "",
+          line: e.anchor.start_line,
+          summary: e.summary,
+        });
+        if (results.length >= limit) break;
+      }
+      if (results.length >= limit) break;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ query, results, count: results.length }));
+  } else if (url.pathname === "/api/blame") {
+    const filePath = url.searchParams.get("file");
+    if (!filePath) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "missing ?file= param" }));
+      return;
+    }
+    const absPath = path.resolve(projectRoot, filePath);
+    if (!absPath.startsWith(projectRoot + path.sep) || !fs.existsSync(absPath)) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "file not found" }));
+      return;
+    }
+    try {
+      const raw = execSync(
+        `git blame --line-porcelain "${absPath}"`,
+        { cwd: projectRoot, maxBuffer: 10 * 1024 * 1024, encoding: "utf-8" }
+      );
+      const lines: Array<{ line: number; author: string; date: string; sha: string; content: string }> = [];
+      let cur: Record<string, string> = {};
+      let lineNum = 0;
+      for (const l of raw.split("\n")) {
+        if (l.startsWith("\t")) {
+          lineNum++;
+          lines.push({
+            line: lineNum,
+            author: cur["author"] || "?",
+            date: cur["author-time"] ? new Date(parseInt(cur["author-time"]) * 1000).toISOString().slice(0, 10) : "?",
+            sha: cur["sha"] || "?",
+            content: l.slice(1),
+          });
+          cur = {};
+        } else {
+          const m = l.match(/^([0-9a-f]{40}) /);
+          if (m) cur["sha"] = m[1].slice(0, 8);
+          const kv = l.match(/^(author|author-time|summary) (.+)/);
+          if (kv) cur[kv[1]] = kv[2];
+        }
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ file: filePath, lines }));
+    } catch {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "git blame failed (not a git repo?)" }));
+    }
   } else {
     res.writeHead(404);
     res.end("Not found");
   }
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, () => {
   console.log(`[vibe-reading] Viewer: http://localhost:${PORT}`);
   console.log(`[vibe-reading] Project: ${projectRoot}`);
   console.log(`[vibe-reading] Loaded ${Object.keys(analysisData).length} analysis files`);

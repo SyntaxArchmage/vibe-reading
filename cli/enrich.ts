@@ -7,6 +7,7 @@ import type { FileAnalysis } from "./types.js";
  *
  * Usage:
  *   npx tsx enrich.ts <project-root> <relative-file-path> '<enrichments-json>'
+ *   npx tsx enrich.ts <project-root> <relative-file-path> --from-file <path-to-json>
  *
  * The enrichments JSON is an array of objects:
  *   [{ "name": "Scheduler", "summary": "...", "description": "..." }, ...]
@@ -41,11 +42,26 @@ interface Enrichment {
 }
 
 function main() {
-  const [projectRoot, relPath, enrichmentsRaw] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const projectRoot = args[0];
+  const relPath = args[1];
+  let enrichmentsRaw: string | undefined;
+
+  if (args[2] === "--from-file" && args[3]) {
+    try {
+      enrichmentsRaw = fs.readFileSync(args[3], "utf-8");
+    } catch {
+      console.error(`[enrich] Cannot read file: ${args[3]}`);
+      process.exit(1);
+    }
+  } else {
+    enrichmentsRaw = args[2];
+  }
 
   if (!projectRoot || !relPath || !enrichmentsRaw) {
     console.error(
-      "Usage: npx tsx enrich.ts <project-root> <relative-file-path> '<enrichments-json>'"
+      "Usage: npx tsx enrich.ts <project-root> <relative-file-path> '<enrichments-json>'\n" +
+      "       npx tsx enrich.ts <project-root> <relative-file-path> --from-file <path>"
     );
     process.exit(1);
   }

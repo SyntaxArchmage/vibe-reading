@@ -50,7 +50,7 @@ def main() -> int:
 
                 tabs = page.locator(".vr-tab").count()
                 if tabs < 4:
-                    errors.append(f"Expected 4 tabs, got {tabs}")
+                    errors.append(f"Expected at least 4 tabs, got {tabs}")
 
                 cards = page.locator(".vr-card").count()
                 if cards < 1:

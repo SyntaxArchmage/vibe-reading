@@ -1,571 +1,289 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import type { DataEntity, FlowDataType, FlowNode, FlowEdge } from "../shared-types";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import type { DataEntity } from "../shared-types";
+
+interface CallGraphFile {
+  file: string;
+  imports: Array<{ source: string; names: string[] }>;
+  exports: string[];
+  calls: Array<{ callee: string; inFunction: string | null }>;
+}
 
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
-  hoveredEntity?: DataEntity | null;
-  onCardHover?: (entity: DataEntity | null) => void;
-  sourceLines?: string[];
-  flowData?: FlowDataType;
   currentFile?: string | null;
-  onNodeClick?: (node: FlowNode) => void;
+  callGraph?: { files: CallGraphFile[] } | null;
+  onFileSelect?: (file: string) => void;
 }
 
-interface LayoutNode {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  node: FlowNode;
-  layer: number;
-}
+const KIND_ICONS: Record<string, string> = {
+  imports: "\u2B05",
+  calls: "\u27A1",
+  exports: "\u2B06",
+};
 
-const NODE_W = 160;
-const NODE_H = 36;
-const LAYER_GAP_X = 200;
-const NODE_GAP_Y = 52;
-const PADDING = 60;
+const KIND_COLORS: Record<string, string> = {
+  imports: "#4fc1ff",
+  calls: "#dcdcaa",
+  exports: "#4ec9b0",
+};
 
-function layoutGraph(
-  nodes: FlowNode[],
-  edges: FlowEdge[],
-  filterFile?: string | null
-): { layoutNodes: LayoutNode[]; layoutEdges: { from: LayoutNode; to: LayoutNode; edge: FlowEdge }[] } {
-  // Filter nodes relevant to current file (and their direct connections)
-  const fileNodes = filterFile
-    ? new Set(nodes.filter(n => n.file === filterFile).map(n => n.id))
-    : new Set(nodes.map(n => n.id));
-
-  // Include connected nodes (1-hop)
-  const connectedNodes = new Set(fileNodes);
-  for (const edge of edges) {
-    if (fileNodes.has(edge.from)) connectedNodes.add(edge.to);
-    if (fileNodes.has(edge.to)) connectedNodes.add(edge.from);
-  }
-
-  const visibleNodes = nodes.filter(n => connectedNodes.has(n.id));
-  const visibleEdges = edges.filter(e => connectedNodes.has(e.from) && connectedNodes.has(e.to));
-
-  if (visibleNodes.length === 0) return { layoutNodes: [], layoutEdges: [] };
-
-  // Topological layering (BFS from roots)
-  const incoming = new Map<string, Set<string>>();
-  const outgoing = new Map<string, Set<string>>();
-  for (const n of visibleNodes) {
-    incoming.set(n.id, new Set());
-    outgoing.set(n.id, new Set());
-  }
-  for (const e of visibleEdges) {
-    incoming.get(e.to)?.add(e.from);
-    outgoing.get(e.from)?.add(e.to);
-  }
-
-  const layers = new Map<string, number>();
-  const queue: string[] = [];
-
-  // Start from nodes with no incoming
-  for (const n of visibleNodes) {
-    if ((incoming.get(n.id)?.size || 0) === 0) {
-      layers.set(n.id, 0);
-      queue.push(n.id);
-    }
-  }
-
-  // BFS to assign layers
-  while (queue.length > 0) {
-    const cur = queue.shift()!;
-    const curLayer = layers.get(cur) || 0;
-    for (const next of outgoing.get(cur) || []) {
-      const existing = layers.get(next);
-      if (existing === undefined || existing < curLayer + 1) {
-        layers.set(next, curLayer + 1);
-        queue.push(next);
-      }
-    }
-  }
-
-  // Assign layer 0 to any unassigned (cycles)
-  for (const n of visibleNodes) {
-    if (!layers.has(n.id)) layers.set(n.id, 0);
-  }
-
-  // Group by layer
-  const layerGroups = new Map<number, FlowNode[]>();
-  for (const n of visibleNodes) {
-    const layer = layers.get(n.id) || 0;
-    const group = layerGroups.get(layer) || [];
-    group.push(n);
-    layerGroups.set(layer, group);
-  }
-
-  // Position nodes
-  const nodeMap = new Map<string, LayoutNode>();
-  for (const [layer, group] of layerGroups) {
-    const x = PADDING + layer * LAYER_GAP_X;
-    const totalHeight = group.length * NODE_GAP_Y;
-    const startY = PADDING + Math.max(0, (400 - totalHeight) / 2);
-
-    for (let i = 0; i < group.length; i++) {
-      const n = group[i];
-      const y = startY + i * NODE_GAP_Y;
-      const ln: LayoutNode = { id: n.id, x, y, width: NODE_W, height: NODE_H, node: n, layer };
-      nodeMap.set(n.id, ln);
-    }
-  }
-
-  const layoutNodes = Array.from(nodeMap.values());
-  const layoutEdges = visibleEdges
-    .map(e => {
-      const from = nodeMap.get(e.from);
-      const to = nodeMap.get(e.to);
-      if (from && to) return { from, to, edge: e };
-      return null;
-    })
-    .filter(Boolean) as { from: LayoutNode; to: LayoutNode; edge: FlowEdge }[];
-
-  return { layoutNodes, layoutEdges };
-}
-
-export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const [selectedSegment, setSelectedSegment] = useState<number>(0);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const dragging = useRef(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-
-  const [showGlobal, setShowGlobal] = useState(false);
-
-  const { layoutNodes, layoutEdges } = useMemo(() => {
-    if (!flowData) return { layoutNodes: [], layoutEdges: [] };
-    return layoutGraph(flowData.nodes, flowData.edges, showGlobal ? null : currentFile);
-  }, [flowData, currentFile, showGlobal]);
-
-  const segmentPath = useMemo(() => {
-    if (!flowData || flowData.segments.length === 0) return new Set<string>();
-    const seg = flowData.segments[selectedSegment];
-    return seg ? new Set(seg.path) : new Set<string>();
-  }, [flowData, selectedSegment]);
-
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    ctx.save();
-    ctx.translate(offset.x, offset.y);
-    ctx.scale(zoom, zoom);
-
-    // Draw file group backgrounds
-    const fileGroups = new Map<string, LayoutNode[]>();
-    for (const ln of layoutNodes) {
-      const group = fileGroups.get(ln.node.file) || [];
-      group.push(ln);
-      fileGroups.set(ln.node.file, group);
-    }
-
-    for (const [file, nodes] of fileGroups) {
-      if (nodes.length < 2) continue;
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const n of nodes) {
-        minX = Math.min(minX, n.x);
-        minY = Math.min(minY, n.y);
-        maxX = Math.max(maxX, n.x + n.width);
-        maxY = Math.max(maxY, n.y + n.height);
-      }
-      const pad = 12;
-      ctx.beginPath();
-      ctx.roundRect(minX - pad, minY - pad, maxX - minX + pad * 2, maxY - minY + pad * 2, 8);
-      ctx.fillStyle = file === currentFile ? "rgba(0, 122, 204, 0.04)" : "rgba(255, 255, 255, 0.015)";
-      ctx.strokeStyle = file === currentFile ? "rgba(0, 122, 204, 0.15)" : "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
-      ctx.fill();
-      ctx.stroke();
-
-      const shortName = file.split("/").pop() || file;
-      ctx.font = "9px -apple-system, sans-serif";
-      ctx.fillStyle = file === currentFile ? "rgba(0, 122, 204, 0.5)" : "rgba(255, 255, 255, 0.2)";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText(shortName, minX - pad + 4, minY - pad + 3);
-    }
-
-    // Draw class container groupings
-    const classGroups = new Map<string, LayoutNode[]>();
-    for (const ln of layoutNodes) {
-      if (ln.node.class) {
-        const key = `${ln.node.file}::${ln.node.class}`;
-        const group = classGroups.get(key) || [];
-        group.push(ln);
-        classGroups.set(key, group);
-      }
-    }
-
-    for (const [key, nodes] of classGroups) {
-      if (nodes.length < 2) continue;
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const n of nodes) {
-        minX = Math.min(minX, n.x);
-        minY = Math.min(minY, n.y);
-        maxX = Math.max(maxX, n.x + n.width);
-        maxY = Math.max(maxY, n.y + n.height);
-      }
-      const pad = 8;
-      ctx.beginPath();
-      ctx.roundRect(minX - pad, minY - pad - 12, maxX - minX + pad * 2, maxY - minY + pad * 2 + 12, 5);
-      ctx.fillStyle = "rgba(220, 220, 170, 0.03)";
-      ctx.strokeStyle = "rgba(220, 220, 170, 0.15)";
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.fill();
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      const className = key.split("::").pop() || "";
-      ctx.font = "bold 9px -apple-system, sans-serif";
-      ctx.fillStyle = "rgba(220, 220, 170, 0.5)";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText(`class ${className}`, minX - pad + 4, minY - pad - 10);
-    }
-
-    // Draw edges
-    for (const { from, to, edge } of layoutEdges) {
-      const fromX = from.x + from.width;
-      const fromY = from.y + from.height / 2;
-      const toX = to.x;
-      const toY = to.y + to.height / 2;
-
-      const inSegment = segmentPath.has(from.id) && segmentPath.has(to.id);
-      const isHovered = hoveredNode === from.id || hoveredNode === to.id;
-
-      ctx.beginPath();
-      ctx.strokeStyle = inSegment ? "#4ec9b0" : isHovered ? "#007acc88" : "#444";
-      ctx.lineWidth = inSegment ? 2 : 1;
-      ctx.setLineDash(edge.type === "instantiate" ? [4, 3] : []);
-
-      // Bezier curve
-      const cx = (fromX + toX) / 2;
-      ctx.moveTo(fromX, fromY);
-      ctx.bezierCurveTo(cx, fromY, cx, toY, toX, toY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Arrow
-      const angle = Math.atan2(toY - fromY, toX - cx);
-      ctx.beginPath();
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.moveTo(toX, toY);
-      ctx.lineTo(toX - 8 * Math.cos(angle - 0.3), toY - 8 * Math.sin(angle - 0.3));
-      ctx.lineTo(toX - 8 * Math.cos(angle + 0.3), toY - 8 * Math.sin(angle + 0.3));
-      ctx.fill();
-    }
-
-    // Architecture layer color derived from path
-    function getLayerColor(file: string): string {
-      if (file.includes("/layers/") || file.includes("/modules/")) return "#4ec9b0";
-      if (file.includes("/engine/") || file.includes("/core/")) return "#dcdcaa";
-      if (file.includes("/models/") || file.includes("/model/")) return "#9cdcfe";
-      if (file.includes("/api/") || file.includes("/server/")) return "#c586c0";
-      if (file.includes("/utils/") || file.includes("/lib/")) return "#ce9178";
-      return "#888";
-    }
-
-    // Draw nodes
-    for (const ln of layoutNodes) {
-      const inSegment = segmentPath.has(ln.id);
-      const isHovered = hoveredNode === ln.id;
-      const isFileLocal = ln.node.file === currentFile;
-      const layerColor = getLayerColor(ln.node.file);
-
-      ctx.beginPath();
-      ctx.roundRect(ln.x, ln.y, ln.width, ln.height, 6);
-
-      if (inSegment) {
-        ctx.fillStyle = "#1a2a2a";
-        ctx.strokeStyle = "#4ec9b0";
-        ctx.lineWidth = 2;
-      } else if (isHovered) {
-        ctx.fillStyle = "#1a2332";
-        ctx.strokeStyle = "#007acc";
-        ctx.lineWidth = 2;
-      } else if (isFileLocal) {
-        ctx.fillStyle = "#252526";
-        ctx.strokeStyle = "#555";
-        ctx.lineWidth = 1;
-      } else {
-        ctx.fillStyle = "#1e1e1e";
-        ctx.strokeStyle = "#3c3c3c";
-        ctx.lineWidth = 1;
-      }
-
-      ctx.fill();
-      ctx.stroke();
-
-      // Node label
-      const label = ln.node.class
-        ? `${ln.node.class}.${ln.node.name}`
-        : ln.node.name;
-      const displayLabel = label.length > 20 ? label.slice(0, 18) + "…" : label;
-
-      ctx.font = "11px 'Cascadia Code', Consolas, monospace";
-      ctx.fillStyle = inSegment ? "#4ec9b0" : isFileLocal ? "#ccc" : "#888";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(displayLabel, ln.x + ln.width / 2, ln.y + ln.height / 2);
-
-      // Architecture layer indicator (left bar)
-      ctx.fillStyle = layerColor;
-      ctx.fillRect(ln.x, ln.y, 3, ln.height);
-    }
-
-    ctx.restore();
-  }, [layoutNodes, layoutEdges, offset, zoom, hoveredNode, segmentPath, currentFile]);
-
-  useEffect(() => { draw(); }, [draw]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const observer = new ResizeObserver(() => draw());
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [draw]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (dragging.current) {
-      setOffset(prev => ({
-        x: prev.x + e.movementX,
-        y: prev.y + e.movementY,
-      }));
-      return;
-    }
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left - offset.x) / zoom;
-    const my = (e.clientY - rect.top - offset.y) / zoom;
-
-    let found: string | null = null;
-    for (const ln of layoutNodes) {
-      if (mx >= ln.x && mx <= ln.x + ln.width && my >= ln.y && my <= ln.y + ln.height) {
-        found = ln.id;
-        break;
-      }
-    }
-    setHoveredNode(found);
-    if (containerRef.current) {
-      containerRef.current.style.cursor = found ? "pointer" : "grab";
-    }
-  }, [layoutNodes, offset, zoom]);
-
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.max(0.3, Math.min(3, prev * delta)));
-  }, []);
-
-  if (!flowData || layoutNodes.length === 0) {
-    return (
-      <div className="vr-no-cards">
-        <p>No flow data available.</p>
-        <p style={{ fontSize: "11px", opacity: 0.6 }}>
-          Run: <code>npx tsx extract-flow.ts &lt;project&gt;</code>
-        </p>
-      </div>
-    );
-  }
+function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEntity) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const kind = (entity.detail.kind as string) || "flow";
+  const icon = KIND_ICONS[kind] || "\u2194";
+  const color = KIND_COLORS[kind] || "#b5cea8";
 
   return (
-    <div className="vr-flow-panel">
-      <style>{flowStyles}</style>
-
-      {/* Controls bar */}
-      <div className="vr-flow-segments">
-        {flowData.segments.map((seg, i) => (
-          <button
-            key={i}
-            className={`vr-flow-seg-btn ${i === selectedSegment ? "vr-flow-seg-btn--active" : ""}`}
-            onClick={() => setSelectedSegment(i)}
-            title={seg.description}
-          >
-            {seg.name}
-          </button>
-        ))}
-        <button
-          className={`vr-flow-seg-btn ${selectedSegment === -1 ? "vr-flow-seg-btn--active" : ""}`}
-          onClick={() => setSelectedSegment(-1)}
-        >
-          None
-        </button>
-        <span className="vr-flow-sep" />
-        <button
-          className={`vr-flow-scope-btn ${showGlobal ? "vr-flow-scope-btn--active" : ""}`}
-          onClick={() => setShowGlobal(!showGlobal)}
-          title={showGlobal ? "Show file-local + neighbors" : "Show full project graph"}
-        >
-          {showGlobal ? "🌐 Global" : "📄 File"}
-        </button>
-      </div>
-
-      {/* Canvas */}
+    <motion.div
+      className="vr-card"
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+    >
       <div
-        ref={containerRef}
-        className="vr-flow-canvas-wrap"
-        onMouseDown={(e) => {
-          dragging.current = true;
-          dragStart.current = { x: e.clientX, y: e.clientY };
-        }}
-        onMouseUp={(e) => {
-          const moved = Math.abs(e.clientX - dragStart.current.x) + Math.abs(e.clientY - dragStart.current.y);
-          dragging.current = false;
-          if (moved < 5 && hoveredNode && onNodeClick) {
-            const ln = layoutNodes.find(n => n.id === hoveredNode);
-            if (ln) onNodeClick(ln.node);
-          }
-        }}
-        onMouseLeave={() => { dragging.current = false; }}
-        onMouseMove={handleMouseMove}
-        onWheel={handleWheel}
+        className="vr-card-header"
+        onClick={() => { onClick(entity); setExpanded(!expanded); }}
       >
-        <canvas ref={canvasRef} className="vr-flow-canvas" />
+        <div className="vr-card-left">
+          <span className="vr-card-badge" style={{ color, borderColor: color + "55" }}>
+            {icon} {kind}
+          </span>
+          <div className="vr-card-title-group">
+            <span className="vr-card-summary">{entity.summary}</span>
+          </div>
+        </div>
+        <div className="vr-card-meta">
+          <span className="vr-card-loc">
+            L{entity.anchor.start_line}–{entity.anchor.end_line}
+          </span>
+          <span className={`vr-card-chevron ${expanded ? "vr-card-chevron--open" : ""}`}>
+            &#x25B8;
+          </span>
+        </div>
       </div>
 
-      {/* Info bar */}
-      <div className="vr-flow-info">
-        <span>{layoutNodes.length} nodes</span>
-        <span>{layoutEdges.length} edges</span>
-        <span>{Math.round(zoom * 100)}%</span>
-        {hoveredNode && (
-          <span className="vr-flow-info-node">
-            {layoutNodes.find(n => n.id === hoveredNode)?.node.class
-              ? `${layoutNodes.find(n => n.id === hoveredNode)!.node.class}.${layoutNodes.find(n => n.id === hoveredNode)!.node.name}`
-              : layoutNodes.find(n => n.id === hoveredNode)?.node.name}
-          </span>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            className="vr-card-detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {kind === "imports" && (
+              <>
+                {(entity.detail.local_deps as string[] | undefined)?.length ? (
+                  <div style={{ marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, color: "#888", textTransform: "uppercase" }}>Local</span>
+                    <div className="vr-card-chips" style={{ marginTop: 2 }}>
+                      {(entity.detail.local_deps as string[]).map((d) => (
+                        <span key={d} className="vr-card-chip">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {(entity.detail.external_deps as string[] | undefined)?.length ? (
+                  <div>
+                    <span style={{ fontSize: 10, color: "#888", textTransform: "uppercase" }}>External</span>
+                    <div className="vr-card-chips" style={{ marginTop: 2 }}>
+                      {(entity.detail.external_deps as string[]).map((d) => (
+                        <span key={d} className="vr-card-chip">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+            {kind === "calls" && (
+              <div className="vr-card-chips">
+                {(entity.detail.callees as string[])?.map((c) => (
+                  <span key={c} className="vr-card-chip" style={{ fontFamily: "monospace" }}>{c}</span>
+                ))}
+              </div>
+            )}
+            {kind === "exports" && (
+              <div className="vr-card-chips">
+                {(entity.detail.names as string[])?.map((n) => (
+                  <span key={n} className="vr-card-chip" style={{ fontFamily: "monospace" }}>{n}</span>
+                ))}
+              </div>
+            )}
+          </motion.div>
         )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+const diagramStyles: Record<string, React.CSSProperties> = {
+  container: { display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 8px", marginBottom: 8, borderBottom: "1px solid #333" },
+  node: { padding: "4px 10px", borderRadius: 4, fontSize: 11, fontFamily: "monospace", textAlign: "center" as const, maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const },
+  connector: { width: 1, height: 12, background: "#555" },
+  label: { fontSize: 9, color: "#666", textTransform: "uppercase" as const, marginBottom: 2 },
+};
+
+function FlowDiagram({ imports, calls, exports }: {
+  imports: DataEntity[];
+  calls: DataEntity[];
+  exports: DataEntity[];
+}) {
+  const localDeps = imports.flatMap(e => (e.detail.local_deps as string[]) || []);
+  const externalDeps = imports.flatMap(e => (e.detail.external_deps as string[]) || []);
+  const callees = calls.flatMap(e => (e.detail.callees as string[]) || []);
+  const exportNames = exports.flatMap(e => (e.detail.names as string[]) || []);
+
+  const hasUp = localDeps.length > 0 || externalDeps.length > 0;
+  const hasDown = exportNames.length > 0;
+
+  return (
+    <div style={diagramStyles.container}>
+      {hasUp && (
+        <>
+          <div style={diagramStyles.label}>imports ({localDeps.length + externalDeps.length})</div>
+          <div style={{ ...diagramStyles.node, background: "#1a2a3a", color: "#4fc1ff", border: "1px solid #4fc1ff33" }}>
+            {localDeps.length > 0 && <span>{localDeps.slice(0, 3).join(", ")}{localDeps.length > 3 ? ` +${localDeps.length - 3}` : ""}</span>}
+            {localDeps.length > 0 && externalDeps.length > 0 && <span> | </span>}
+            {externalDeps.length > 0 && <span style={{ color: "#888" }}>{externalDeps.slice(0, 2).join(", ")}{externalDeps.length > 2 ? ` +${externalDeps.length - 2}` : ""}</span>}
+          </div>
+          <div style={diagramStyles.connector} />
+          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
+        </>
+      )}
+      <div style={{ ...diagramStyles.node, background: "#2a2d2e", color: "#d4d4d4", border: "1px solid #555", fontWeight: "bold" }}>
+        this file
+        {callees.length > 0 && <span style={{ color: "#dcdcaa", fontWeight: "normal" }}> → {callees.slice(0, 3).join(", ")}{callees.length > 3 ? ` +${callees.length - 3}` : ""}</span>}
       </div>
+      {hasDown && (
+        <>
+          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
+          <div style={diagramStyles.connector} />
+          <div style={diagramStyles.label}>exports ({exportNames.length})</div>
+          <div style={{ ...diagramStyles.node, background: "#1a3a2a", color: "#4ec9b0", border: "1px solid #4ec9b033" }}>
+            {exportNames.slice(0, 4).join(", ")}{exportNames.length > 4 ? ` +${exportNames.length - 4}` : ""}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-const flowStyles = `
-  .vr-flow-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: string; callGraph: { files: CallGraphFile[] }; onFileSelect?: (file: string) => void }) {
+  const cgEntry = callGraph.files.find(f => f.file === currentFile);
+  if (!cgEntry) return null;
+
+  const importers = callGraph.files
+    .map(f => {
+      const matchingImps = f.imports.filter(imp => {
+        const source = imp.source.replace(/^\.\//, "");
+        return currentFile.endsWith(source) || currentFile.endsWith(source + ".ts") || currentFile.endsWith(source + ".js");
+      });
+      if (matchingImps.length === 0) return null;
+      const names = matchingImps.flatMap(imp => imp.names);
+      return { file: f.file, names };
+    })
+    .filter((x): x is { file: string; names: string[] } => x !== null);
+
+  const dependencies = cgEntry.imports
+    .filter(imp => imp.source.startsWith("."))
+    .map(imp => {
+      const resolved = callGraph.files.find(f => {
+        const source = imp.source.replace(/^\.\//, "");
+        return f.file.endsWith(source) || f.file.endsWith(source + ".ts") || f.file.endsWith(source + ".js") || f.file.endsWith(source + ".tsx");
+      });
+      return { source: imp.source, names: imp.names, resolved: resolved?.file };
+    });
+
+  const circular = dependencies.some(dep =>
+    dep.resolved && importers.some(imp => imp.file === dep.resolved)
+  );
+
+  if (importers.length === 0 && dependencies.length === 0) return null;
+
+  return (
+    <div style={{ padding: "8px 10px", borderBottom: "1px solid #333", fontSize: 11 }}>
+      {circular && (
+        <div style={{ color: "#f44747", fontSize: 10, marginBottom: 6, padding: "2px 6px",
+                      background: "#3a1a1a", borderRadius: 3, border: "1px solid #f4474733" }}>
+          &#x26A0; Circular dependency detected
+        </div>
+      )}
+      {dependencies.length > 0 && (
+        <>
+          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
+            Depends on ({dependencies.length})
+          </div>
+          {dependencies.slice(0, 6).map(dep => (
+            <div
+              key={dep.source}
+              style={{ color: dep.resolved ? "#9cdcfe" : "#666", padding: "2px 0", cursor: dep.resolved && onFileSelect ? "pointer" : "default" }}
+              onClick={() => dep.resolved && onFileSelect?.(dep.resolved)}
+            >
+              {dep.resolved || dep.source}
+              {dep.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({dep.names.join(", ")})</span>}
+            </div>
+          ))}
+          {dependencies.length > 6 && <div style={{ color: "#666" }}>+{dependencies.length - 6} more</div>}
+        </>
+      )}
+      {importers.length > 0 && (
+        <>
+          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4, marginTop: dependencies.length > 0 ? 8 : 0 }}>
+            Imported by ({importers.length})
+          </div>
+          {importers.slice(0, 8).map(f => (
+            <div
+              key={f.file}
+              style={{ color: "#9cdcfe", padding: "2px 0", cursor: onFileSelect ? "pointer" : "default" }}
+              onClick={() => onFileSelect?.(f.file)}
+            >
+              {f.file}
+              {f.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({f.names.slice(0, 3).join(", ")}{f.names.length > 3 ? ` +${f.names.length - 3}` : ""})</span>}
+            </div>
+          ))}
+          {importers.length > 8 && <div style={{ color: "#666" }}>+{importers.length - 8} more</div>}
+        </>
+      )}
+    </div>
+  );
+}
+
+export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileSelect }: Props) {
+  if (entities.length === 0) {
+    return <div className="vr-no-cards">No flow cards for this file.</div>;
   }
 
-  .vr-flow-segments {
-    display: flex;
-    gap: 4px;
-    padding: 6px 8px;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #333;
-  }
+  const imports = entities.filter((e) => e.detail.kind === "imports");
+  const calls = entities.filter((e) => e.detail.kind === "calls");
+  const exports = entities.filter((e) => e.detail.kind === "exports");
+  const ordered = [...imports, ...calls, ...exports];
 
-  .vr-flow-seg-btn {
-    padding: 3px 10px;
-    background: rgba(78, 201, 176, 0.06);
-    border: 1px solid #3c3c3c;
-    border-radius: 12px;
-    color: #888;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
+  const localDeps = imports.flatMap(e => (e.detail.local_deps as string[]) || []);
+  const externalDeps = imports.flatMap(e => (e.detail.external_deps as string[]) || []);
+  const exportNames = exports.flatMap(e => (e.detail.names as string[]) || []);
+  const totalImports = localDeps.length + externalDeps.length;
 
-  .vr-flow-seg-btn:hover {
-    color: #ccc;
-    border-color: #555;
-  }
-
-  .vr-flow-seg-btn--active {
-    color: #4ec9b0;
-    border-color: #4ec9b0;
-    background: rgba(78, 201, 176, 0.12);
-  }
-
-  .vr-flow-sep {
-    width: 1px;
-    height: 16px;
-    background: #3c3c3c;
-    align-self: center;
-    margin: 0 4px;
-  }
-
-  .vr-flow-scope-btn {
-    padding: 3px 10px;
-    background: rgba(156, 220, 254, 0.06);
-    border: 1px solid #3c3c3c;
-    border-radius: 12px;
-    color: #888;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-
-  .vr-flow-scope-btn:hover {
-    color: #ccc;
-    border-color: #555;
-  }
-
-  .vr-flow-scope-btn--active {
-    color: #9cdcfe;
-    border-color: #9cdcfe;
-    background: rgba(156, 220, 254, 0.12);
-  }
-
-  .vr-flow-canvas-wrap {
-    flex: 1;
-    overflow: hidden;
-    cursor: grab;
-    position: relative;
-  }
-
-  .vr-flow-canvas-wrap:active {
-    cursor: grabbing;
-  }
-
-  .vr-flow-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .vr-flow-info {
-    display: flex;
-    gap: 12px;
-    padding: 4px 10px;
-    font-size: 10px;
-    color: #666;
-    border-top: 1px solid #333;
-    flex-shrink: 0;
-  }
-
-  .vr-flow-info-node {
-    color: #4ec9b0;
-    font-family: 'Cascadia Code', Consolas, monospace;
-    margin-left: auto;
-  }
-`;
+  return (
+    <div>
+      <FlowDiagram imports={imports} calls={calls} exports={exports} />
+      {(totalImports > 0 || exportNames.length > 0) && (
+        <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "0 0 6px" }}>
+          {totalImports} imports ({localDeps.length} local) · {exportNames.length} exports
+          {totalImports > 0 && exportNames.length > 0 && (
+            <span> · ratio {(exportNames.length / totalImports).toFixed(1)}</span>
+          )}
+        </div>
+      )}
+      {currentFile && callGraph && <CrossFileInfo currentFile={currentFile} callGraph={callGraph} onFileSelect={onFileSelect} />}
+      <AnimatePresence mode="popLayout">
+        {ordered.map((e, i) => (
+          <FlowCard key={`flow-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}

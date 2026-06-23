@@ -1,472 +1,265 @@
-import { useState, useMemo } from "react";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 
-interface EntityHistory {
-  id: string;
-  file: string;
-  name: string;
-  line_range: [number, number];
-  created?: { commit: string; author: string; date: string; message: string };
-  last_modified?: { commit: string; author: string; date: string; message: string };
-  modification_count: number;
-  authors: string[];
-  primary_author?: string;
-  age_days: number;
-  key_changes: { commit: string; date: string; message: string; author: string }[];
-}
-
-interface HistoryDataType {
-  entities: EntityHistory[];
-  file_stats: Record<string, { commits: number; authors: string[]; first_commit: string; last_commit: string }>;
+interface BlameLine {
+  line: number;
+  author: string;
+  date: string;
+  sha: string;
+  content: string;
 }
 
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
-  hoveredEntity?: DataEntity | null;
-  onCardHover?: (entity: DataEntity | null) => void;
-  sourceLines?: string[];
-  historyData?: HistoryDataType;
-  currentFile?: string | null;
+  currentFile?: string;
 }
 
-type SortKey = "name" | "age" | "modifications" | "authors";
+const KIND_ICONS: Record<string, string> = {
+  file_history: "\u{1F4C5}",
+  recent_changes: "\u{1F504}",
+  hot_spot: "\u{1F525}",
+};
 
-function getActivityLevel(ent: EntityHistory): { label: string; icon: string; color: string } {
-  if (ent.age_days < 30 || ent.modification_count >= 10) return { label: "Active", icon: "🔥", color: "#e06c4c" };
-  if (ent.age_days < 90 || ent.modification_count >= 5) return { label: "Recent", icon: "⚡", color: "#dcdcaa" };
-  return { label: "Stable", icon: "💤", color: "#6a9955" };
-}
+const KIND_COLORS: Record<string, string> = {
+  file_history: "#9cdcfe",
+  recent_changes: "#dcdcaa",
+  hot_spot: "#f44747",
+};
 
-export function HistoryTab({ entities, historyData, currentFile, onCardClick }: Props) {
-  const [sortBy, setSortBy] = useState<SortKey>("modifications");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [expandedCommit, setExpandedCommit] = useState<string | null>(null);
+function HistoryCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEntity) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const kind = (entity.detail.kind as string) || "history";
+  const icon = KIND_ICONS[kind] || "\u{1F4DC}";
+  const color = KIND_COLORS[kind] || "#b5cea8";
 
-  const fileEntities = useMemo(() => {
-    if (!historyData || !currentFile) return [];
-    return historyData.entities
-      .filter(e => e.file === currentFile)
-      .sort((a, b) => {
-        switch (sortBy) {
-          case "age": return b.age_days - a.age_days;
-          case "modifications": return b.modification_count - a.modification_count;
-          case "authors": return b.authors.length - a.authors.length;
-          default: return a.name.localeCompare(b.name);
-        }
-      });
-  }, [historyData, currentFile, sortBy]);
-
-  const fileStat = currentFile ? historyData?.file_stats[currentFile] : null;
-
-  if (!historyData || fileEntities.length === 0) {
-    return (
-      <div className="vr-no-cards">
-        <p>No history data available.</p>
-        <p style={{ fontSize: "11px", opacity: 0.6 }}>
-          Run: <code>npx tsx extract-history.ts &lt;project&gt;</code>
-        </p>
+  return (
+    <motion.div
+      className="vr-card"
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div
+        className="vr-card-header"
+        onClick={() => { onClick(entity); setExpanded(!expanded); }}
+      >
+        <div className="vr-card-left">
+          <span className="vr-card-badge" style={{ color, borderColor: color + "55" }}>
+            {icon} {kind.replace(/_/g, " ")}
+          </span>
+          <div className="vr-card-title-group">
+            <span className="vr-card-summary">{entity.summary}</span>
+          </div>
+        </div>
+        <div className="vr-card-meta">
+          <span className={`vr-card-chevron ${expanded ? "vr-card-chevron--open" : ""}`}>
+            &#x25B8;
+          </span>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            className="vr-card-detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {kind === "file_history" && (
+              <div style={{ fontSize: 12, lineHeight: 1.6 }}>
+                <div><strong>Last changed:</strong> {formatDate(entity.detail.last_modified as string)}</div>
+                <div><strong>By:</strong> {entity.detail.last_author as string}</div>
+                <div><strong>Message:</strong> {entity.detail.last_message as string}</div>
+                <div><strong>Total commits:</strong> {entity.detail.total_commits as number}</div>
+                {entity.detail.created_at ? (
+                  <div><strong>Created:</strong> {formatDate(String(entity.detail.created_at))}</div>
+                ) : null}
+              </div>
+            )}
+            {kind === "recent_changes" && (
+              <div style={{ fontSize: 11, fontFamily: "monospace" }}>
+                {(entity.detail.commits as Array<{ hash: string; date: string; author: string; message: string }>)?.map((c) => (
+                  <div key={c.hash} style={{ padding: "3px 0", borderBottom: "1px solid #333" }}>
+                    <span style={{ color: "#dcdcaa" }}>{c.hash}</span>{" "}
+                    <span style={{ color: "#666" }}>{formatDate(c.date)}</span>{" "}
+                    <span>{c.message}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {kind === "hot_spot" && (
+              <p className="vr-card-desc">
+                This file has been actively modified ({entity.detail.recent_count as number} changes
+                in the last {entity.detail.period_days as number} days). Consider reviewing for stability.
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function formatDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const now = Date.now();
+    const diff = now - d.getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return "today";
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    if (days < 365) return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return iso;
+  }
+}
+
+function BlameView({ file }: { file: string }) {
+  const [lines, setLines] = useState<BlameLine[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchBlame = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/blame?file=${encodeURIComponent(file)}`);
+      const data = await res.json();
+      if (data.error) { setError(data.error); return; }
+      setLines(data.lines);
+    } catch (e) {
+      setError("Failed to fetch blame data");
+    } finally {
+      setLoading(false);
+    }
+  }, [file]);
+
+  if (!lines && !loading && !error) {
+    return (
+      <button onClick={fetchBlame} style={blameButtonStyle}>
+        Show Git Blame
+      </button>
     );
   }
 
+  if (loading) return <div style={{ color: "#888", fontSize: 12, padding: 8 }}>Loading blame...</div>;
+  if (error) return <div style={{ color: "#f44747", fontSize: 12, padding: 8 }}>{error}</div>;
+
+  const authors = [...new Set(lines!.map(l => l.author))];
+  const authorColors: Record<string, string> = {};
+  const palette = ["#4ec9b0", "#dcdcaa", "#9cdcfe", "#ce9178", "#c586c0", "#b5cea8", "#569cd6", "#d4d4d4"];
+  authors.forEach((a, i) => { authorColors[a] = palette[i % palette.length]; });
+
   return (
-    <div className="vr-history-panel">
-      <style>{historyStyles}</style>
-
-      {/* File summary */}
-      {fileStat && (
-        <div className="vr-history-file-summary">
-          <span className="vr-history-stat">
-            <strong>{fileStat.commits}</strong> commits
-          </span>
-          <span className="vr-history-stat">
-            <strong>{fileStat.authors.length}</strong> author{fileStat.authors.length !== 1 ? "s" : ""}
-          </span>
-          <span className="vr-history-stat">
-            {fileStat.first_commit} → {fileStat.last_commit}
-          </span>
+    <div style={{ fontSize: 11, fontFamily: "monospace", maxHeight: 400, overflowY: "auto" }}>
+      <div style={{ display: "flex", gap: 8, padding: "4px 0", borderBottom: "1px solid #333", marginBottom: 4 }}>
+        <span style={{ width: 30, color: "#666", flexShrink: 0 }}>Line</span>
+        <span style={{ width: 70, color: "#666", flexShrink: 0 }}>SHA</span>
+        <span style={{ width: 90, color: "#666", flexShrink: 0 }}>Author</span>
+        <span style={{ width: 80, color: "#666", flexShrink: 0 }}>Date</span>
+        <span style={{ color: "#666" }}>Code</span>
+      </div>
+      {lines!.map(l => (
+        <div key={l.line} style={{ display: "flex", gap: 8, padding: "1px 0" }}>
+          <span style={{ width: 30, color: "#666", textAlign: "right", flexShrink: 0 }}>{l.line}</span>
+          <span style={{ width: 70, color: "#dcdcaa", flexShrink: 0 }}>{l.sha}</span>
+          <span style={{ width: 90, color: authorColors[l.author] || "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flexShrink: 0 }}>{l.author}</span>
+          <span style={{ width: 80, color: "#888", flexShrink: 0 }}>{l.date}</span>
+          <span style={{ color: "#d4d4d4", whiteSpace: "pre", overflow: "hidden", textOverflow: "ellipsis" }}>{l.content}</span>
         </div>
-      )}
+      ))}
+    </div>
+  );
+}
 
-      {/* Sort controls */}
-      <div className="vr-history-sort">
-        {(["modifications", "age", "authors", "name"] as SortKey[]).map(key => (
-          <button
-            key={key}
-            className={`vr-history-sort-btn ${sortBy === key ? "vr-history-sort-btn--active" : ""}`}
-            onClick={() => setSortBy(key)}
-          >
-            {key === "modifications" ? "Changes" : key.charAt(0).toUpperCase() + key.slice(1)}
-          </button>
+const blameButtonStyle: React.CSSProperties = {
+  background: "#2d2d2d",
+  color: "#9cdcfe",
+  border: "1px solid #444",
+  borderRadius: 4,
+  padding: "6px 12px",
+  cursor: "pointer",
+  fontSize: 12,
+  width: "100%",
+  marginTop: 8,
+};
+
+function CommitTimeline({ commits }: { commits: Array<{ date: string }> }) {
+  if (!commits || commits.length < 2) return null;
+  const now = Date.now();
+  const WEEKS = 12;
+  const buckets = new Array(WEEKS).fill(0);
+  for (const c of commits) {
+    const age = now - new Date(c.date).getTime();
+    const week = Math.floor(age / (7 * 86400000));
+    if (week >= 0 && week < WEEKS) buckets[WEEKS - 1 - week]++;
+  }
+  const max = Math.max(...buckets, 1);
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 24, padding: "4px 8px" }}
+         title={`Commit frequency over last ${WEEKS} weeks`}>
+      {buckets.map((v, i) => (
+        <div key={i} style={{
+          flex: 1, background: v > 0 ? "#4ec9b0" : "#333",
+          height: `${Math.max((v / max) * 100, 4)}%`, borderRadius: 1, minHeight: 2, opacity: v > 0 ? 0.7 : 0.3 }} />
+      ))}
+    </div>
+  );
+}
+
+function AuthorBar({ commits }: { commits: Array<{ author: string }> }) {
+  if (!commits || commits.length < 2) return null;
+  const counts: Record<string, number> = {};
+  for (const c of commits) counts[c.author] = (counts[c.author] || 0) + 1;
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const total = commits.length;
+  const palette = ["#4ec9b0", "#dcdcaa", "#9cdcfe", "#ce9178", "#c586c0", "#b5cea8"];
+  return (
+    <div style={{ padding: "2px 8px", fontSize: 10 }}>
+      <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden" }}>
+        {sorted.map(([author, count], i) => (
+          <div key={author} title={`${author}: ${count} commits`}
+               style={{ width: `${(count / total) * 100}%`, background: palette[i % palette.length] }} />
         ))}
       </div>
-
-      {/* Entity list */}
-      <div className="vr-history-list">
-        {fileEntities.map(ent => {
-          const isExpanded = expandedId === ent.id;
-          const activity = getActivityLevel(ent);
-          const matchingEntity = entities.find(e =>
-            e.anchor.start_line === ent.line_range[0] && (e.detail?.name as string) === ent.name
-          );
-
-          return (
-            <div
-              key={ent.id}
-              className={`vr-history-item ${isExpanded ? "vr-history-item--expanded" : ""}`}
-              style={{ borderLeftColor: activity.color }}
-            >
-              <div
-                className="vr-history-item-header"
-                onClick={() => {
-                  setExpandedId(isExpanded ? null : ent.id);
-                  if (matchingEntity) onCardClick(matchingEntity);
-                }}
-              >
-                <div className="vr-history-item-left">
-                  <span className="vr-history-item-activity" title={activity.label}>{activity.icon}</span>
-                  <span className="vr-history-item-name">{ent.name}</span>
-                  <span className="vr-history-item-line">L{ent.line_range[0]}</span>
-                </div>
-                <div className="vr-history-item-right">
-                  <span className="vr-history-item-changes" title="Modification count">
-                    {ent.modification_count}×
-                  </span>
-                  {ent.authors.length > 1 && (
-                    <span className="vr-history-item-authors" title={ent.authors.join(", ")}>
-                      👥{ent.authors.length}
-                    </span>
-                  )}
-                  {ent.age_days > 0 && (
-                    <span className="vr-history-item-age" title="Days since creation">
-                      {ent.age_days}d
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div className="vr-history-item-detail">
-                  {ent.created && (
-                    <div className="vr-history-meta-row">
-                      <span className="vr-history-meta-label">Created</span>
-                      <span className="vr-history-meta-value">
-                        {ent.created.date} by <strong>{ent.created.author}</strong>
-                      </span>
-                    </div>
-                  )}
-                  {ent.last_modified && ent.last_modified.commit !== ent.created?.commit && (
-                    <div className="vr-history-meta-row">
-                      <span className="vr-history-meta-label">Modified</span>
-                      <span className="vr-history-meta-value">
-                        {ent.last_modified.date} by <strong>{ent.last_modified.author}</strong>
-                      </span>
-                    </div>
-                  )}
-                  {ent.primary_author && (
-                    <div className="vr-history-meta-row">
-                      <span className="vr-history-meta-label">Owner</span>
-                      <span className="vr-history-meta-value">{ent.primary_author}</span>
-                    </div>
-                  )}
-
-                  {/* Timeline */}
-                  {ent.key_changes.length > 0 && (
-                    <div className="vr-history-timeline">
-                      {ent.key_changes.map((kc, i) => (
-                        <div key={i} className="vr-history-timeline-item">
-                          <span className="vr-history-tl-dot" />
-                          <span
-                            className="vr-history-tl-date vr-history-tl-clickable"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedCommit(expandedCommit === kc.commit ? null : kc.commit);
-                            }}
-                            title="Click to expand"
-                          >{kc.date}</span>
-                          <span className="vr-history-tl-commit">{kc.commit}</span>
-                          <span className="vr-history-tl-msg">{kc.message}</span>
-                          {expandedCommit === kc.commit && (
-                            <div className="vr-history-tl-expanded">
-                              <div className="vr-history-tl-detail-row">
-                                <span className="vr-history-tl-detail-label">Author</span>
-                                <span>{kc.author}</span>
-                              </div>
-                              <div className="vr-history-tl-detail-row">
-                                <span className="vr-history-tl-detail-label">Message</span>
-                                <span>{kc.message}</span>
-                              </div>
-                              <div className="vr-history-tl-detail-row">
-                                <span className="vr-history-tl-detail-label">SHA</span>
-                                <code>{kc.commit}</code>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div style={{ display: "flex", gap: 6, marginTop: 2, flexWrap: "wrap" }}>
+        {sorted.slice(0, 4).map(([author, count], i) => (
+          <span key={author} style={{ color: palette[i % palette.length] }}>
+            {author.split(" ")[0]} ({count})
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-const historyStyles = `
-  .vr-history-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
+  if (entities.length === 0 && !currentFile) {
+    return <div className="vr-no-cards">No history cards for this file.</div>;
   }
 
-  .vr-history-file-summary {
-    display: flex;
-    gap: 12px;
-    padding: 8px 10px;
-    border-bottom: 1px solid #333;
-    flex-shrink: 0;
-    font-size: 11px;
-    color: #888;
-  }
+  const recentChanges = entities.find(e => e.detail.kind === "recent_changes");
+  const commits = recentChanges?.detail.commits as Array<{ date: string; author: string }> | undefined;
 
-  .vr-history-stat strong {
-    color: #ccc;
-    margin-right: 3px;
-  }
-
-  .vr-history-sort {
-    display: flex;
-    gap: 4px;
-    padding: 6px 8px;
-    flex-shrink: 0;
-  }
-
-  .vr-history-sort-btn {
-    padding: 2px 8px;
-    background: none;
-    border: 1px solid #3c3c3c;
-    border-radius: 10px;
-    color: #888;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-
-  .vr-history-sort-btn:hover { color: #ccc; border-color: #555; }
-
-  .vr-history-sort-btn--active {
-    color: #dcdcaa;
-    border-color: #dcdcaa;
-    background: rgba(220, 220, 170, 0.08);
-  }
-
-  .vr-history-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 8px;
-  }
-
-  .vr-history-item {
-    border: 1px solid #333;
-    border-left: 3px solid #555;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-  }
-
-  .vr-history-item:hover { border-color: #4a4a4a; }
-
-  .vr-history-item--expanded {
-    border-color: #dcdcaa55;
-  }
-
-  .vr-history-item-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 10px;
-    cursor: pointer;
-    gap: 8px;
-  }
-
-  .vr-history-item-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .vr-history-item-activity {
-    font-size: 12px;
-    flex-shrink: 0;
-  }
-
-  .vr-history-item-name {
-    font-family: 'Cascadia Code', Consolas, monospace;
-    font-size: 12px;
-    color: #ccc;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .vr-history-item-line {
-    font-size: 10px;
-    color: #666;
-    flex-shrink: 0;
-  }
-
-  .vr-history-item-right {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-shrink: 0;
-  }
-
-  .vr-history-item-changes {
-    font-size: 10px;
-    color: #dcdcaa;
-    font-weight: 600;
-  }
-
-  .vr-history-item-authors {
-    font-size: 10px;
-    color: #9cdcfe;
-  }
-
-  .vr-history-item-age {
-    font-size: 10px;
-    color: #666;
-  }
-
-  .vr-history-item-detail {
-    padding: 8px 10px;
-    border-top: 1px solid #333;
-    background: rgba(0, 0, 0, 0.1);
-  }
-
-  .vr-history-meta-row {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    font-size: 11px;
-    margin-bottom: 4px;
-  }
-
-  .vr-history-meta-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: #666;
-    min-width: 52px;
-    flex-shrink: 0;
-  }
-
-  .vr-history-meta-value {
-    color: #aaa;
-  }
-
-  .vr-history-meta-value strong {
-    color: #ccc;
-    font-weight: 600;
-  }
-
-  .vr-history-timeline {
-    margin-top: 8px;
-    padding-left: 8px;
-    border-left: 2px solid #3c3c3c;
-  }
-
-  .vr-history-tl-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #dcdcaa;
-    flex-shrink: 0;
-    margin-left: -12px;
-  }
-
-  .vr-history-tl-date {
-    color: #888;
-    flex-shrink: 0;
-    min-width: 70px;
-  }
-
-  .vr-history-tl-commit {
-    font-family: monospace;
-    color: #4ec9b066;
-    flex-shrink: 0;
-  }
-
-  .vr-history-tl-msg {
-    color: #aaa;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .vr-history-tl-clickable {
-    cursor: pointer;
-    border-radius: 3px;
-    padding: 0 3px;
-    transition: background 0.15s;
-  }
-
-  .vr-history-tl-clickable:hover {
-    background: rgba(220, 220, 170, 0.12);
-    color: #dcdcaa;
-  }
-
-  .vr-history-timeline-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0;
-    font-size: 10px;
-    position: relative;
-    flex-wrap: wrap;
-  }
-
-  .vr-history-tl-expanded {
-    width: 100%;
-    margin-top: 4px;
-    margin-left: 6px;
-    padding: 6px 8px;
-    background: rgba(220, 220, 170, 0.04);
-    border: 1px solid rgba(220, 220, 170, 0.15);
-    border-radius: 4px;
-    font-size: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .vr-history-tl-detail-row {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    color: #aaa;
-  }
-
-  .vr-history-tl-detail-label {
-    color: #666;
-    font-size: 9px;
-    text-transform: uppercase;
-    min-width: 48px;
-    flex-shrink: 0;
-  }
-
-  .vr-history-tl-detail-row code {
-    font-family: monospace;
-    color: #4ec9b0;
-    font-size: 10px;
-  }
-`;
+  return (
+    <div>
+      {commits && commits.length >= 2 && <CommitTimeline commits={commits} />}
+      {commits && commits.length >= 2 && <AuthorBar commits={commits} />}
+      <AnimatePresence mode="popLayout">
+        {entities.map((e, i) => (
+          <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
+        ))}
+      </AnimatePresence>
+      {currentFile && <BlameView key={currentFile} file={currentFile} />}
+    </div>
+  );
+}

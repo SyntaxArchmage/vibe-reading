@@ -1,6 +1,6 @@
 # Vibe Reading — Handoff Document
 
-Session: 2026-06-08 → 2026-06-12
+Session: 2026-06-08 → 2026-06-15
 Machines: 10.0.16.52 (original) → current machine (codes1gn)
 
 ## Quick Start (New Machine)
@@ -12,7 +12,10 @@ cd vibe-reading
 # 1. Dev-install: links skills + installs deps
 bash scripts/dev-install.sh
 
-# 2. Run CLI tests (57 assertions)
+# 2. Install viewer dependencies
+cd viewer && npm install && cd ..
+
+# 3. Run CLI tests (357 assertions)
 npx tsx test/test.ts
 
 # 3. Build viewer
@@ -61,14 +64,16 @@ npx tsx cli/harness.ts test/data/nano-vllm
 - `.vibe-reading/` directory convention (files/, global/, manifest.json)
 - `cli/analyze.ts` — AST extraction orchestrator (Tree-sitter WASM)
 - `cli/enrich.ts` — agent writes enriched concept data
-- `cli/harness.ts` — coverage verification tool
+- `cli/harness.ts` — coverage verification + schema validation
+- `cli/stats.ts` — project stats (avg entities/file, extension breakdown)
+- `cli/export-md.ts` — export analysis as Markdown summary
 - `skills/learn-code/SKILL.md` — agent skill for data generation
-- 57 automated tests in `test/test.ts`
+- 328 automated tests in `test/test.ts`
 
 ### Phase 1: Concept Push ✅
 - Tree-sitter extraction: TypeScript, TSX, JavaScript, Python
 - Agent enrichment pipeline (agent IS the LLM)
-- `cli/auto-enrich.ts` — Tier 1 auto-enrichment (heuristic, no LLM)
+- `cli/auto-enrich.ts` — batch enrichment from JSDoc (genericized)
 - Polished Card component with kind badges, expand/collapse
 - Demo: Pi agent project (663 files, 1465 entities enriched)
 
@@ -78,10 +83,119 @@ npx tsx cli/harness.ts test/data/nano-vllm
 - [x] Monaco Editor integrated (CDN-loaded, syntax highlighting)
 - [x] 3-panel layout: file tree | cards sidebar | Monaco editor
 - [x] Bidirectional hover (code↔card with debounce + animations)
+- [x] Activity bar, file tree, multi-tab bar, command palette (Ctrl+P)
 - [x] Card click → Monaco decoration highlighting
-- [x] Ctrl+P file search picker (overlay)
+- [x] Schema validation in harness (rejects malformed JSON)
+- [x] Navigation history with back/forward (Alt+←/→)
+- [x] Status bar with keyboard shortcut hints
 - [x] Playwright E2E test script (20 tests)
 - [x] Visual regression baselines + pixel-diff comparison script
+
+### Phase 2: Macro Flow ✅
+- Flow extractor: imports, function calls, exports (Tree-sitter)
+- Global call-graph.json for cross-file relationships
+- FlowTab with categorized cards (imports/calls/exports)
+- Visual flow diagram in FlowTab header (imports → file → exports)
+
+### Phase 3: Evolve Map ✅
+- History extractor: git log, change frequency, hot spots
+- HistoryTab with commit timeline and hot spot indicators
+- On-demand git blame via /api/blame endpoint
+- Blame view with per-line author/date/sha annotations
+
+### Phase 4: Vibe Jump ✅
+- Jump extractor: local import resolution to target files
+- JumpTab with one-click navigation to target files
+- Jump card click navigates to target file in Monaco
+
+### Code Quality
+- Shared Tree-sitter parser module (eliminated ~200 lines of duplication)
+- Server hardened: malformed JSON handling, path traversal protection
+- Server auto-reloads analysis data when files change
+- Genericized auto-enrich (removed project-specific hardcoding)
+- Global entity search panel (Ctrl+Shift+F) across all files
+- Entity search keyboard navigation (arrows + enter)
+- Entity search: `t:` type filter, `f:` file filter, path search
+- Card enrichment indicator (shows "enriched" chip)
+- Card filter and sort controls in sidebar
+- Monaco gutter entity markers (colored by type)
+- Python docstring support in auto-enrich
+- Rust `///`, Go `//`, Ruby `#` doc comment support in auto-enrich
+- Debounced server file watcher for hot-reload
+- Memoized allEntities/allFiles for render performance
+- `.cursor/rules/` for AI session consistency
+- File tree heat dots (commit frequency color-coded indicators)
+- File tree folder entity counts (propagated from children)
+- Clickable "Imported by" and "Depends on" cross-file navigation
+- Type filtering in entity search (`t:concept`, `t:flow`)
+- Entity type distribution in empty state
+- Top 5 most complex files in empty state sidebar
+- React error boundary for crash resilience
+- Python `__all__` export extraction
+- Breadcrumb: status bar shows entity at cursor position
+- Clickable breadcrumb navigates to concept tab
+- Commit count badge in file header
+- Keyboard shortcuts help overlay (? key)
+- `/api/stats` endpoint for project-level statistics
+- `/api/export` endpoint for complete data download
+- `export-md.ts` tool for Markdown summaries
+- `export-dot.ts` tool for Graphviz DOT call graph export
+- Analyze reports entity counts by file extension
+- Blame view shows source code alongside annotations
+- Enrichment progress bar in empty state sidebar
+- Flow tab import/export ratio summary
+- Concept tab groups entities by kind (collapsible sections)
+- Entity density minimap bar in concept tab
+- Card highlight follows cursor position
+- Commit frequency sparkline in history tab
+- `[` / `]` keyboard shortcuts for prev/next file navigation
+- Persist last viewed file and active tab (localStorage)
+- Close other tabs button
+- Copy entity name button in card
+- Fix: export extractor no longer over-collects internal identifiers
+- Fix: entity search closes on selection, safe end_line fallback
+- Fix: summaryIsPlaceholder regex covers all entity kinds
+- Fix: removed broken tree-sitter-wasms language entries
+- Fix: 3 TypeScript strict errors in viewer (null→undefined, unknown→ReactNode)
+- Fix: stale entitySearchOpen closure in keyboard handler
+- Outline tab with nested entity tree and cursor tracking (Alt+5)
+- Viewport indicator on entity density minimap (synced with editor scroll)
+- Cross-file usages shown in expanded concept cards
+- Bi-directional jump tab ("imported by" section)
+- Entity hover tooltips in Monaco editor
+- Entity bookmarks with star toggle (localStorage persisted)
+- Bookmarked entities shown in sidebar empty state
+- Go-to-symbol dialog (Ctrl+Shift+O)
+- File complexity score badge (cx) in file header
+- File summary line in concept tab
+- File tree sort by name/entities/commits
+- File picker prioritizes open tabs
+- Enhanced status bar (concept count, complexity, language)
+- Imported names shown next to importers in flow tab
+- Live reload via Server-Sent Events (/api/events)
+- Enhanced /api/health with entity count, uptime, SSE clients
+- Auto-enrich extracts function parameters and return types
+- `complexity.ts` CLI tool: ranked complexity report with --top flag
+- `diff.ts` CLI tool: snapshot-based analysis comparison
+- `search.ts` CLI tool: cross-file entity search
+- `summary.ts` CLI tool: tab-separated file overview (--json, --sort)
+- `export-dot --clusters` groups files by directory into subgraphs
+- Stats tool: dependency graph analysis (imports, exports, isolated files, longest chain)
+- `export-dot --focus` flag for targeted graph visualization
+- Concept tab kind filter chips (click to filter by entity type)
+- Tab tooltips showing entity count and complexity score
+- `export-md --outline` mode with hierarchical indentation
+- Export-md summary footer (file/entity/enriched counts)
+- Density minimap click-to-jump to nearest entity
+- Entity filter input in concept tab (search by name/summary)
+- Ctrl+D bookmark shortcut for current entity
+- Function params and return type in expanded card detail
+- Params and return type in editor hover tooltips
+- Author distribution bar in history tab
+- Outline tab filter/search input
+- Circular dependency detection warning in flow tab
+- Ctrl+Shift+T to reopen recently closed tabs
+- `search --kind` and `--regex` filter modes
 
 ## Architecture Decisions (2026-06-12)
 
@@ -108,7 +222,11 @@ vibe-reading/
 │   ├── enrich.ts               # Agent enrichment tool
 │   ├── auto-enrich.ts          # Batch enrichment from JSDoc
 │   ├── harness.ts              # Coverage verification
+│   ├── extractors/parser.ts    # Shared Tree-sitter init/parse
 │   ├── extractors/concept.ts   # Tree-sitter concept extractor
+│   ├── extractors/flow.ts      # Import/call/export flow extractor
+│   ├── extractors/history.ts   # Git history extractor
+│   ├── extractors/jump.ts      # Navigation jump extractor
 │   ├── types.ts                # Shared TypeScript types
 │   └── package.json            # Dependencies: web-tree-sitter, tsx
 ├── viewer/                     # Standalone web viewer
@@ -137,12 +255,12 @@ vibe-reading/
 │   ├── dev-install.sh          # Symlink skills + install deps
 │   └── setup-test-data.sh      # Clone nano-vllm test data
 ├── test/
-│   ├── test.ts                 # 57 CLI pipeline tests
+│   ├── test.ts                 # 242 CLI pipeline tests
 │   ├── e2e/test_viewer.py      # 20 Playwright E2E tests
 │   ├── e2e/visual_diff.py      # Visual regression pixel-diff tool
 │   ├── e2e/baselines/          # Canonical baseline screenshots
 │   ├── e2e/screenshots/        # Current screenshots (regenerated)
-│   ├── fixture/                # Deterministic test fixture (3 files)
+│   ├── fixture/                # Test fixture (5 source files)
 │   └── data/                   # Larger test projects (gitignored)
 ├── prd/
 │   ├── prd.md                  # Product requirements
@@ -182,7 +300,8 @@ vibe-reading/
 │   ├── src__scheduler_ts.json
 │   ├── src__engine_py.json
 │   └── ...
-└── global/                 # Cross-file data (future)
+└── global/                 # Cross-file data
+    └── call-graph.json     # Import/export/call relationships
 ```
 
 Each file JSON:
@@ -215,12 +334,23 @@ Each file JSON:
    External CDN downloads (npm, Playwright browsers) frequently fail
    with ECONNRESET. Git push to GitHub works but is slow (~10-45s).
 
-2. **extension/ has duplicated code**: The old `extension/webview/`
+2. **Playwright browser not installed**: E2E tests written but can't
+   run. Need `playwright install chromium` on a machine with good
+   network.
+
+3. **Playwright system lib missing**: `libxkbcommon.so.0` cannot be
+   installed via apt on this machine. E2E tests are written and ready
+   to run when the dependency is resolved.
+
+4. **extension/ has duplicated code**: The old `extension/webview/`
    still exists alongside the new `viewer/`. Can be cleaned up when
    we confirm extension is no longer needed.
 
 ## What To Do Next
 
-1. **Phase 2: Macro Flow** — LSP call hierarchy → Flow tab
-2. **Consider**: multi-tab / split-view support
-3. **Clean up** legacy `extension/` directory if no longer needed
+1. **Install Playwright Chromium** — run E2E tests, capture baseline
+   screenshots, iterate on UI
+2. **LSP integration** — go-to-definition targets for jump tab
+3. **LLM enrichment** — semantic relationship inference for jumps
+4. **PR description extraction** — GitHub API integration for history
+5. **Clean up** legacy `extension/` directory if no longer needed

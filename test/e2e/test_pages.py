@@ -45,7 +45,7 @@ def main() -> int:
 
             checks = [
                 (f"{prefix}/", "PREVIEW_DATA"),
-                (f"{prefix}/", "GLOBAL_DATA"),
+                (f"{prefix}/", "CALL_GRAPH"),
                 (f"{prefix}/viewer.js", "function"),
                 (f"{prefix}/source/bench.py.json", '"content"'),
                 (f"{prefix}/source/nanovllm__config.py.json", "dataclass"),

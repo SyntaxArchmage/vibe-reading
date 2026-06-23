@@ -2,7 +2,17 @@ import * as fs from "fs";
 import * as path from "path";
 import { glob } from "glob";
 import { extractConcepts } from "./extractors/concept.js";
+import { extractFlow, type FlowData } from "./extractors/flow.js";
+import { extractHistory } from "./extractors/history.js";
+import { extractJumps } from "./extractors/jump.js";
 import type { DataEntity, FileAnalysis, Manifest, ManifestEntry } from "./types.js";
+
+interface CallGraphEntry {
+  file: string;
+  imports: { source: string; names: string[] }[];
+  exports: string[];
+  calls: { callee: string; inFunction: string | null }[];
+}
 
 const VIBE_DIR = ".vibe-reading";
 const FILES_DIR = path.join(VIBE_DIR, "files");
@@ -33,8 +43,15 @@ async function main() {
   const projectRoot = process.argv[2] || process.cwd();
   console.log(`[vibe-reading] Analyzing: ${projectRoot}`);
 
-  fs.mkdirSync(path.join(projectRoot, FILES_DIR), { recursive: true });
+  const filesPath = path.join(projectRoot, FILES_DIR);
+  fs.mkdirSync(filesPath, { recursive: true });
   fs.mkdirSync(path.join(projectRoot, GLOBAL_DIR), { recursive: true });
+
+  for (const old of fs.readdirSync(filesPath)) {
+    if (old.endsWith(".json")) {
+      fs.unlinkSync(path.join(filesPath, old));
+    }
+  }
 
   const files = await glob("**/*", {
     cwd: projectRoot,
@@ -50,11 +67,12 @@ async function main() {
   console.log(`[vibe-reading] Found ${sourceFiles.length} source files`);
 
   const manifestEntries: ManifestEntry[] = [];
+  const callGraph: CallGraphEntry[] = [];
 
   for (const file of sourceFiles) {
     const absPath = path.join(projectRoot, file);
     try {
-      const analysis = await analyzeFile(file, absPath);
+      const { analysis, flowData } = await analyzeFile(file, absPath, projectRoot, sourceFiles);
       const outName = file.replace(/[/\\]/g, "__") + ".json";
       const outPath = path.join(projectRoot, FILES_DIR, outName);
       fs.writeFileSync(outPath, JSON.stringify(analysis, null, 2));
@@ -63,6 +81,13 @@ async function main() {
         path: file,
         status: "analyzed",
         entity_count: analysis.entities.length,
+      });
+
+      callGraph.push({
+        file,
+        imports: flowData.imports.map((i) => ({ source: i.source, names: i.names })),
+        exports: flowData.exports,
+        calls: flowData.calls,
       });
 
       console.log(`  [ok] ${file} → ${analysis.entities.length} entities`);
@@ -88,27 +113,55 @@ async function main() {
     JSON.stringify(manifest, null, 2)
   );
 
+  fs.writeFileSync(
+    path.join(projectRoot, GLOBAL_DIR, "call-graph.json"),
+    JSON.stringify({
+      generated_at: new Date().toISOString(),
+      files: callGraph,
+    }, null, 2)
+  );
+
+  const totalEntities = manifestEntries.reduce((sum, e) => sum + e.entity_count, 0);
+
+  const extCounts: Record<string, { files: number; entities: number }> = {};
+  for (const e of manifestEntries) {
+    const ext = path.extname(e.path).toLowerCase() || "(none)";
+    if (!extCounts[ext]) extCounts[ext] = { files: 0, entities: 0 };
+    extCounts[ext].files++;
+    extCounts[ext].entities += e.entity_count;
+  }
+
   console.log(
     `\n[vibe-reading] Done. Coverage: ${(manifest.coverage * 100).toFixed(1)}% ` +
     `(${manifest.analyzed_files}/${manifest.total_files})`
   );
+  console.log(`[vibe-reading] Total entities: ${totalEntities}`);
+  console.log(`[vibe-reading] Call graph: ${callGraph.length} files`);
+  console.log(`[vibe-reading] By extension: ${Object.entries(extCounts).map(([ext, c]) => `${ext}(${c.files} files, ${c.entities} entities)`).join(", ")}`);
 }
 
 async function analyzeFile(
   relativePath: string,
-  absPath: string
-): Promise<FileAnalysis> {
+  absPath: string,
+  projectRoot: string,
+  allFiles: string[]
+): Promise<{ analysis: FileAnalysis; flowData: FlowData }> {
   const content = fs.readFileSync(absPath, "utf-8");
 
   const concepts = await extractConcepts(relativePath, content);
+  const flowData = await extractFlow(relativePath, content);
+  const historyEntities = await extractHistory(relativePath, content, projectRoot);
+  const jumpEntities = await extractJumps(relativePath, content, allFiles);
 
-  // Future phases will add flow, history, jump extractors here
-  const entities: DataEntity[] = [...concepts];
+  const entities: DataEntity[] = [...concepts, ...flowData.entities, ...historyEntities, ...jumpEntities];
 
   return {
-    file: relativePath,
-    entities,
-    analyzed_at: new Date().toISOString(),
+    analysis: {
+      file: relativePath,
+      entities,
+      analyzed_at: new Date().toISOString(),
+    },
+    flowData,
   };
 }
 

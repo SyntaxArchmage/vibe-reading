@@ -3,16 +3,24 @@ import { ConceptTab } from "./tabs/ConceptTab";
 import { FlowTab } from "./tabs/FlowTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { JumpTab } from "./tabs/JumpTab";
+import { OutlineTab } from "./tabs/OutlineTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
-import { FileTree } from "./components/FileTree";
-import type { DataEntity, TabId, FlowDataType, FlowNode } from "./shared-types";
+import { FileTree, fileTreeStyles } from "./components/FileTree";
+import type { DataEntity, TabId } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
   string,
   { file: string; entities: DataEntity[] }
 >;
 
-declare const GLOBAL_DATA: Record<string, unknown> | undefined;
+declare const CALL_GRAPH: {
+  files: Array<{
+    file: string;
+    imports: Array<{ source: string; names: string[] }>;
+    exports: string[];
+    calls: Array<{ callee: string; inFunction: string | null }>;
+  }>;
+} | null;
 
 function sourceStaticPath(file: string): string {
   return `source/${file.replace(/\//g, "__")}.json`;
@@ -47,12 +55,15 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "flow", label: "Flow" },
   { id: "history", label: "History" },
   { id: "jump", label: "Jump" },
+  { id: "outline", label: "Outline" },
 ];
 
 interface FileInfo {
   key: string;
   file: string;
   count: number;
+  commits: number;
+  complexity: number;
 }
 
 function useResizable(initialWidth: number, min: number, max: number) {
@@ -91,7 +102,10 @@ function useResizable(initialWidth: number, min: number, max: number) {
 }
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<TabId>("concept");
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    try { const t = localStorage.getItem("vr-active-tab"); if (t && TABS.some(tab => tab.id === t)) return t as TabId; } catch {}
+    return "concept";
+  });
   const [entities, setEntities] = useState<DataEntity[]>([]);
   const [currentFile, setCurrentFile] = useState<string | null>(null);
   const [sourceCode, setSourceCode] = useState<string>("");
@@ -100,43 +114,181 @@ export function App() {
     startLine: number;
     endLine: number;
   } | null>(null);
+  const [openFiles, setOpenFiles] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [knowledgeLevel, setKnowledgeLevel] = useState<"all" | "basic" | "advanced">("all");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [treeOpen, setTreeOpen] = useState(true);
+  const [navHistory, setNavHistory] = useState<string[]>([]);
+  const [navIndex, setNavIndex] = useState(-1);
+  const [cardFilter, setCardFilter] = useState("");
+  const [cardSort, setCardSort] = useState<"line" | "name" | "kind">("line");
+  const [entitySearch, setEntitySearch] = useState("");
+  const [entitySearchOpen, setEntitySearchOpen] = useState(false);
+  const [entitySearchIdx, setEntitySearchIdx] = useState(0);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [cursorLine, setCursorLine] = useState(0);
+  const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
+  const [gotoLineOpen, setGotoLineOpen] = useState(false);
+  const [gotoLineValue, setGotoLineValue] = useState("");
+  const gotoLineRef = useRef<HTMLInputElement>(null);
+  const [symbolOpen, setSymbolOpen] = useState(false);
+  const [symbolQuery, setSymbolQuery] = useState("");
+  const [symbolIdx, setSymbolIdx] = useState(0);
+  const symbolRef = useRef<HTMLInputElement>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("vr-bookmarks");
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { return new Set(); }
+  });
+  const toggleBookmark = useCallback((key: string) => {
+    setBookmarks(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      try { localStorage.setItem("vr-bookmarks", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }, []);
   const [hoveredEntityIdx, setHoveredEntityIdx] = useState<number | null>(null);
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
   const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const entitySearchRef = useRef<HTMLInputElement>(null);
 
   const treeResize = useResizable(220, 120, 400);
   const sidebarResize = useResizable(340, 240, 600);
 
-  const allFiles: FileInfo[] = Object.entries(PREVIEW_DATA)
-    .map(([key, data]) => ({
-      key,
-      file: data.file,
-      count: data.entities.length,
-    }))
-    .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
+  const allEntities = useMemo(() =>
+    Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
+      (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
+    ), []);
+
+  const entitySearchResults = entitySearch.trim()
+    ? (() => {
+        let q = entitySearch.toLowerCase().trim();
+        let typeFilter: string | null = null;
+        let fileFilter: string | null = null;
+        const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
+        if (typeMatch) {
+          typeFilter = typeMatch[1];
+          q = q.slice(typeMatch[0].length);
+        }
+        const fileMatch = q.match(/^(?:file:|f:)(\S+)\s*/);
+        if (fileMatch) {
+          fileFilter = fileMatch[1];
+          q = q.slice(fileMatch[0].length);
+        }
+        return allEntities.filter(e => {
+          if (typeFilter && !e.type.startsWith(typeFilter)) return false;
+          if (fileFilter && !e.anchor.file.toLowerCase().includes(fileFilter)) return false;
+          if (!q) return true;
+          const name = ((e.detail.name as string) || "").toLowerCase();
+          const summary = e.summary.toLowerCase();
+          const file = e.anchor.file.toLowerCase();
+          return name.includes(q) || summary.includes(q) || file.includes(q);
+        }).slice(0, 50);
+      })()
+    : [];
+
+  const breadcrumbPath = useMemo(() => {
+    if (!cursorLine) return [];
+    const concepts = entities.filter(e => e.type === "concept");
+    const chain: DataEntity[] = [];
+    for (const e of concepts) {
+      if (cursorLine >= e.anchor.start_line && cursorLine <= e.anchor.end_line) {
+        chain.push(e);
+      }
+    }
+    chain.sort((a, b) => (a.anchor.end_line - a.anchor.start_line) - (b.anchor.end_line - b.anchor.start_line));
+    const result: DataEntity[] = [];
+    for (const e of chain.reverse()) {
+      if (result.length === 0 || (result[result.length - 1].anchor.start_line <= e.anchor.start_line && result[result.length - 1].anchor.end_line >= e.anchor.end_line)) {
+        result.push(e);
+      }
+    }
+    return result;
+  }, [cursorLine, entities]);
+
+  const breadcrumbEntity = breadcrumbPath.length > 0 ? breadcrumbPath[breadcrumbPath.length - 1] : null;
+
+  const allFiles: FileInfo[] = useMemo(() =>
+    Object.entries(PREVIEW_DATA)
+      .map(([key, data]) => {
+        const hist = (data.entities as DataEntity[]).find(
+          e => e.type === "history" && (e.detail.kind === "file_history")
+        );
+        const ents = data.entities as DataEntity[];
+        const flows = ents.filter(e => e.type === "flow");
+        const imports = flows.filter(e => e.detail.kind === "imports");
+        const importCount = imports.reduce((sum, e) =>
+          sum + ((e.detail.names as string[])?.length || 0), 0);
+        const concepts = ents.filter(e => e.type === "concept");
+        const maxDepth = concepts.reduce((max, e) => {
+          const lines = e.anchor.end_line - e.anchor.start_line;
+          return Math.max(max, lines);
+        }, 0);
+        const complexity = Math.round(
+          concepts.length * 2 + importCount * 1.5 + Math.sqrt(maxDepth) * 3
+        );
+        return {
+          key,
+          file: data.file,
+          count: data.entities.length,
+          commits: (hist?.detail.total_commits as number) || 0,
+          complexity,
+        };
+      })
+      .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)),
+  []);
 
   const filteredFiles = searchQuery.trim()
-    ? allFiles.filter((f) =>
-        f.file.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
-    : allFiles;
+    ? (() => {
+        const q = searchQuery.toLowerCase().trim();
+        const scored = allFiles
+          .map(f => {
+            const file = f.file.toLowerCase();
+            if (file.includes(q)) return { f, score: 2 };
+            let qi = 0;
+            for (let fi = 0; fi < file.length && qi < q.length; fi++) {
+              if (file[fi] === q[qi]) qi++;
+            }
+            return qi === q.length ? { f, score: 1 } : null;
+          })
+          .filter(Boolean) as { f: typeof allFiles[0]; score: number }[];
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map(s => s.f);
+      })()
+    : (() => {
+        const recentSet = new Set(openFiles);
+        const recent = allFiles.filter(f => recentSet.has(f.key));
+        const rest = allFiles.filter(f => !recentSet.has(f.key));
+        return [...recent, ...rest];
+      })();
 
   const visibleFiles = filteredFiles.slice(0, 100);
   const remaining = filteredFiles.length - visibleFiles.length;
 
   const selectFile = useCallback(
-    async (key: string) => {
+    async (key: string, skipHistory = false) => {
       const data = PREVIEW_DATA[key];
       if (!data) return;
+
+      if (!skipHistory) {
+        setNavHistory((prev) => {
+          const trimmed = prev.slice(0, navIndex + 1);
+          return [...trimmed, data.file];
+        });
+        setNavIndex((prev) => prev + 1);
+      }
 
       setCurrentFile(data.file);
       setEntities(data.entities);
       setHighlightRange(null);
+      setCardFilter("");
       setSourceLanguage(detectLanguage(data.file));
+      setOpenFiles((prev) =>
+        prev.includes(data.file) ? prev : [...prev, data.file]
+      );
 
       try {
         const content = await loadSourceContent(data.file);
@@ -145,39 +297,94 @@ export function App() {
         setSourceCode(`// Failed to load source: ${data.file}`);
       }
     },
-    []
+    [navIndex]
   );
 
+  const navigateBack = useCallback(() => {
+    if (navIndex <= 0) return;
+    const newIdx = navIndex - 1;
+    const file = navHistory[newIdx];
+    const fk = allFiles.find((f) => f.file === file)?.key;
+    if (fk) {
+      setNavIndex(newIdx);
+      selectFile(fk, true);
+    }
+  }, [navIndex, navHistory, allFiles, selectFile]);
+
+  useEffect(() => {
+    if (currentFile) {
+      try { localStorage.setItem("vr-last-file", currentFile); } catch {}
+    }
+  }, [currentFile]);
+
+  useEffect(() => {
+    try { localStorage.setItem("vr-active-tab", activeTab); } catch {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    try {
+      const last = localStorage.getItem("vr-last-file");
+      if (last) {
+        const fk = allFiles.find(f => f.file === last)?.key;
+        if (fk) selectFile(fk);
+      }
+    } catch {}
+  }, []);
+
+  const navigateForward = useCallback(() => {
+    if (navIndex >= navHistory.length - 1) return;
+    const newIdx = navIndex + 1;
+    const file = navHistory[newIdx];
+    const fk = allFiles.find((f) => f.file === file)?.key;
+    if (fk) {
+      setNavIndex(newIdx);
+      selectFile(fk, true);
+    }
+  }, [navIndex, navHistory, allFiles, selectFile]);
+
+  const [closedTabs, setClosedTabs] = useState<string[]>([]);
+
+  const closeTab = useCallback(
+    (file: string) => {
+      setClosedTabs(prev => [file, ...prev.filter(f => f !== file)].slice(0, 10));
+      setOpenFiles((prev) => {
+        const next = prev.filter((f) => f !== file);
+        if (file === currentFile && next.length > 0) {
+          const fileKey = allFiles.find((f) => f.file === next[next.length - 1])?.key;
+          if (fileKey) selectFile(fileKey);
+        } else if (next.length === 0) {
+          setCurrentFile(null);
+          setEntities([]);
+          setSourceCode("");
+        }
+        return next;
+      });
+    },
+    [currentFile, allFiles, selectFile]
+  );
+
+  const reopenTab = useCallback(() => {
+    if (closedTabs.length === 0) return;
+    const file = closedTabs[0];
+    setClosedTabs(prev => prev.slice(1));
+    const fk = allFiles.find(f => f.file === file)?.key;
+    if (fk) selectFile(fk);
+  }, [closedTabs, allFiles, selectFile]);
+
   const onCardClick = useCallback((entity: DataEntity) => {
+    if (entity.type === "jump" && entity.detail.target_file) {
+      const targetFile = entity.detail.target_file as string;
+      const fk = allFiles.find((f) => f.file === targetFile)?.key;
+      if (fk) {
+        selectFile(fk);
+        return;
+      }
+    }
     setHighlightRange({
       startLine: entity.anchor.start_line,
       endLine: entity.anchor.end_line || entity.anchor.start_line,
     });
-  }, []);
-
-  const onFlowNodeClick = useCallback((node: FlowNode) => {
-    if (node.file === currentFile) {
-      setHighlightRange({ startLine: node.line, endLine: node.end_line });
-    } else {
-      const key = Object.keys(PREVIEW_DATA).find(k => PREVIEW_DATA[k].file === node.file);
-      if (key) {
-        selectFile(key).then(() => {
-          setTimeout(() => setHighlightRange({ startLine: node.line, endLine: node.end_line }), 100);
-        });
-      }
-    }
-  }, [currentFile, selectFile]);
-
-  const onJumpToFile = useCallback((file: string, line?: number) => {
-    const key = Object.keys(PREVIEW_DATA).find(k => PREVIEW_DATA[k].file === file);
-    if (key) {
-      selectFile(key).then(() => {
-        if (line) {
-          setTimeout(() => setHighlightRange({ startLine: line, endLine: line + 5 }), 100);
-        }
-      });
-    }
-  }, [selectFile]);
+  }, [allFiles, selectFile]);
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -239,12 +446,70 @@ export function App() {
     }
   }, []);
 
-  const filtered = entities.filter((e) => {
-    if (e.type !== activeTab) return false;
-    if (knowledgeLevel === "all") return true;
-    const level = (e.detail as { level?: string }).level || "basic";
-    return level === knowledgeLevel;
-  });
+  const filtered = entities
+    .filter((e) => {
+      if (e.type !== activeTab) return false;
+      if (!cardFilter.trim()) return true;
+      const q = cardFilter.toLowerCase();
+      return e.summary.toLowerCase().includes(q) ||
+        (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
+        (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      if (cardSort === "name") {
+        const na = String(a.detail?.name || a.summary).toLowerCase();
+        const nb = String(b.detail?.name || b.summary).toLowerCase();
+        return na.localeCompare(nb);
+      }
+      if (cardSort === "kind") {
+        const ka = String(a.detail?.kind || "").toLowerCase();
+        const kb = String(b.detail?.kind || "").toLowerCase();
+        return ka.localeCompare(kb) || a.anchor.start_line - b.anchor.start_line;
+      }
+      return a.anchor.start_line - b.anchor.start_line;
+    });
+
+  const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
+
+  const onVisibleRange = useCallback((start: number, end: number) => {
+    setVisibleRange({ start, end });
+  }, []);
+
+  const entityMarkers = useMemo(
+    () => entities.map(e => ({
+      startLine: e.anchor.start_line,
+      endLine: e.anchor.end_line,
+      type: e.type,
+    })),
+    [entities]
+  );
+
+  const hoverInfos = useMemo(
+    () => entities
+      .filter(e => e.type === "concept" && e.detail.name)
+      .map(e => ({
+        startLine: e.anchor.start_line,
+        endLine: e.anchor.end_line,
+        name: String(e.detail.name),
+        kind: String(e.detail.node_type || e.detail.kind || ""),
+        summary: e.summary,
+        params: e.detail.params as string[] | undefined,
+        returnType: e.detail.return_type as string | undefined,
+      })),
+    [entities]
+  );
+  const focusedEntity = focusedCardIdx != null ? filtered[focusedCardIdx] ?? null : null;
+  const effectiveHighlight = focusedEntity ?? hoveredEntity;
+
+  const symbolResults = useMemo(() => {
+    if (!symbolOpen) return [];
+    const q = symbolQuery.toLowerCase().trim();
+    return entities
+      .filter(e => e.type === "concept" && e.detail.name)
+      .filter(e => !q || String(e.detail.name).toLowerCase().includes(q))
+      .sort((a, b) => a.anchor.start_line - b.anchor.start_line)
+      .slice(0, 20);
+  }, [symbolOpen, symbolQuery, entities]);
 
   // Reset focused card when file or tab changes
   useEffect(() => { setFocusedCardIdx(null); }, [currentFile, activeTab]);
@@ -258,14 +523,77 @@ export function App() {
         return;
       }
       if (e.key === "Escape") {
-        if (pickerOpen) setPickerOpen(false);
-        else setFocusedCardIdx(null);
-        return;
+        setPickerOpen(false);
+        setEntitySearchOpen(false);
+        setHelpOpen(false);
+        setGotoLineOpen(false);
+        setSymbolOpen(false);
+        setFocusedCardIdx(null);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "O") {
+        e.preventDefault();
+        setSymbolOpen(true);
+        setSymbolQuery("");
+        setSymbolIdx(0);
+        setTimeout(() => symbolRef.current?.focus(), 0);
+      }
+      if (e.key === "?" && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
+        setHelpOpen(v => !v);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        setTreeOpen((v) => !v);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "g") {
+        e.preventDefault();
+        setGotoLineOpen(true);
+        setGotoLineValue("");
+        setTimeout(() => gotoLineRef.current?.focus(), 0);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
+        e.preventDefault();
+        setEntitySearchOpen((v) => {
+          if (!v) setTimeout(() => entitySearchRef.current?.focus(), 0);
+          return !v;
+        });
+      }
+      if (e.altKey && e.key >= "1" && e.key <= "5") {
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        if (TABS[idx]) setActiveTab(TABS[idx].id);
+      }
+      if (e.altKey && e.key === "ArrowLeft") {
+        e.preventDefault();
+        navigateBack();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "w") {
+        e.preventDefault();
+        if (currentFile) closeTab(currentFile);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "T") {
+        e.preventDefault();
+        reopenTab();
+      }
+      if (e.altKey && e.key === "ArrowRight") {
+        e.preventDefault();
+        navigateForward();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault();
+        if (breadcrumbEntity && currentFile) {
+          toggleBookmark(`${currentFile}:${breadcrumbEntity.detail.name}`);
+        }
+      }
+      if ((e.key === "[" || e.key === "]") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
+        const idx = allFiles.findIndex(f => f.key === currentFile);
+        if (idx >= 0) {
+          const next = e.key === "]" ? idx + 1 : idx - 1;
+          if (next >= 0 && next < allFiles.length) selectFile(allFiles[next].key);
+        }
       }
 
-      // Skip if user is typing in an input or the picker is open
       const tag = (e.target as HTMLElement)?.tagName;
-      if (pickerOpen || tag === "INPUT" || tag === "TEXTAREA") return;
+      if (pickerOpen || entitySearchOpen || symbolOpen || gotoLineOpen || helpOpen || tag === "INPUT" || tag === "TEXTAREA") return;
 
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -287,7 +615,7 @@ export function App() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [pickerOpen, filtered, focusedCardIdx, onCardClick]);
+  }, [navigateBack, navigateForward, allFiles, currentFile, pickerOpen, filtered, focusedCardIdx, onCardClick, breadcrumbEntity, toggleBookmark, closeTab, reopenTab, selectFile]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -300,25 +628,48 @@ export function App() {
           ? Math.min(idx + 1, visibleFiles.length - 1)
           : Math.max(idx - 1, 0);
       if (visibleFiles[next]) selectFile(visibleFiles[next].key);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (visibleFiles.length > 0) {
+        const active = visibleFiles.find((f) => f.file === currentFile);
+        selectFile((active ?? visibleFiles[0]).key);
+        setPickerOpen(false);
+      }
     } else if (e.key === "Escape") {
       setPickerOpen(false);
     }
   };
 
-  const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
-  const focusedEntity = focusedCardIdx != null ? filtered[focusedCardIdx] ?? null : null;
-  const effectiveHighlight = focusedEntity ?? hoveredEntity;
-
-  const flowData = typeof GLOBAL_DATA !== "undefined" ? (GLOBAL_DATA as Record<string, unknown>).flow as FlowDataType | undefined : undefined;
-  const historyData = typeof GLOBAL_DATA !== "undefined" ? (GLOBAL_DATA as Record<string, unknown>).history as unknown : undefined;
 
   const tabContent = () => {
-    const props = { entities: filtered, onCardClick, hoveredEntity: effectiveHighlight, onCardHover, sourceLines };
     switch (activeTab) {
-      case "concept": return <ConceptTab {...props} />;
-      case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} onNodeClick={onFlowNodeClick} />;
-      case "history": return <HistoryTab {...props} historyData={historyData as any} currentFile={currentFile} />;
-      case "jump": return <JumpTab {...props} flowData={flowData} currentFile={currentFile} onJumpToFile={onJumpToFile} />;
+      case "concept":
+        return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity}
+                           totalLines={sourceCode ? sourceCode.split("\n").length : 0}
+                           visibleRange={visibleRange}
+                           callGraph={CALL_GRAPH} currentFile={currentFile}
+                           onFileSelect={(file) => {
+                             const fk = allFiles.find(f => f.file === file)?.key;
+                             if (fk) selectFile(fk);
+                           }}
+                           bookmarks={bookmarks}
+                           onBookmark={toggleBookmark} />;
+      case "flow":
+        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
+          const fk = allFiles.find(f => f.file === file)?.key;
+          if (fk) selectFile(fk);
+        }} />;
+      case "history":
+        return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile ?? undefined} />;
+      case "jump":
+        return <JumpTab entities={filtered} onCardClick={onCardClick}
+                        callGraph={CALL_GRAPH} currentFile={currentFile}
+                        onFileSelect={(file) => {
+                          const fk = allFiles.find(f => f.file === file)?.key;
+                          if (fk) selectFile(fk);
+                        }} />;
+      case "outline":
+        return <OutlineTab entities={entities} onCardClick={onCardClick} cursorLine={cursorLine} />;
     }
   };
 
@@ -326,13 +677,93 @@ export function App() {
     <div className="vr-layout">
       <style>{layoutStyles}</style>
       <style>{sidebarStyles}</style>
-      <style>{treeStyles}</style>
+      <style>{fileTreeStyles}</style>
+
+      {/* Activity bar — icon strip */}
+      <div className="vr-activity-bar">
+        <button
+          className={`vr-activity-btn ${treeOpen ? "vr-activity-btn--active" : ""}`}
+          onClick={() => setTreeOpen(!treeOpen)}
+          title="Explorer"
+        >
+          &#x1F4C1;
+        </button>
+        <button
+          className={`vr-activity-btn ${entitySearchOpen ? "vr-activity-btn--active" : ""}`}
+          onClick={() => { setEntitySearchOpen(!entitySearchOpen); if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0); }}
+          title="Search Entities"
+        >
+          &#x1F50D;
+        </button>
+      </div>
 
       {/* File tree panel */}
-      <div className="vr-tree-panel" style={{ width: treeResize.width }}>
-        <FileTree files={allFiles} currentFile={currentFile} onSelectFile={selectFile} />
-      </div>
-      <div className="vr-resize-handle" onMouseDown={treeResize.onMouseDown} />
+      {treeOpen && (
+        <div className="vr-file-panel" style={{ width: treeResize.width }}>
+          <FileTree files={allFiles} currentFile={currentFile} onSelect={selectFile} />
+        </div>
+      )}
+      {treeOpen && <div className="vr-resize-handle" onMouseDown={treeResize.onMouseDown} />}
+
+      {/* Entity search panel */}
+      {entitySearchOpen && (
+        <div className="vr-entity-search-panel">
+          <div className="vr-entity-search-header">
+            <input
+              ref={entitySearchRef}
+              type="text"
+              placeholder="Search... (t:concept, f:filename, Esc to close)"
+              value={entitySearch}
+              onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setEntitySearchIdx(i => Math.min(i + 1, entitySearchResults.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setEntitySearchIdx(i => Math.max(i - 1, 0));
+                } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
+                  const hit = entitySearchResults[entitySearchIdx];
+                  selectFile((hit as any)._key);
+                  setActiveTab(hit.type as TabId);
+                  setEntitySearchOpen(false);
+                  setTimeout(() => {
+                    setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
+                  }, 100);
+                }
+              }}
+              className="vr-entity-search-input"
+            />
+          </div>
+          <div className="vr-entity-search-results">
+            {entitySearch.trim() && entitySearchResults.length === 0 && (
+              <div style={{ color: "#888", fontSize: 12, padding: 8 }}>No matches</div>
+            )}
+            {entitySearchResults.map((e, i) => (
+              <div
+                key={`es-${i}`}
+                ref={i === entitySearchIdx ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
+                className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
+                onClick={() => {
+                  selectFile((e as any)._key);
+                  setActiveTab(e.type as TabId);
+                  setEntitySearchOpen(false);
+                  setTimeout(() => {
+                    setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line || e.anchor.start_line });
+                  }, 100);
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span className="vr-entity-search-type">{e.type}</span>
+                  {e.detail.kind ? <span style={{ fontSize: 10, color: "#888" }}>({String(e.detail.kind)})</span> : null}
+                  <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
+                </div>
+                <span className="vr-entity-search-file">{(e as any)._file}:{e.anchor.start_line}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Sidebar — knowledge cards */}
       <div className="vr-sidebar" style={{ width: sidebarResize.width }}>
@@ -342,6 +773,63 @@ export function App() {
             <div className="vr-empty-title">Vibe Reading</div>
             <div className="vr-empty-hint">
               Select a file to see knowledge cards.
+              <div style={{ marginTop: 8, fontSize: 11, color: "#777" }}>
+                {allFiles.length} files · {allEntities.length} entities
+              </div>
+              <div style={{ marginTop: 4, fontSize: 10, color: "#555", display: "flex", gap: 8, justifyContent: "center" }}>
+                <span style={{ color: "#4ec9b0" }}>{allEntities.filter(e => e.type === "concept").length} concepts</span>
+                <span style={{ color: "#dcdcaa" }}>{allEntities.filter(e => e.type === "flow").length} flow</span>
+                <span style={{ color: "#9cdcfe" }}>{allEntities.filter(e => e.type === "history").length} history</span>
+                <span style={{ color: "#c586c0" }}>{allEntities.filter(e => e.type === "jump").length} jump</span>
+              </div>
+              {(() => {
+                const concepts = allEntities.filter(e => e.type === "concept");
+                const enriched = concepts.filter(e => {
+                  const desc = e.detail.description as string | undefined;
+                  return desc && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(desc);
+                });
+                const pct = concepts.length > 0 ? Math.round((enriched.length / concepts.length) * 100) : 0;
+                return concepts.length > 0 ? (
+                  <div style={{ marginTop: 8, fontSize: 10, color: "#666" }}>
+                    Enrichment: {enriched.length}/{concepts.length} concepts ({pct}%)
+                    <div style={{ marginTop: 3, height: 3, background: "#333", borderRadius: 2, overflow: "hidden" }}>
+                      <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "#4ec9b0" : "#dcdcaa", borderRadius: 2 }} />
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+              {bookmarks.size > 0 && (
+                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
+                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
+                    ★ Bookmarks ({bookmarks.size})
+                  </div>
+                  {[...bookmarks].slice(0, 8).map(bk => {
+                    const [file, name] = bk.split(":");
+                    return (
+                      <div key={bk} style={{ fontSize: 11, color: "#dcdcaa", padding: "2px 0", cursor: "pointer" }}
+                           onClick={() => { const fk = allFiles.find(f => f.key === file)?.key; if (fk) selectFile(fk); }}>
+                        {name} <span style={{ color: "#666" }}>{file?.split("__").pop()?.replace(".json", "")}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {allFiles.length > 0 && (
+                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
+                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
+                    Most complex files
+                  </div>
+                  {allFiles.slice(0, 5).map(f => (
+                    <div
+                      key={f.key}
+                      style={{ fontSize: 11, color: "#9cdcfe", padding: "2px 0", cursor: "pointer" }}
+                      onClick={() => selectFile(f.key)}
+                    >
+                      {f.file} <span style={{ color: "#666" }}>({f.count})</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -350,10 +838,30 @@ export function App() {
           <>
             <div className="vr-file-header">
               <span className="vr-file-icon">&#x1F4C4;</span>
-              <span className="vr-file-path" title={currentFile}>
+              <span
+                className="vr-file-path"
+                title={`${currentFile} (click to copy)`}
+                onClick={() => currentFile && navigator.clipboard?.writeText(currentFile)}
+              >
                 {currentFile}
               </span>
-              <span className="vr-file-count">{entities.length}</span>
+              <span className="vr-file-count" title="entities">{entities.length}</span>
+              {sourceCode && <span className="vr-file-loc" title="lines of code">{sourceCode.split("\n").length}L</span>}
+              {(() => {
+                const hist = entities.find(e => e.type === "history" && e.detail.kind === "file_history");
+                const commits = hist?.detail.total_commits as number | undefined;
+                return commits ? <span className="vr-file-commits" title={`${commits} commits`}>{commits}c</span> : null;
+              })()}
+              {(() => {
+                const fi = allFiles.find(f => f.key === currentFile);
+                return fi && fi.complexity > 0 ? (
+                  <span title={`complexity score: ${fi.complexity}`} style={{
+                    fontSize: 10, padding: "0 4px", borderRadius: 3, marginLeft: 2,
+                    background: fi.complexity > 50 ? "#4a2020" : fi.complexity > 25 ? "#3a3a20" : "#1a2a1a",
+                    color: fi.complexity > 50 ? "#f44747" : fi.complexity > 25 ? "#dcdcaa" : "#4ec9b0",
+                  }}>{fi.complexity}cx</span>
+                ) : null;
+              })()}
             </div>
             <nav className="vr-tabs">
               {TABS.map((tab) => {
@@ -376,28 +884,30 @@ export function App() {
                 );
               })}
             </nav>
-            {activeTab === "concept" && (
-              <div className="vr-level-toggle">
-                <button
-                  className={`vr-level-btn ${knowledgeLevel === "all" ? "vr-level-btn--active" : ""}`}
-                  onClick={() => setKnowledgeLevel("all")}
-                >
-                  All
-                </button>
-                <button
-                  className={`vr-level-btn ${knowledgeLevel === "basic" ? "vr-level-btn--active" : ""}`}
-                  onClick={() => setKnowledgeLevel("basic")}
-                >
-                  Basic
-                </button>
-                <button
-                  className={`vr-level-btn ${knowledgeLevel === "advanced" ? "vr-level-btn--active" : ""}`}
-                  onClick={() => setKnowledgeLevel("advanced")}
-                >
-                  Advanced
-                </button>
+            <div className="vr-card-filter">
+              <input
+                type="text"
+                className="vr-card-filter-input"
+                placeholder="Filter cards..."
+                value={cardFilter}
+                onChange={(e) => setCardFilter(e.target.value)}
+              />
+              <div className="vr-sort-btns">
+                {(["line", "name", "kind"] as const).map((s) => (
+                  <button
+                    key={s}
+                    className={`vr-sort-btn ${cardSort === s ? "vr-sort-btn--active" : ""}`}
+                    onClick={() => setCardSort(s)}
+                    title={`Sort by ${s}`}
+                  >{s === "line" ? "#" : s === "name" ? "Az" : "Kd"}</button>
+                ))}
               </div>
-            )}
+              {cardFilter && (
+                <span className="vr-card-filter-count">
+                  {filtered.length}/{entities.filter((e) => e.type === activeTab).length}
+                </span>
+              )}
+            </div>
             <div className="vr-content">{tabContent()}</div>
           </>
         )}
@@ -406,16 +916,50 @@ export function App() {
 
       {/* Main area — Monaco editor */}
       <div className="vr-main">
-        {currentFile && (
-          <div className="vr-breadcrumb-bar">
-            {currentFile.split("/").map((segment, i, arr) => (
-              <span key={i} className="vr-breadcrumb-segment">
-                {i > 0 && <span className="vr-breadcrumb-sep">&#x276F;</span>}
-                <span className={`vr-breadcrumb-label${i === arr.length - 1 ? " vr-breadcrumb-label--active" : ""}`}>
-                  {segment}
-                </span>
-              </span>
-            ))}
+        {openFiles.length > 0 && (
+          <div className="vr-tab-bar">
+            <button
+              className="vr-nav-btn"
+              disabled={navIndex <= 0}
+              onClick={navigateBack}
+              title="Go Back (Alt+←)"
+            >&#x2190;</button>
+            <button
+              className="vr-nav-btn"
+              disabled={navIndex >= navHistory.length - 1}
+              onClick={navigateForward}
+              title="Go Forward (Alt+→)"
+            >&#x2192;</button>
+            {openFiles.length > 1 && (
+              <button
+                className="vr-nav-btn"
+                onClick={() => {
+                  setOpenFiles(currentFile ? [currentFile] : []);
+                }}
+                title="Close other tabs"
+                style={{ fontSize: 10 }}
+              >&#x2716;</button>
+            )}
+            {openFiles.map((file) => {
+              const fk = allFiles.find((f) => f.file === file)?.key;
+              const fi = allFiles.find((f) => f.file === file);
+              return (
+                <div
+                  key={file}
+                  className={`vr-tab-item ${file === currentFile ? "vr-tab-item--active" : ""}`}
+                  onClick={() => fk && selectFile(fk)}
+                  title={fi ? `${fi.count} entities · ${fi.complexity}cx` : file}
+                >
+                  <span className="vr-tab-item-label">{file.split("/").pop()}</span>
+                  <span
+                    className="vr-tab-item-close"
+                    onClick={(e) => { e.stopPropagation(); closeTab(file); }}
+                  >
+                    &#x2715;
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
         <div className="vr-editor-wrap">
@@ -424,6 +968,10 @@ export function App() {
               code={sourceCode}
               language={sourceLanguage}
               highlightRange={highlightRange}
+              entityMarkers={entityMarkers}
+              onCursorLine={setCursorLine}
+              onVisibleRange={onVisibleRange}
+              hoverInfos={hoverInfos}
               hoverRange={hoverRange}
               onHoverLine={onHoverLine}
             />
@@ -435,8 +983,46 @@ export function App() {
         </div>
       </div>
 
-      {/* File picker — floating panel */}
+      {/* Status bar */}
+      <div className="vr-statusbar">
+        <span>
+          {currentFile ?? "No file selected"}
+          {breadcrumbPath.map((be, i) => (
+            <span
+              key={i}
+              className="vr-breadcrumb"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                setActiveTab("concept");
+                setHighlightRange({
+                  startLine: be.anchor.start_line,
+                  endLine: be.anchor.end_line,
+                });
+              }}
+              title={`${be.detail.kind}: ${be.detail.name} (L${be.anchor.start_line}–${be.anchor.end_line})`}
+            >
+              {" > "}{i === breadcrumbPath.length - 1
+                ? <strong>{be.detail.name as string}</strong>
+                : <span style={{ color: "#666" }}>{be.detail.name as string}</span>}
+            </span>
+          ))}
+        </span>
+        <span className="vr-statusbar-right">
+          {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
+          {cursorLine > 0 && ` · Ln ${cursorLine}`}
+          {currentFile && (() => {
+            const fi = allFiles.find(f => f.key === currentFile);
+            return fi && fi.complexity > 0 ? ` · ${fi.complexity}cx` : "";
+          })()}
+          {sourceCode && ` · ${sourceCode.split("\n").length} lines`}
+          {currentFile && ` · ${sourceLanguage}`}
+        </span>
+      </div>
+
+      {/* File picker — command palette */}
       {pickerOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setPickerOpen(false)} />
         <div className="vr-picker">
           <div className="vr-picker-header">
             <input
@@ -465,12 +1051,14 @@ export function App() {
                 }`}
                 onClick={() => {
                   selectFile(f.key);
+                  setPickerOpen(false);
                 }}
               >
                 <span className="vr-picker-path">{f.file}</span>
-                {f.count > 0 && (
-                  <span className="vr-picker-count">{f.count}</span>
-                )}
+                <span style={{ marginLeft: "auto", display: "flex", gap: 6, fontSize: 10, color: "#666", flexShrink: 0 }}>
+                  {f.count > 0 && <span>{f.count}e</span>}
+                  {f.complexity > 0 && <span style={{ color: f.complexity > 10 ? "#f44747" : f.complexity > 5 ? "#dcdcaa" : "#4ec9b0" }}>{f.complexity}cx</span>}
+                </span>
               </div>
             ))}
             {remaining > 0 && (
@@ -483,6 +1071,109 @@ export function App() {
             {allFiles.length} files &middot; {filteredFiles.length} matches
           </div>
         </div>
+        </>
+      )}
+
+      {gotoLineOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setGotoLineOpen(false)} />
+        <div className="vr-picker" style={{ maxHeight: 60 }}>
+          <input
+            ref={gotoLineRef}
+            type="text"
+            className="vr-picker-input"
+            placeholder="Go to line..."
+            value={gotoLineValue}
+            onChange={e => setGotoLineValue(e.target.value.replace(/[^0-9]/g, ""))}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                const line = parseInt(gotoLineValue);
+                if (line > 0) {
+                  setHighlightRange({ startLine: line, endLine: line });
+                  setGotoLineOpen(false);
+                }
+              }
+              if (e.key === "Escape") setGotoLineOpen(false);
+            }}
+          />
+        </div>
+        </>
+      )}
+
+      {symbolOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setSymbolOpen(false)} />
+        <div className="vr-picker">
+          <input
+            ref={symbolRef}
+            type="text"
+            className="vr-picker-input"
+            placeholder="Go to symbol... (Ctrl+Shift+O)"
+            value={symbolQuery}
+            onChange={e => { setSymbolQuery(e.target.value); setSymbolIdx(0); }}
+            onKeyDown={e => {
+              if (e.key === "ArrowDown") { e.preventDefault(); setSymbolIdx(i => Math.min(i + 1, symbolResults.length - 1)); }
+              if (e.key === "ArrowUp") { e.preventDefault(); setSymbolIdx(i => Math.max(i - 1, 0)); }
+              if (e.key === "Enter" && symbolResults[symbolIdx]) {
+                onCardClick(symbolResults[symbolIdx]);
+                setSymbolOpen(false);
+              }
+              if (e.key === "Escape") setSymbolOpen(false);
+            }}
+          />
+          <div className="vr-picker-list" style={{ maxHeight: 300, overflowY: "auto" }}>
+            {symbolResults.map((e, i) => {
+              const kind = (e.detail.node_type as string || "").toLowerCase();
+              return (
+                <div key={i}
+                     className={`vr-picker-item ${i === symbolIdx ? "vr-picker-item--active" : ""}`}
+                     onClick={() => { onCardClick(e); setSymbolOpen(false); }}
+                >
+                  <span style={{ fontSize: 10, color: "#888", marginRight: 4 }}>{kind}</span>
+                  <span>{String(e.detail.name)}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 10, color: "#666" }}>L{e.anchor.start_line}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        </>
+      )}
+
+      {helpOpen && (
+        <>
+        <div className="vr-picker-overlay" onClick={() => setHelpOpen(false)} />
+        <div className="vr-help-panel">
+          <div className="vr-help-title">Keyboard Shortcuts</div>
+          <div className="vr-help-grid">
+            <kbd>Ctrl+P</kbd><span>File picker</span>
+            <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
+            <kbd>Ctrl+Shift+O</kbd><span>Go to symbol</span>
+            <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
+            <kbd>Ctrl+D</kbd><span>Bookmark entity</span>
+            <kbd>Ctrl+G</kbd><span>Go to line</span>
+            <kbd>Ctrl+W</kbd><span>Close tab</span>
+            <kbd>Ctrl+Shift+T</kbd><span>Reopen closed tab</span>
+            <kbd>Alt+1-5</kbd><span>Switch tab</span>
+            <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
+            <kbd>[ / ]</kbd><span>Previous/next file</span>
+            <kbd>?</kbd><span>Toggle this help</span>
+            <kbd>Esc</kbd><span>Close overlays</span>
+          </div>
+          <div className="vr-help-footer">
+            <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: "#888" }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Entity Types</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[["function","#4ec9b0"],["class","#dcdcaa"],["interface","#9cdcfe"],["type","#9cdcfe"],
+                ["variable","#ce9178"],["enum","#b5cea8"],["method","#4ec9b0"],["decorated","#c586c0"]].map(([k,c]) => (
+                <span key={k} style={{ color: c as string }}>{k}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        </>
       )}
     </div>
   );
@@ -491,13 +1182,118 @@ export function App() {
 const layoutStyles = `
   .vr-layout {
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 22px);
     width: 100vw;
     overflow: hidden;
     background: #1e1e1e;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 13px;
     color: #ccc;
+  }
+
+  .vr-activity-bar {
+    width: 40px;
+    background: #333;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .vr-activity-btn {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+  }
+
+  .vr-activity-btn:hover { opacity: 0.9; }
+  .vr-activity-btn--active { opacity: 1; border-left: 2px solid #007acc; }
+
+  .vr-file-panel {
+    min-width: 160px;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .vr-entity-search-panel {
+    width: 260px;
+    min-width: 200px;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .vr-entity-search-header {
+    padding: 8px;
+    border-bottom: 1px solid #3c3c3c;
+  }
+  .vr-entity-search-input {
+    width: 100%;
+    background: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .vr-entity-search-input:focus { border-color: #007acc; }
+  .vr-entity-search-results {
+    overflow-y: auto;
+    flex: 1;
+  }
+  .vr-entity-search-item {
+    padding: 5px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border-bottom: 1px solid #2d2d2d;
+  }
+  .vr-entity-search-item:hover { background: #2a2d2e; }
+  .vr-entity-search-item--active { background: #094771; }
+  .vr-entity-search-type {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: #333;
+    color: #888;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .vr-entity-search-name {
+    font-family: monospace;
+    font-size: 12px;
+    color: #d4d4d4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .vr-entity-search-file {
+    font-size: 10px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .vr-resize-handle {
@@ -529,23 +1325,32 @@ const layoutStyles = `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
   }
 
-  .vr-breadcrumb-bar {
+  .vr-tab-bar {
     display: flex;
-    align-items: center;
     background: #252526;
     border-bottom: 1px solid #3c3c3c;
-    height: 28px;
-    padding: 0 12px;
+    height: 35px;
+    align-items: stretch;
     flex-shrink: 0;
-    overflow: hidden;
+    overflow-x: auto;
   }
 
-  .vr-breadcrumb-segment {
+  .vr-tab-bar::-webkit-scrollbar { height: 0; }
+
+  .vr-tab-item {
+    padding: 0 8px 0 12px;
+    font-size: 12px;
+    color: #888;
     display: flex;
     align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border-right: 1px solid #3c3c3c;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .vr-breadcrumb-sep {
@@ -564,6 +1369,34 @@ const layoutStyles = `
     color: #ccc;
     font-weight: 500;
   }
+
+  .vr-tab-item-label { pointer-events: none; }
+
+  .vr-tab-item-close {
+    font-size: 10px;
+    opacity: 0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: opacity 0.1s;
+  }
+
+  .vr-tab-item:hover .vr-tab-item-close { opacity: 0.6; }
+  .vr-tab-item-close:hover { opacity: 1 !important; background: rgba(255,255,255,0.1); }
+
+  .vr-nav-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    padding: 0 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .vr-nav-btn:hover:not(:disabled) { color: #ccc; }
+  .vr-nav-btn:disabled { opacity: 0.3; cursor: default; }
 
   .vr-editor-wrap {
     flex: 1;
@@ -589,22 +1422,64 @@ const layoutStyles = `
     border-radius: 1px;
   }
 
+  .vr-marker-concept { background: #4ec9b0; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-flow { background: #dcdcaa; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-history { background: #9cdcfe; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+  .vr-marker-jump { background: #c586c0; width: 3px !important; margin-left: 1px; border-radius: 1px; }
+
   .vr-monaco-hover-range {
     background: rgba(0, 122, 204, 0.06) !important;
     border-left: 2px solid rgba(0, 122, 204, 0.3);
   }
 
-  /* File picker */
+  .vr-statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 22px;
+    background: #007acc;
+    color: #fff;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .vr-statusbar-right {
+    opacity: 0.85;
+  }
+
+  .vr-breadcrumb {
+    color: #888;
+    font-size: 11px;
+  }
+  .vr-breadcrumb strong {
+    color: #dcdcaa;
+  }
+
+  /* File picker — VS Code-style command palette */
+  .vr-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 199;
+  }
+
   .vr-picker {
     position: fixed;
-    bottom: 16px;
-    right: 16px;
-    width: 380px;
-    max-height: 400px;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 520px;
+    max-height: 440px;
     background: #2d2d2d;
     border: 1px solid #555;
     border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5);
     z-index: 200;
     display: flex;
     flex-direction: column;
@@ -706,6 +1581,53 @@ const layoutStyles = `
     border-top: 1px solid #444;
     text-align: right;
   }
+
+  .vr-help-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #252526;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px 24px;
+    z-index: 200;
+    min-width: 300px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .vr-help-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d4d4d4;
+    margin-bottom: 12px;
+  }
+  .vr-help-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    font-size: 12px;
+    color: #bbb;
+  }
+  .vr-help-grid kbd {
+    background: #3c3c3c;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #d4d4d4;
+  }
+  .vr-help-footer {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #666;
+  }
+  .vr-help-footer code {
+    background: #3c3c3c;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 10px;
+  }
 `;
 
 const sidebarStyles = `
@@ -758,7 +1680,10 @@ const sidebarStyles = `
     text-align: left;
     min-width: 0;
     flex: 1;
+    cursor: pointer;
   }
+
+  .vr-file-path:hover { color: #fff; }
 
   .vr-file-count {
     flex-shrink: 0;
@@ -766,6 +1691,28 @@ const sidebarStyles = `
     opacity: 0.5;
     background: #4d4d4d;
     color: #ccc;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
+  }
+
+  .vr-file-loc {
+    flex-shrink: 0;
+    font-size: 10px;
+    opacity: 0.5;
+    background: #2a3a2a;
+    color: #b5cea8;
+    padding: 0 5px;
+    border-radius: 8px;
+    line-height: 16px;
+  }
+
+  .vr-file-commits {
+    flex-shrink: 0;
+    font-size: 10px;
+    opacity: 0.5;
+    background: #3a3a2a;
+    color: #dcdcaa;
     padding: 0 5px;
     border-radius: 8px;
     line-height: 16px;
@@ -810,62 +1757,86 @@ const sidebarStyles = `
     line-height: 16px;
   }
 
-  .vr-level-toggle {
+  .vr-card-filter {
     display: flex;
-    gap: 2px;
-    padding: 0 8px 6px;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
     flex-shrink: 0;
   }
 
-  .vr-level-btn {
+  .vr-card-filter-input {
     flex: 1;
-    padding: 3px 4px;
-    background: none;
+    padding: 4px 8px;
+    background: #1e1e1e;
+    color: #ccc;
     border: 1px solid #3c3c3c;
     border-radius: 4px;
-    color: #888;
-    cursor: pointer;
-    font-size: 10px;
+    font-size: 11px;
     font-family: inherit;
-    text-align: center;
-    transition: all 0.15s;
+    outline: none;
   }
 
-  .vr-level-btn:hover { color: #ccc; border-color: #555; }
-
-  .vr-level-btn--active {
-    color: #ccc;
-    background: rgba(0, 122, 204, 0.15);
+  .vr-card-filter-input:focus {
     border-color: #007acc;
+  }
+
+  .vr-sort-btns {
+    display: flex;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+
+  .vr-sort-btn {
+    background: #2d2d2d;
+    border: 1px solid #3c3c3c;
+    color: #888;
+    font-size: 10px;
+    padding: 2px 5px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .vr-sort-btn:first-child { border-radius: 3px 0 0 3px; }
+  .vr-sort-btn:last-child { border-radius: 0 3px 3px 0; }
+  .vr-sort-btn--active { background: #007acc; color: #fff; border-color: #007acc; }
+  .vr-sort-btn:hover:not(.vr-sort-btn--active) { background: #3c3c3c; }
+
+  .vr-card-filter-count {
+    font-size: 10px;
+    color: #666;
+    flex-shrink: 0;
   }
 
   .vr-content {
     flex: 1;
     overflow-y: auto;
     padding: 6px 8px;
+    scroll-behavior: smooth;
   }
+
+  .vr-content::-webkit-scrollbar { width: 6px; }
+  .vr-content::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+  .vr-content::-webkit-scrollbar-track { background: transparent; }
 
   .vr-card {
     background: #1e1e1e;
-    border: 1px solid #333;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border: 1px solid #3c3c3c;
+    border-radius: 6px;
+    margin-bottom: 6px;
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.15s ease;
+    transition: border-color 0.25s ease, box-shadow 0.3s ease, background 0.3s ease;
   }
 
   .vr-card:hover {
-    border-color: #4a4a4a;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(-1px);
+    border-color: #007acc;
+    box-shadow: 0 0 0 1px rgba(0,122,204,0.15);
   }
 
-  .vr-card--highlighted {
+  .vr-card-highlight {
     border-color: #007acc;
-    box-shadow: 0 0 16px rgba(0,122,204,0.25), 0 4px 12px rgba(0, 0, 0, 0.3);
-    background: #1a2332;
-    transform: translateY(-1px);
+    background: #1a2a3a;
   }
 
   .vr-card-header {
@@ -943,20 +1914,15 @@ const sidebarStyles = `
   .vr-card-chevron--open { transform: rotate(90deg); }
 
   .vr-card-detail {
-    padding: 10px 12px 12px;
+    padding: 8px 10px 10px;
     font-size: 12px;
     line-height: 1.6;
     color: #8b8b8b;
-    border-top: 1px solid #333;
+    border-top: 1px solid #3c3c3c;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.1);
   }
 
-  .vr-card-desc {
-    margin: 2px 0 10px;
-    color: #999;
-    line-height: 1.55;
-  }
+  .vr-card-desc { margin: 4px 0 8px; }
 
   .vr-card-raw {
     margin: 4px 0 8px;
@@ -964,6 +1930,50 @@ const sidebarStyles = `
     font-family: monospace;
     white-space: pre-wrap;
     word-break: break-word;
+  }
+
+  .vr-card-code-preview {
+    margin: 6px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1a1a1a;
+    border: 1px solid #333;
+  }
+
+  .vr-card-code {
+    margin: 0;
+    padding: 6px 0;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  .vr-card-code::-webkit-scrollbar { height: 4px; }
+  .vr-card-code::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+  .vr-card-code-line {
+    display: flex;
+    padding: 0 8px 0 0;
+    white-space: pre;
+  }
+
+  .vr-card-code-num {
+    color: #555;
+    text-align: right;
+    width: 32px;
+    padding-right: 8px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .vr-card-code-text {
+    color: #ccc;
+  }
+
+  .vr-card-code-more {
+    color: #666;
+    font-style: italic;
   }
 
   .vr-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -976,6 +1986,10 @@ const sidebarStyles = `
     color: #8b8b8b;
     white-space: nowrap;
   }
+  .vr-card-chip--enriched {
+    background: #1a3a2a;
+    color: #4ec9b0;
+  }
 
   .vr-no-cards {
     text-align: center;
@@ -983,433 +1997,5 @@ const sidebarStyles = `
     color: #8b8b8b;
     font-size: 12px;
   }
-
-  /* Knowledge sections */
-  .vr-card-knowledge {
-    margin: 10px 0 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .vr-card-knowledge--basic {
-    border-left: 2px solid #4ec9b055;
-    padding-left: 10px;
-    background: rgba(78, 201, 176, 0.02);
-    border-radius: 0 4px 4px 0;
-    padding: 8px 10px 8px 10px;
-  }
-
-  .vr-card-knowledge--advanced {
-    border-left: 2px solid #c586c055;
-    padding-left: 10px;
-    margin-top: 8px;
-    background: rgba(197, 134, 192, 0.02);
-    border-radius: 0 4px 4px 0;
-    padding: 8px 10px 8px 10px;
-  }
-
-  .vr-card-krow {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 11.5px;
-    line-height: 1.55;
-  }
-
-  .vr-card-klabel {
-    flex-shrink: 0;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #4ec9b0;
-    min-width: 54px;
-    opacity: 0.9;
-  }
-
-  .vr-card-klabel--adv {
-    color: #c586c0;
-  }
-
-  .vr-card-ktext {
-    color: #b8b8b8;
-  }
-
-  .vr-card-ktext--analogy {
-    font-style: italic;
-    color: #9cdcfe;
-    opacity: 0.9;
-  }
-
-  .vr-card-ktakeaway {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .vr-card-teach-chip {
-    font-size: 10.5px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    background: rgba(78, 201, 176, 0.08);
-    color: #6db5a6;
-    border: 1px solid rgba(78, 201, 176, 0.15);
-    font-family: 'Cascadia Code', Consolas, monospace;
-    line-height: 1.4;
-  }
-
-  .vr-card-teach-chip--clickable {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    color: #4ec9b0;
-    border-color: rgba(78, 201, 176, 0.3);
-    background: rgba(78, 201, 176, 0.1);
-  }
-
-  .vr-card-teach-chip--clickable::after {
-    content: '↗';
-    font-size: 8px;
-    margin-left: 3px;
-    opacity: 0.5;
-    transition: opacity 0.15s;
-  }
-
-  .vr-card-teach-chip--clickable:hover {
-    background: rgba(78, 201, 176, 0.22);
-    border-color: #4ec9b0;
-    box-shadow: 0 0 8px rgba(78, 201, 176, 0.15);
-    transform: translateY(-1px);
-  }
-
-  .vr-card-teach-chip--clickable:hover::after {
-    opacity: 1;
-  }
-
-  .vr-card-teach-chip--active {
-    background: rgba(78, 201, 176, 0.28);
-    border-color: #4ec9b0;
-    color: #7eecd8;
-    box-shadow: 0 0 12px rgba(78, 201, 176, 0.2);
-  }
-
-  .vr-card-teach-chip--active::after {
-    content: '▾';
-    opacity: 1;
-  }
-
-  .vr-card-krow--takeaway {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .vr-card-ktakeaway-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-  }
-
-  .vr-card-teach-tooltip {
-    background: #1a2a2a;
-    border: 1px solid rgba(78, 201, 176, 0.25);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: 11.5px;
-    line-height: 1.6;
-    color: #c8e0d8;
-    margin-top: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    animation: tooltipFadeIn 0.15s ease-out;
-  }
-
-  @keyframes tooltipFadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .vr-teach-explain {
-    margin: 0 0 8px;
-    color: #d4e8e0;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-  .vr-teach-rationale {
-    margin: 0 0 6px;
-    padding: 5px 8px;
-    background: rgba(78, 201, 176, 0.06);
-    border-radius: 4px;
-    color: #9cc;
-    font-size: 11px;
-  }
-
-  .vr-teach-rationale strong {
-    color: #4ec9b0;
-    font-weight: 600;
-    margin-right: 4px;
-  }
-
-  .vr-teach-crosslang {
-    margin: 0 0 6px;
-    padding: 5px 8px;
-    background: rgba(156, 220, 254, 0.06);
-    border-radius: 4px;
-    color: #9cc8e8;
-    font-size: 11px;
-    font-family: 'Cascadia Code', Consolas, monospace;
-  }
-
-  .vr-teach-crosslang strong {
-    color: #9cdcfe;
-    font-weight: 600;
-    margin-right: 4px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  .vr-teach-gotcha {
-    margin: 0;
-    padding: 5px 8px;
-    background: rgba(206, 145, 120, 0.08);
-    border-left: 2px solid rgba(206, 145, 120, 0.4);
-    border-radius: 0 4px 4px 0;
-    color: #e8c0a8;
-    font-size: 11px;
-  }
-
-  .vr-teach-filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    background: rgba(78, 201, 176, 0.08);
-    border-bottom: 1px solid rgba(78, 201, 176, 0.2);
-    flex-shrink: 0;
-    font-size: 11px;
-  }
-
-  .vr-teach-filter-label {
-    color: #888;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .vr-teach-filter-tag {
-    color: #4ec9b0;
-    font-family: 'Cascadia Code', Consolas, monospace;
-    font-weight: 600;
-  }
-
-  .vr-teach-filter-clear {
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 12px;
-    cursor: pointer;
-    padding: 0 4px;
-    line-height: 1;
-  }
-
-  .vr-teach-filter-clear:hover { color: #e88; }
-
-  .vr-teach-filter-count {
-    margin-left: auto;
-    color: #666;
-    font-size: 10px;
-  }
-
-  .vr-card-advanced-toggle {
-    background: rgba(197, 134, 192, 0.06);
-    border: 1px solid rgba(197, 134, 192, 0.2);
-    border-radius: 4px;
-    color: #c586c0;
-    font-size: 10px;
-    cursor: pointer;
-    padding: 4px 10px;
-    text-align: left;
-    opacity: 0.8;
-    transition: all 0.15s;
-    margin-top: 6px;
-  }
-
-  .vr-card-advanced-toggle:hover {
-    opacity: 1;
-    background: rgba(197, 134, 192, 0.12);
-    border-color: rgba(197, 134, 192, 0.4);
-  }
-
-  .vr-card-advanced-toggle--collapse {
-    margin-bottom: 6px;
-    margin-top: 0;
-  }
-
-  .vr-card-krow--analogy {
-    margin-top: 2px;
-    padding-top: 4px;
-    border-top: 1px solid #3c3c3c;
-  }
 `;
 
-const treeStyles = `
-  .vr-tree-panel {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #252526;
-  }
-
-  .vr-tree {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  .vr-tree-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #8b8b8b;
-    border-bottom: 1px solid #3c3c3c;
-    flex-shrink: 0;
-  }
-
-  .vr-tree-header-label { font-weight: 600; }
-
-  .vr-tree-header-count {
-    font-size: 10px;
-    background: #4d4d4d;
-    color: #ccc;
-    padding: 0 5px;
-    border-radius: 8px;
-    line-height: 16px;
-  }
-
-  .vr-tree-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 0;
-  }
-
-  .vr-tree-list::-webkit-scrollbar { width: 6px; }
-  .vr-tree-list::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-
-  .vr-tree-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #bbb;
-    white-space: nowrap;
-    overflow: hidden;
-    line-height: 22px;
-  }
-
-  .vr-tree-item:hover { background: rgba(255,255,255,0.04); }
-  .vr-tree-item--active { background: rgba(0,122,204,0.15); color: #fff; }
-
-  .vr-tree-icon {
-    width: 12px;
-    font-size: 10px;
-    text-align: center;
-    color: #888;
-    flex-shrink: 0;
-  }
-
-  .vr-tree-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-  }
-
-  .vr-tree-dir { color: #ccc; font-weight: 500; }
-
-  .vr-tree-count {
-    font-size: 10px;
-    color: #666;
-    flex-shrink: 0;
-  }
-
-  .vr-tree-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .vr-tree-btn {
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 12px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 16px;
-  }
-
-  .vr-tree-btn:hover { color: #ccc; }
-
-  .vr-tree-filter {
-    position: relative;
-    padding: 4px 8px;
-    flex-shrink: 0;
-  }
-
-  .vr-tree-filter-input {
-    width: 100%;
-    padding: 3px 22px 3px 8px;
-    background: #3c3c3c;
-    border: 1px solid #555;
-    border-radius: 3px;
-    color: #ccc;
-    font-size: 11px;
-    outline: none;
-    box-sizing: border-box;
-  }
-
-  .vr-tree-filter-input:focus { border-color: #007acc; }
-  .vr-tree-filter-input::placeholder { color: #666; }
-
-  .vr-tree-filter-clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 0 2px;
-    line-height: 1;
-  }
-
-  .vr-tree-filter-clear:hover { color: #ccc; }
-
-  .vr-tree-match {
-    color: #e8a838;
-    font-weight: 600;
-  }
-
-  .vr-tree-empty {
-    padding: 12px;
-    color: #666;
-    font-size: 11px;
-    font-style: italic;
-    text-align: center;
-  }
-`;
-
-declare function acquireVsCodeApi(): {
-  postMessage(msg: unknown): void;
-  getState(): unknown;
-  setState(state: unknown): void;
-};

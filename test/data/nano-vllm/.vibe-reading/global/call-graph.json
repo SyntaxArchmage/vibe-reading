@@ -1,0 +1,663 @@
+{
+  "generated_at": "2026-06-23T05:11:21.309Z",
+  "files": [
+    {
+      "file": "example.py",
+      "imports": [
+        {
+          "source": "os",
+          "names": []
+        },
+        {
+          "source": "nanovllm",
+          "names": [
+            "LLM",
+            "SamplingParams"
+          ]
+        },
+        {
+          "source": "transformers",
+          "names": [
+            "AutoTokenizer"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "bench.py",
+      "imports": [
+        {
+          "source": "os",
+          "names": []
+        },
+        {
+          "source": "time",
+          "names": []
+        },
+        {
+          "source": "random",
+          "names": [
+            "randint",
+            "seed"
+          ]
+        },
+        {
+          "source": "nanovllm",
+          "names": [
+            "LLM",
+            "SamplingParams"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/sampling_params.py",
+      "imports": [
+        {
+          "source": "dataclasses",
+          "names": [
+            "dataclass"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/llm.py",
+      "imports": [
+        {
+          "source": "nanovllm.engine.llm_engine",
+          "names": [
+            "LLMEngine"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/config.py",
+      "imports": [
+        {
+          "source": "os",
+          "names": []
+        },
+        {
+          "source": "dataclasses",
+          "names": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "transformers",
+          "names": [
+            "AutoConfig"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/__init__.py",
+      "imports": [
+        {
+          "source": "nanovllm.llm",
+          "names": [
+            "LLM"
+          ]
+        },
+        {
+          "source": "nanovllm.sampling_params",
+          "names": [
+            "SamplingParams"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/models/qwen3.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.distributed"
+          ]
+        },
+        {
+          "source": "transformers",
+          "names": [
+            "Qwen3Config"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.activation",
+          "names": [
+            "SiluAndMul"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.attention",
+          "names": [
+            "Attention"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.layernorm",
+          "names": [
+            "RMSNorm"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.linear",
+          "names": [
+            "QKVParallelLinear",
+            "MergedColumnParallelLinear",
+            "RowParallelLinear"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.rotary_embedding",
+          "names": [
+            "get_rope"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.embed_head",
+          "names": [
+            "VocabParallelEmbedding",
+            "ParallelLMHead"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/utils/loader.py",
+      "imports": [
+        {
+          "source": "os",
+          "names": []
+        },
+        {
+          "source": "glob",
+          "names": [
+            "glob"
+          ]
+        },
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "safetensors",
+          "names": [
+            "safe_open"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/utils/context.py",
+      "imports": [
+        {
+          "source": "dataclasses",
+          "names": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "torch",
+          "names": []
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/sampler.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/rotary_embedding.py",
+      "imports": [
+        {
+          "source": "functools",
+          "names": [
+            "lru_cache"
+          ]
+        },
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/linear.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.nn.functional"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.distributed"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/layernorm.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/embed_head.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.nn.functional"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.distributed"
+          ]
+        },
+        {
+          "source": "nanovllm.utils.context",
+          "names": [
+            "get_context"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/attention.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "triton",
+          "names": []
+        },
+        {
+          "source": "",
+          "names": [
+            "triton.language"
+          ]
+        },
+        {
+          "source": "flash_attn",
+          "names": [
+            "flash_attn_varlen_func",
+            "flash_attn_with_kvcache"
+          ]
+        },
+        {
+          "source": "nanovllm.utils.context",
+          "names": [
+            "get_context"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/layers/activation.py",
+      "imports": [
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": [
+            "nn"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.nn.functional"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/engine/sequence.py",
+      "imports": [
+        {
+          "source": "copy",
+          "names": [
+            "copy"
+          ]
+        },
+        {
+          "source": "enum",
+          "names": [
+            "Enum",
+            "auto"
+          ]
+        },
+        {
+          "source": "itertools",
+          "names": [
+            "count"
+          ]
+        },
+        {
+          "source": "nanovllm.sampling_params",
+          "names": [
+            "SamplingParams"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/engine/scheduler.py",
+      "imports": [
+        {
+          "source": "collections",
+          "names": [
+            "deque"
+          ]
+        },
+        {
+          "source": "nanovllm.config",
+          "names": [
+            "Config"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.sequence",
+          "names": [
+            "Sequence",
+            "SequenceStatus"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.block_manager",
+          "names": [
+            "BlockManager"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/engine/model_runner.py",
+      "imports": [
+        {
+          "source": "pickle",
+          "names": []
+        },
+        {
+          "source": "torch",
+          "names": []
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.distributed"
+          ]
+        },
+        {
+          "source": "multiprocessing.synchronize",
+          "names": [
+            "Event"
+          ]
+        },
+        {
+          "source": "multiprocessing.shared_memory",
+          "names": [
+            "SharedMemory"
+          ]
+        },
+        {
+          "source": "nanovllm.config",
+          "names": [
+            "Config"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.sequence",
+          "names": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "nanovllm.models.qwen3",
+          "names": [
+            "Qwen3ForCausalLM"
+          ]
+        },
+        {
+          "source": "nanovllm.layers.sampler",
+          "names": [
+            "Sampler"
+          ]
+        },
+        {
+          "source": "nanovllm.utils.context",
+          "names": [
+            "set_context",
+            "get_context",
+            "reset_context"
+          ]
+        },
+        {
+          "source": "nanovllm.utils.loader",
+          "names": [
+            "load_model"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/engine/llm_engine.py",
+      "imports": [
+        {
+          "source": "atexit",
+          "names": []
+        },
+        {
+          "source": "dataclasses",
+          "names": [
+            "fields"
+          ]
+        },
+        {
+          "source": "time",
+          "names": [
+            "perf_counter"
+          ]
+        },
+        {
+          "source": "tqdm.auto",
+          "names": [
+            "tqdm"
+          ]
+        },
+        {
+          "source": "transformers",
+          "names": [
+            "AutoTokenizer"
+          ]
+        },
+        {
+          "source": "",
+          "names": [
+            "torch.multiprocessing"
+          ]
+        },
+        {
+          "source": "nanovllm.config",
+          "names": [
+            "Config"
+          ]
+        },
+        {
+          "source": "nanovllm.sampling_params",
+          "names": [
+            "SamplingParams"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.sequence",
+          "names": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.scheduler",
+          "names": [
+            "Scheduler"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.model_runner",
+          "names": [
+            "ModelRunner"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    },
+    {
+      "file": "nanovllm/engine/block_manager.py",
+      "imports": [
+        {
+          "source": "collections",
+          "names": [
+            "deque"
+          ]
+        },
+        {
+          "source": "xxhash",
+          "names": []
+        },
+        {
+          "source": "",
+          "names": [
+            "numpy"
+          ]
+        },
+        {
+          "source": "nanovllm.engine.sequence",
+          "names": [
+            "Sequence"
+          ]
+        }
+      ],
+      "exports": [],
+      "calls": []
+    }
+  ]
+}

@@ -1,181 +1,92 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
 interface FileTreeProps {
-  files: { key: string; file: string; count: number }[];
+  files: { key: string; file: string; count: number; commits: number }[];
   currentFile: string | null;
-  onSelectFile: (key: string) => void;
+  onSelect: (key: string) => void;
 }
 
 interface TreeNode {
   name: string;
   path: string;
-  children: TreeNode[];
+  children: Map<string, TreeNode>;
   fileKey?: string;
-  count?: number;
-  totalCount: number;
+  count: number;
+  commits: number;
 }
 
-function buildTree(files: { key: string; file: string; count: number }[]): TreeNode {
-  const root: TreeNode = { name: "", path: "", children: [], totalCount: 0 };
+function buildTree(files: { key: string; file: string; count: number; commits: number }[]): TreeNode {
+  const root: TreeNode = { name: "", path: "", children: new Map(), count: 0, commits: 0 };
 
   for (const f of files) {
     const parts = f.file.split("/");
-    let current = root;
-    let pathSoFar = "";
-
+    let node = root;
     for (let i = 0; i < parts.length; i++) {
-      pathSoFar = pathSoFar ? `${pathSoFar}/${parts[i]}` : parts[i];
-      const isLeaf = i === parts.length - 1;
-
-      let child = current.children.find((c) => c.name === parts[i]);
-      if (!child) {
-        child = {
-          name: parts[i],
-          path: pathSoFar,
-          children: [],
-          totalCount: 0,
-        };
-        current.children.push(child);
+      const part = parts[i];
+      if (!node.children.has(part)) {
+        node.children.set(part, {
+          name: part,
+          path: parts.slice(0, i + 1).join("/"),
+          children: new Map(),
+          count: 0,
+          commits: 0,
+        });
       }
-
-      if (isLeaf) {
-        child.fileKey = f.key;
-        child.count = f.count;
-      }
-      current = child;
+      node = node.children.get(part)!;
     }
+    node.fileKey = f.key;
+    node.count = f.count;
+    node.commits = f.commits;
   }
 
-  function computeTotals(node: TreeNode): number {
-    let total = node.count || 0;
-    for (const child of node.children) {
-      total += computeTotals(child);
-    }
-    node.totalCount = total;
-    return total;
-  }
-  computeTotals(root);
-
-  function sortChildren(node: TreeNode) {
-    node.children.sort((a, b) => {
-      const aDir = a.children.length > 0 ? 0 : 1;
-      const bDir = b.children.length > 0 ? 0 : 1;
-      if (aDir !== bDir) return aDir - bDir;
-      return a.name.localeCompare(b.name);
-    });
-    for (const c of node.children) sortChildren(c);
-  }
-  sortChildren(root);
-
-  function collapse(node: TreeNode): TreeNode {
-    if (node.children.length === 1 && !node.fileKey && node.children[0].children.length > 0) {
-      const child = node.children[0];
-      return collapse({
-        ...child,
-        name: node.name ? `${node.name}/${child.name}` : child.name,
-      });
-    }
-    return { ...node, children: node.children.map(collapse) };
-  }
-  return collapse(root);
+  propagateCounts(root);
+  return root;
 }
 
-function collectAllDirs(node: TreeNode): Set<string> {
-  const dirs = new Set<string>();
-  if (node.children.length > 0) {
-    dirs.add(node.path);
-    for (const c of node.children) {
-      for (const d of collectAllDirs(c)) dirs.add(d);
+function propagateCounts(node: TreeNode): number {
+  if (node.children.size === 0) return node.count;
+  let total = node.fileKey ? node.count : 0;
+  for (const child of node.children.values()) {
+    total += propagateCounts(child);
+  }
+  if (!node.fileKey) node.count = total;
+  return total;
+}
+
+function collapseRoot(root: TreeNode): TreeNode {
+  if (root.children.size === 1 && !root.fileKey) {
+    const [child] = root.children.values();
+    if (child.children.size > 0 && !child.fileKey) {
+      return collapseRoot(child);
     }
   }
-  return dirs;
+  return root;
 }
 
-/** Filter tree to only nodes matching query; returns null if nothing matches. */
-function filterTree(node: TreeNode, query: string): TreeNode | null {
-  const q = query.toLowerCase();
+const EXT_ICONS: Record<string, string> = {
+  ".ts": "TS", ".tsx": "TX", ".js": "JS", ".jsx": "JX",
+  ".py": "Py", ".rs": "Rs", ".go": "Go", ".rb": "Rb",
+  ".java": "Jv", ".c": "C", ".cpp": "C+", ".h": "H",
+  ".css": "Cs", ".html": "Ht", ".json": "Js", ".md": "Md",
+  ".vue": "Vu", ".svelte": "Sv",
+};
 
-  if (node.children.length === 0) {
-    return node.name.toLowerCase().includes(q) ? node : null;
-  }
-
-  const filteredChildren: TreeNode[] = [];
-  for (const child of node.children) {
-    const filtered = filterTree(child, query);
-    if (filtered) filteredChildren.push(filtered);
-  }
-
-  if (filteredChildren.length === 0 && !node.name.toLowerCase().includes(q)) {
-    return null;
-  }
-
-  return { ...node, children: filteredChildren };
+function extIcon(name: string): string {
+  const dot = name.lastIndexOf(".");
+  if (dot < 0) return "·";
+  return EXT_ICONS[name.slice(dot)] || "·";
 }
 
-function TreeItem({
-  node,
-  depth,
-  currentFile,
-  expanded,
-  onToggle,
-  onSelect,
-  highlight,
-}: {
-  node: TreeNode;
-  depth: number;
-  currentFile: string | null;
-  expanded: Set<string>;
-  onToggle: (path: string) => void;
-  onSelect: (key: string) => void;
-  highlight?: string;
-}) {
-  const isDir = node.children.length > 0;
-  const isOpen = expanded.has(node.path);
-  const isActive = node.fileKey && currentFile === node.path;
-
-  const nameEl = highlight ? highlightMatch(node.name, highlight) : node.name;
-
-  return (
-    <>
-      <div
-        className={`vr-tree-item${isActive ? " vr-tree-item--active" : ""}`}
-        style={{ paddingLeft: `${8 + depth * 14}px` }}
-        onClick={() => {
-          if (isDir) {
-            onToggle(node.path);
-          } else if (node.fileKey) {
-            onSelect(node.fileKey);
-          }
-        }}
-      >
-        <span className="vr-tree-icon">
-          {isDir ? (isOpen ? "▾" : "▸") : ""}
-        </span>
-        <span className={`vr-tree-name${isDir ? " vr-tree-dir" : ""}`}>
-          {nameEl}
-        </span>
-        {(node.count ?? 0) > 0 && (
-          <span className="vr-tree-count">{node.count}</span>
-        )}
-      </div>
-      {isDir && isOpen &&
-        node.children.map((child) => (
-          <TreeItem
-            key={child.path}
-            node={child}
-            depth={depth + 1}
-            currentFile={currentFile}
-            expanded={expanded}
-            onToggle={onToggle}
-            onSelect={onSelect}
-            highlight={highlight}
-          />
-        ))}
-    </>
-  );
+function heatColor(commits: number, maxCommits: number): string | null {
+  if (commits <= 0 || maxCommits <= 0) return null;
+  const ratio = commits / maxCommits;
+  if (ratio < 0.25) return "#4ec9b0";
+  if (ratio < 0.5) return "#dcdcaa";
+  if (ratio < 0.75) return "#ce9178";
+  return "#f44747";
 }
 
-function highlightMatch(text: string, query: string): JSX.Element {
+function highlightMatch(text: string, query: string): React.ReactElement {
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx === -1) return <>{text}</>;
   return (
@@ -187,40 +98,126 @@ function highlightMatch(text: string, query: string): JSX.Element {
   );
 }
 
-export function FileTree({ files, currentFile, onSelectFile }: FileTreeProps) {
-  const tree = useMemo(() => buildTree(files), [files]);
+function DirNode({
+  node,
+  currentFile,
+  onSelect,
+  depth,
+  maxCommits,
+  filterQuery,
+}: {
+  node: TreeNode;
+  currentFile: string | null;
+  onSelect: (key: string) => void;
+  depth: number;
+  maxCommits: number;
+  filterQuery?: string;
+}) {
+  const containsCurrent = currentFile ? currentFile.startsWith(node.path + "/") || currentFile === node.path : false;
+  const [open, setOpen] = useState(depth < 2 || containsCurrent);
+
+  useEffect(() => {
+    if (containsCurrent && !open) setOpen(true);
+  }, [currentFile]);
+
+  const dirs: TreeNode[] = [];
+  const fileNodes: TreeNode[] = [];
+  for (const child of node.children.values()) {
+    if (child.children.size > 0 && !child.fileKey) {
+      dirs.push(child);
+    } else {
+      fileNodes.push(child);
+    }
+  }
+  dirs.sort((a, b) => a.name.localeCompare(b.name));
+  fileNodes.sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <>
+      {node.name && (
+        <div
+          className="vr-tree-dir"
+          style={{ paddingLeft: depth * 12 + 4 }}
+          onClick={() => setOpen(!open)}
+        >
+          <span className={`vr-tree-arrow ${open ? "vr-tree-arrow--open" : ""}`}>
+            &#x25B8;
+          </span>
+          <span className="vr-tree-dir-name">
+            {filterQuery ? highlightMatch(node.name, filterQuery) : node.name}
+          </span>
+          {node.count > 0 && <span className="vr-tree-dir-count">{node.count}</span>}
+        </div>
+      )}
+      {(open || !node.name) && (
+        <>
+          {dirs.map((d) => (
+            <DirNode
+              key={d.path}
+              node={d}
+              currentFile={currentFile}
+              onSelect={onSelect}
+              depth={node.name ? depth + 1 : depth}
+              maxCommits={maxCommits}
+              filterQuery={filterQuery}
+            />
+          ))}
+          {fileNodes.map((f) => {
+            const heat = heatColor(f.commits, maxCommits);
+            return (
+              <div
+                key={f.path}
+                className={`vr-tree-file ${
+                  currentFile === f.path ? "vr-tree-file--active" : ""
+                }`}
+                style={{ paddingLeft: (node.name ? depth + 1 : depth) * 12 + 4 }}
+                onClick={() => f.fileKey && onSelect(f.fileKey)}
+                title={f.commits > 0 ? `${f.commits} commits` : undefined}
+              >
+                {heat && <span className="vr-tree-heat" style={{ background: heat }} />}
+                <span style={{ fontSize: 10, color: "#666", flexShrink: 0, width: 14, textAlign: "center" }}>
+                  {extIcon(f.name)}
+                </span>
+                <span className="vr-tree-file-name">
+                  {filterQuery ? highlightMatch(f.name, filterQuery) : f.name}
+                </span>
+                {f.count > 0 && (
+                  <span className="vr-tree-file-count">{f.count}</span>
+                )}
+              </div>
+            );
+          })}
+        </>
+      )}
+    </>
+  );
+}
+
+type SortMode = "name" | "entities" | "commits";
+
+export function FileTree({ files, currentFile, onSelect }: FileTreeProps) {
   const [filter, setFilter] = useState("");
+  const [collapseKey, setCollapseKey] = useState(0);
+  const [sortMode, setSortMode] = useState<SortMode>("name");
   const filterRef = useRef<HTMLInputElement>(null);
+  const sorted = useMemo(() => {
+    const arr = [...files];
+    switch (sortMode) {
+      case "entities": arr.sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)); break;
+      case "commits": arr.sort((a, b) => b.commits - a.commits || a.file.localeCompare(b.file)); break;
+      default: arr.sort((a, b) => a.file.localeCompare(b.file));
+    }
+    return arr;
+  }, [files, sortMode]);
+  const filtered = useMemo(() => {
+    if (!filter.trim()) return sorted;
+    const q = filter.toLowerCase();
+    return sorted.filter(f => f.file.toLowerCase().includes(q));
+  }, [sorted, filter]);
+  const tree = useMemo(() => collapseRoot(buildTree(filtered)), [filtered]);
+  const maxCommits = useMemo(() => Math.max(...files.map(f => f.commits), 1), [files]);
+  const filterQuery = filter.trim() || undefined;
 
-  const allDirs = useMemo(() => collectAllDirs(tree), [tree]);
-
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(allDirs));
-
-  const displayTree = useMemo(() => {
-    if (!filter.trim()) return tree;
-    return filterTree(tree, filter.trim());
-  }, [tree, filter]);
-
-  // When filtering, auto-expand all dirs so matches are visible
-  const displayExpanded = useMemo(() => {
-    if (!filter.trim()) return expanded;
-    if (!displayTree) return expanded;
-    return collectAllDirs(displayTree);
-  }, [filter, displayTree, expanded]);
-
-  const onToggle = useCallback((path: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  }, []);
-
-  const expandAll = useCallback(() => setExpanded(new Set(allDirs)), [allDirs]);
-  const collapseAll = useCallback(() => setExpanded(new Set<string>()), []);
-
-  // Focus filter on Ctrl+Shift+E
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === "E") {
@@ -235,29 +232,32 @@ export function FileTree({ files, currentFile, onSelectFile }: FileTreeProps) {
   return (
     <div className="vr-tree">
       <div className="vr-tree-header">
-        <span className="vr-tree-header-label">Explorer</span>
-        <div className="vr-tree-header-actions">
+        EXPLORER
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span className="vr-tree-header-count">{filtered.length} files</span>
+          {(["name", "entities", "commits"] as SortMode[]).map(m => (
+            <button key={m}
+              className="vr-tree-collapse-btn"
+              style={{ opacity: sortMode === m ? 1 : 0.4, fontSize: 9, padding: "0 3px" }}
+              onClick={() => setSortMode(m)}
+              title={`Sort by ${m}`}
+            >{m === "name" ? "Az" : m === "entities" ? "#" : "~"}</button>
+          ))}
           <button
-            className="vr-tree-btn"
-            onClick={expandAll}
-            title="Expand all"
-          >⊞</button>
-          <button
-            className="vr-tree-btn"
-            onClick={collapseAll}
-            title="Collapse all"
-          >⊟</button>
-          <span className="vr-tree-header-count">{files.length}</span>
+            className="vr-tree-collapse-btn"
+            onClick={() => setCollapseKey(k => k + 1)}
+            title="Collapse all folders"
+          >&#x25B4;</button>
         </div>
       </div>
       <div className="vr-tree-filter">
         <input
           ref={filterRef}
           type="text"
-          className="vr-tree-filter-input"
           placeholder="Filter files..."
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={e => setFilter(e.target.value)}
+          className="vr-tree-filter-input"
         />
         {filter && (
           <button
@@ -266,24 +266,186 @@ export function FileTree({ files, currentFile, onSelectFile }: FileTreeProps) {
           >×</button>
         )}
       </div>
-      <div className="vr-tree-list">
-        {displayTree ? (
-          displayTree.children.map((child) => (
-            <TreeItem
-              key={child.path}
-              node={child}
-              depth={0}
-              currentFile={currentFile}
-              expanded={displayExpanded}
-              onToggle={onToggle}
-              onSelect={onSelectFile}
-              highlight={filter.trim() || undefined}
-            />
-          ))
-        ) : (
+      <div className="vr-tree-list" key={collapseKey}>
+        {filtered.length === 0 && filter.trim() ? (
           <div className="vr-tree-empty">No files match "{filter}"</div>
+        ) : (
+          <DirNode node={tree} currentFile={currentFile} onSelect={onSelect} depth={0} maxCommits={maxCommits} filterQuery={filterQuery} />
         )}
       </div>
     </div>
   );
 }
+
+export const fileTreeStyles = `
+  .vr-tree {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .vr-tree-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #888;
+    border-bottom: 1px solid #3c3c3c;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vr-tree-header-count {
+    font-weight: 400;
+    font-size: 10px;
+    opacity: 0.7;
+    letter-spacing: 0;
+  }
+
+  .vr-tree-collapse-btn {
+    background: none;
+    border: 1px solid #555;
+    color: #888;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 3px;
+    line-height: 14px;
+  }
+  .vr-tree-collapse-btn:hover { color: #d4d4d4; border-color: #888; }
+
+  .vr-tree-filter {
+    padding: 4px 8px;
+    border-bottom: 1px solid #3c3c3c;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .vr-tree-filter-input {
+    width: 100%;
+    background: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .vr-tree-filter-input:focus { border-color: #007acc; }
+
+  .vr-tree-filter-clear {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .vr-tree-filter-clear:hover { color: #ccc; }
+
+  .vr-tree-match {
+    background: rgba(220, 220, 170, 0.25);
+    border-radius: 2px;
+  }
+
+  .vr-tree-empty {
+    padding: 12px;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+  }
+
+  .vr-tree-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .vr-tree-list::-webkit-scrollbar { width: 6px; }
+  .vr-tree-list::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+  .vr-tree-dir {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .vr-tree-dir:hover { background: rgba(255,255,255,0.04); }
+
+  .vr-tree-arrow {
+    font-size: 9px;
+    color: #888;
+    transition: transform 0.15s;
+    width: 12px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .vr-tree-arrow--open { transform: rotate(90deg); }
+
+  .vr-tree-dir-name {
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .vr-tree-dir-count {
+    font-size: 10px;
+    color: #666;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-right: 8px;
+  }
+
+  .vr-tree-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 2px 20px;
+    font-size: 12px;
+    color: #bbb;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .vr-tree-file:hover { background: rgba(255,255,255,0.04); }
+
+  .vr-tree-file--active {
+    background: rgba(0,122,204,0.2);
+    color: #fff;
+  }
+
+  .vr-tree-file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .vr-tree-file-count {
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #666;
+    margin-left: 4px;
+  }
+
+  .vr-tree-heat {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 4px;
+  }
+`;

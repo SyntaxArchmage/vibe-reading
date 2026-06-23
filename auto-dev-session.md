@@ -1,0 +1,105 @@
+# Auto-Dev Session Log
+
+### Auto-Dev Session 2026-06-14 22:12 (Cycle 4 complete → Cycle 5 in progress)
+- **Duration**: 90+ minutes across 2 cycles
+- **Tests**: 357 assertions (up from 245 → +112 new)
+- **Defects found**: 4
+  - 3 TypeScript strict errors in viewer (null→undefined, unknown→ReactNode)
+  - 1 stale entitySearchOpen closure in keyboard handler
+- **Defects fixed**: 4
+- **Features implemented** (40+ items):
+  - Outline tab with nested entity tree and cursor tracking (Alt+5)
+  - Viewport indicator on entity density minimap
+  - Cross-file usages in expanded concept cards
+  - Bi-directional jump tab ("imported by" section)
+  - Entity hover tooltips in Monaco editor
+  - Entity bookmarks (star toggle, localStorage persisted)
+  - Go-to-symbol dialog (Ctrl+Shift+O)
+  - File complexity score badge (cx) in file header
+  - File summary line in concept tab
+  - File tree sort by name/entities/commits
+  - File picker prioritizes open tabs
+  - Enhanced status bar info
+  - Flow tab importer names
+  - Live reload via SSE (/api/events)
+  - Auto-enrich: parameter and return type extraction
+  - `complexity.ts` — ranked complexity report
+  - `diff.ts` — snapshot-based comparison
+  - `search.ts` — cross-file entity search with --kind and --regex
+  - `summary.ts` — tab-separated file overview
+  - `export-dot --clusters` — directory grouping
+  - Concept tab kind filter chips
+  - Tab tooltips (entity count + complexity)
+  - `export-md --outline` mode
+  - Export-md summary footer
+  - Density minimap click-to-jump
+  - Entity filter input in concept tab
+  - Ctrl+D bookmark shortcut
+  - Params/return type in card detail and hover
+  - Author distribution bar in history tab
+  - Outline tab filter/search
+  - Circular dependency detection in flow tab
+  - Ctrl+Shift+T reopen closed tab
+  - Stats: dependency graph analysis
+  - Enhanced /api/health
+  - Bookmarks in empty state
+- **Commits**: 25+ commits
+
+### Auto-Dev Session 2026-06-14 18:12 (completed)
+- **Duration**: 90 minutes
+- **Tests**: 245 assertions (up from 148 → 97 new)
+- **Defects found**: 1
+  - All tree-sitter-wasms language parsers had ABI mismatch (silent failures)
+- **Defects fixed**: 1
+  - Removed broken tree-sitter-wasms entries + dead concept extractor code
+- **Features implemented** (32 items):
+  - Keyboard shortcuts help overlay (? to toggle)
+  - Ctrl+G goto line dialog
+  - Commit count badge in file header
+  - Lines of code badge in file header
+  - Breadcrumb: status bar shows entity at cursor position
+  - Clickable breadcrumb navigates to concept tab
+  - Auto-enrich supports Rust `///`, Go `//`, Ruby `#` doc comments
+  - Entity search: `f:filename` filter, file path search
+  - Entity search results show kind and line number
+  - Blame view shows source code alongside annotations
+  - `/api/stats` endpoint for project-level statistics
+  - `/api/search` endpoint for programmatic entity search
+  - `/api/export` endpoint for complete data download
+  - `export-md.ts` — Markdown analysis export
+  - `export-dot.ts` — Graphviz DOT call graph export
+  - Top 5 most complex files in empty state sidebar
+  - Enrichment progress bar in empty state
+  - Folder entity counts in file tree
+  - Fuzzy file matching in command palette
+  - Relative date formatting in HistoryTab
+  - Persist last viewed file and active tab (localStorage)
+  - Close other tabs button
+  - Copy entity name button in card
+  - Stats tool: average entities/file, extension breakdown
+  - Analyze reports entity counts by file extension
+  - Status bar simplification with ? help hint
+  - Flow tab import/export ratio summary
+  - Concept tab groups entities by kind (collapsible)
+  - Entity density minimap bar in concept tab
+  - Card highlight follows cursor position
+  - Commit frequency sparkline in history tab
+  - `[` / `]` keyboard shortcuts for prev/next file
+  - `export-dot --focus` flag to highlight specific file
+- **Commits**: 48 commits (78d6e82 → 80027d4)
+
+### Auto-Dev Session 2026-06-14 16:12 (completed)
+- **Duration**: 90 minutes
+- **Defects found**: 7 (P0: 0, P1: 0, P2: 1, P3: 1, P4: 5)
+- **Defects fixed**: 7
+  - P2: Required parameter after optional in buildDescription (lint error)
+  - P3: Entity search used file path instead of key for selectFile (navigated wrong)
+  - P4: Shadowed `filesDir` variable in server.ts
+  - P4: History extractor used shell pipe `| wc -l` and `| tail -1` instead of git-native flags
+  - P4: Auto-enrich `isUnenriched` check missed enum/method/struct/module/decorated kinds
+  - P4: Blame view kept stale data when switching files (missing key prop)
+  - P4: allEntities and allFiles recomputed on every render (memoized)
+- **Tests added**: 35 (70 → 105 assertions)
+- **Features implemented**: 16 features including stats tool, blame view, flow diagram, entity search, etc.
+- **Commits**: 32 commits (f8c607d → 78d6e82)
+- **PRD progress**: Flow diagram and git blame deferred items completed

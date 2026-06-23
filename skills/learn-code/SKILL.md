@@ -1,13 +1,19 @@
 ---
 name: learn-code
-description: Analyze a codebase and generate Vibe Reading concept cards. Three-step pipeline — AST extraction, automatic enrichment, then optional deep enrichment by the agent for important entities.
+description: Analyze a codebase and generate Vibe Reading data — concept cards, call flow, git history, and navigation jumps. Three-step pipeline — AST extraction, automatic enrichment, then optional deep enrichment by the agent for important entities.
 ---
 
 # /learn-code — Generate Vibe Reading Data
 
 ## What This Does
 
-Generates concept cards for every source file in a project. Each card explains what a function, class, or interface does — purpose, patterns, architecture role. The data powers the Vibe Reading web viewer.
+Generates knowledge data for every source file in a project:
+- **Concept cards**: What each function, class, interface does
+- **Flow cards**: Import dependencies, function call chains, exports
+- **History cards**: Git commit history, change frequency, hot spots
+- **Jump suggestions**: Navigation links to related files via imports
+
+The data powers the Vibe Reading web viewer.
 
 ## Prerequisites
 
@@ -23,7 +29,12 @@ cd <vibe-reading-repo>/cli && npm install  # first time only
 cd <vibe-reading-repo>/cli && npx tsx analyze.ts <target-project-root>
 ```
 
-Creates `<target-project-root>/.vibe-reading/files/*.json` with skeleton entities — names, line numbers, AST types. Summaries are placeholders like `"function: foo"`.
+This creates `<target-project-root>/.vibe-reading/` with:
+- `files/*.json` — per-file entities (concepts, flow, history, jumps)
+- `global/call-graph.json` — cross-file call relationships
+- `manifest.json` — coverage status
+
+Concept summaries are placeholders like `"function: foo"` that need enrichment. Flow, history, and jump entities are auto-generated.
 
 ### Step 2: Auto-Enrich (Tier 1 — Instant)
 
@@ -60,6 +71,8 @@ For each file you want to deep-enrich:
 
 ```bash
 cd <vibe-reading-repo>/cli && npx tsx enrich.ts <target-project-root> <relative-file-path> '<enrichments-json>'
+# Or use --from-file for large enrichments (avoids shell escaping issues):
+cd <vibe-reading-repo>/cli && npx tsx enrich.ts <target-project-root> <relative-file-path> --from-file /tmp/enrichments.json
 ```
 
 Enrichments JSON format:
@@ -222,6 +235,29 @@ Tell the user:
 - Number of files analyzed and entities enriched
 - Coverage percentage
 - How to view: run `/teach-me` or `PORT=3460 npx tsx viewer/server.ts <target-project-root>`
+
+### Step 2.5 (Optional): Auto-Enrich from JSDoc/Docstrings
+
+Before manual enrichment, run auto-enrich to handle entities that already
+have good documentation:
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx auto-enrich.ts <target-project-root>
+```
+
+This extracts JSDoc comments (JS/TS) and Python docstrings to generate
+summaries and descriptions automatically. Only unenriched entities are
+updated.
+
+### Quick Stats
+
+Check analysis metrics without opening the viewer:
+
+```bash
+cd <vibe-reading-repo>/cli && npx tsx stats.ts <target-project-root>
+```
+
+Shows entity counts, enrichment percentage, and largest file.
 
 ## Batch Processing
 
