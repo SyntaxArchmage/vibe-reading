@@ -22,8 +22,16 @@ declare const CALL_GRAPH: {
   }>;
 } | null;
 
+declare const VR_BASE: string | undefined;
+
+function appBase(): string {
+  const base = typeof VR_BASE === "string" ? VR_BASE : "";
+  if (!base) return "";
+  return base.endsWith("/") ? base : `${base}/`;
+}
+
 function sourceStaticPath(file: string): string {
-  return `source/${file.replace(/\//g, "__")}.json`;
+  return `${appBase()}source/${file.replace(/\//g, "__")}.json`;
 }
 
 async function loadSourceContent(file: string): Promise<string> {
@@ -49,6 +57,19 @@ async function loadSourceContent(file: string): Promise<string> {
 
   return `// Source file not found: ${file}`;
 }
+
+const DEFAULT_FILE_KEY = (() => {
+  const entries = Object.entries(PREVIEW_DATA);
+  if (entries.length === 0) return null;
+  try {
+    const last = localStorage.getItem("vr-last-file");
+    if (last) {
+      const hit = entries.find(([, data]) => data.file === last);
+      if (hit) return hit[0];
+    }
+  } catch {}
+  return entries.sort((a, b) => b[1].entities.length - a[1].entities.length)[0][0];
+})();
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "concept", label: "Concept" },
@@ -106,15 +127,23 @@ export function App() {
     try { const t = localStorage.getItem("vr-active-tab"); if (t && TABS.some(tab => tab.id === t)) return t as TabId; } catch {}
     return "concept";
   });
-  const [entities, setEntities] = useState<DataEntity[]>([]);
-  const [currentFile, setCurrentFile] = useState<string | null>(null);
-  const [sourceCode, setSourceCode] = useState<string>("");
-  const [sourceLanguage, setSourceLanguage] = useState<string>("plaintext");
+  const [entities, setEntities] = useState<DataEntity[]>(() =>
+    DEFAULT_FILE_KEY ? PREVIEW_DATA[DEFAULT_FILE_KEY].entities : []
+  );
+  const [currentFile, setCurrentFile] = useState<string | null>(() =>
+    DEFAULT_FILE_KEY ? PREVIEW_DATA[DEFAULT_FILE_KEY].file : null
+  );
+  const [sourceCode, setSourceCode] = useState("");
+  const [sourceLanguage, setSourceLanguage] = useState<string>(() =>
+    DEFAULT_FILE_KEY ? detectLanguage(PREVIEW_DATA[DEFAULT_FILE_KEY].file) : "plaintext"
+  );
   const [highlightRange, setHighlightRange] = useState<{
     startLine: number;
     endLine: number;
   } | null>(null);
-  const [openFiles, setOpenFiles] = useState<string[]>([]);
+  const [openFiles, setOpenFiles] = useState<string[]>(() =>
+    DEFAULT_FILE_KEY ? [PREVIEW_DATA[DEFAULT_FILE_KEY].file] : []
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [treeOpen, setTreeOpen] = useState(true);
@@ -322,14 +351,8 @@ export function App() {
   }, [activeTab]);
 
   useEffect(() => {
-    try {
-      const last = localStorage.getItem("vr-last-file");
-      if (last) {
-        const fk = allFiles.find(f => f.file === last)?.key;
-        if (fk) selectFile(fk);
-      }
-    } catch {}
-  }, []);
+    if (DEFAULT_FILE_KEY) selectFile(DEFAULT_FILE_KEY);
+  }, [selectFile]);
 
   const navigateForward = useCallback(() => {
     if (navIndex >= navHistory.length - 1) return;
@@ -439,12 +462,6 @@ export function App() {
         : null,
     [hoverSource]
   );
-
-  useEffect(() => {
-    if (allFiles.length > 0 && !currentFile) {
-      selectFile(allFiles[0].key);
-    }
-  }, []);
 
   const filtered = entities
     .filter((e) => {
@@ -585,7 +602,7 @@ export function App() {
         }
       }
       if ((e.key === "[" || e.key === "]") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
-        const idx = allFiles.findIndex(f => f.key === currentFile);
+        const idx = allFiles.findIndex(f => f.file === currentFile);
         if (idx >= 0) {
           const next = e.key === "]" ? idx + 1 : idx - 1;
           if (next >= 0 && next < allFiles.length) selectFile(allFiles[next].key);
@@ -767,73 +784,6 @@ export function App() {
 
       {/* Sidebar — knowledge cards */}
       <div className="vr-sidebar" style={{ width: sidebarResize.width }}>
-        {!currentFile && (
-          <div className="vr-empty">
-            <div className="vr-empty-icon">&#x1F4D6;</div>
-            <div className="vr-empty-title">Vibe Reading</div>
-            <div className="vr-empty-hint">
-              Select a file to see knowledge cards.
-              <div style={{ marginTop: 8, fontSize: 11, color: "#777" }}>
-                {allFiles.length} files · {allEntities.length} entities
-              </div>
-              <div style={{ marginTop: 4, fontSize: 10, color: "#555", display: "flex", gap: 8, justifyContent: "center" }}>
-                <span style={{ color: "#4ec9b0" }}>{allEntities.filter(e => e.type === "concept").length} concepts</span>
-                <span style={{ color: "#dcdcaa" }}>{allEntities.filter(e => e.type === "flow").length} flow</span>
-                <span style={{ color: "#9cdcfe" }}>{allEntities.filter(e => e.type === "history").length} history</span>
-                <span style={{ color: "#c586c0" }}>{allEntities.filter(e => e.type === "jump").length} jump</span>
-              </div>
-              {(() => {
-                const concepts = allEntities.filter(e => e.type === "concept");
-                const enriched = concepts.filter(e => {
-                  const desc = e.detail.description as string | undefined;
-                  return desc && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(desc);
-                });
-                const pct = concepts.length > 0 ? Math.round((enriched.length / concepts.length) * 100) : 0;
-                return concepts.length > 0 ? (
-                  <div style={{ marginTop: 8, fontSize: 10, color: "#666" }}>
-                    Enrichment: {enriched.length}/{concepts.length} concepts ({pct}%)
-                    <div style={{ marginTop: 3, height: 3, background: "#333", borderRadius: 2, overflow: "hidden" }}>
-                      <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "#4ec9b0" : "#dcdcaa", borderRadius: 2 }} />
-                    </div>
-                  </div>
-                ) : null;
-              })()}
-              {bookmarks.size > 0 && (
-                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
-                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
-                    ★ Bookmarks ({bookmarks.size})
-                  </div>
-                  {[...bookmarks].slice(0, 8).map(bk => {
-                    const [file, name] = bk.split(":");
-                    return (
-                      <div key={bk} style={{ fontSize: 11, color: "#dcdcaa", padding: "2px 0", cursor: "pointer" }}
-                           onClick={() => { const fk = allFiles.find(f => f.key === file)?.key; if (fk) selectFile(fk); }}>
-                        {name} <span style={{ color: "#666" }}>{file?.split("__").pop()?.replace(".json", "")}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {allFiles.length > 0 && (
-                <div style={{ marginTop: 12, textAlign: "left", width: "100%" }}>
-                  <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>
-                    Most complex files
-                  </div>
-                  {allFiles.slice(0, 5).map(f => (
-                    <div
-                      key={f.key}
-                      style={{ fontSize: 11, color: "#9cdcfe", padding: "2px 0", cursor: "pointer" }}
-                      onClick={() => selectFile(f.key)}
-                    >
-                      {f.file} <span style={{ color: "#666" }}>({f.count})</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {currentFile && (
           <>
             <div className="vr-file-header">
@@ -853,7 +803,7 @@ export function App() {
                 return commits ? <span className="vr-file-commits" title={`${commits} commits`}>{commits}c</span> : null;
               })()}
               {(() => {
-                const fi = allFiles.find(f => f.key === currentFile);
+                const fi = allFiles.find(f => f.file === currentFile);
                 return fi && fi.complexity > 0 ? (
                   <span title={`complexity score: ${fi.complexity}`} style={{
                     fontSize: 10, padding: "0 4px", borderRadius: 3, marginLeft: 2,
@@ -1011,7 +961,7 @@ export function App() {
           {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
           {cursorLine > 0 && ` · Ln ${cursorLine}`}
           {currentFile && (() => {
-            const fi = allFiles.find(f => f.key === currentFile);
+            const fi = allFiles.find(f => f.file === currentFile);
             return fi && fi.complexity > 0 ? ` · ${fi.complexity}cx` : "";
           })()}
           {sourceCode && ` · ${sourceCode.split("\n").length} lines`}
