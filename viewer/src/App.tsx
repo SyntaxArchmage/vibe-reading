@@ -1991,6 +1991,196 @@ const sidebarStyles = `
     color: #4ec9b0;
   }
 
+  .vr-card-knowledge {
+    margin: 10px 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .vr-card-knowledge--basic {
+    border-left: 2px solid #4ec9b055;
+    background: rgba(78, 201, 176, 0.02);
+    border-radius: 0 4px 4px 0;
+    padding: 8px 10px;
+  }
+
+  .vr-card-knowledge--advanced {
+    border-left: 2px solid #c586c055;
+    margin-top: 8px;
+    background: rgba(197, 134, 192, 0.02);
+    border-radius: 0 4px 4px 0;
+    padding: 8px 10px;
+  }
+
+  .vr-card-krow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+
+  .vr-card-klabel {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #4ec9b0;
+    min-width: 54px;
+    opacity: 0.9;
+  }
+
+  .vr-card-klabel--adv { color: #c586c0; }
+
+  .vr-card-ktext { color: #b8b8b8; }
+
+  .vr-card-ktext--analogy {
+    font-style: italic;
+    color: #9cdcfe;
+    opacity: 0.9;
+  }
+
+  .vr-card-ktakeaway {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .vr-card-teach-chip {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(78, 201, 176, 0.08);
+    color: #6db5a6;
+    border: 1px solid rgba(78, 201, 176, 0.15);
+    font-family: 'Cascadia Code', Consolas, monospace;
+    line-height: 1.4;
+  }
+
+  .vr-card-teach-chip--clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #4ec9b0;
+    border-color: rgba(78, 201, 176, 0.3);
+    background: rgba(78, 201, 176, 0.1);
+  }
+
+  .vr-card-teach-chip--clickable:hover {
+    background: rgba(78, 201, 176, 0.22);
+    border-color: #4ec9b0;
+  }
+
+  .vr-card-teach-chip--active {
+    background: rgba(78, 201, 176, 0.28);
+    border-color: #4ec9b0;
+    color: #7eecd8;
+  }
+
+  .vr-card-krow--takeaway {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vr-card-ktakeaway-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .vr-card-teach-tooltip {
+    background: #1a2a2a;
+    border: 1px solid rgba(78, 201, 176, 0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #c8e0d8;
+    margin-top: 6px;
+  }
+
+  .vr-teach-explain {
+    margin: 0 0 8px;
+    color: #d4e8e0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .vr-teach-rationale {
+    margin: 0 0 6px;
+    padding: 5px 8px;
+    background: rgba(78, 201, 176, 0.06);
+    border-radius: 4px;
+    color: #9cc;
+    font-size: 11px;
+  }
+
+  .vr-teach-rationale strong {
+    color: #4ec9b0;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .vr-teach-crosslang {
+    margin: 0 0 6px;
+    padding: 5px 8px;
+    background: rgba(156, 220, 254, 0.06);
+    border-radius: 4px;
+    color: #9cc8e8;
+    font-size: 11px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+  }
+
+  .vr-teach-crosslang strong {
+    color: #9cdcfe;
+    font-weight: 600;
+    margin-right: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .vr-teach-gotcha {
+    margin: 0;
+    padding: 5px 8px;
+    background: rgba(206, 145, 120, 0.08);
+    border-left: 2px solid rgba(206, 145, 120, 0.4);
+    border-radius: 0 4px 4px 0;
+    color: #e8c0a8;
+    font-size: 11px;
+  }
+
+  .vr-card-advanced-toggle {
+    background: rgba(197, 134, 192, 0.06);
+    border: 1px solid rgba(197, 134, 192, 0.2);
+    border-radius: 4px;
+    color: #c586c0;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 4px 10px;
+    text-align: left;
+    opacity: 0.8;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+
+  .vr-card-advanced-toggle:hover {
+    opacity: 1;
+    background: rgba(197, 134, 192, 0.12);
+    border-color: rgba(197, 134, 192, 0.4);
+  }
+
+  .vr-card-advanced-toggle--collapse {
+    margin-bottom: 6px;
+    margin-top: 0;
+  }
+
+  .vr-card-krow--analogy {
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top: 1px solid #3c3c3c;
+  }
+
   .vr-no-cards {
     text-align: center;
     padding: 32px 20px;
