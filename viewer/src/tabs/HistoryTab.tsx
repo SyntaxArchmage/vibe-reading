@@ -259,7 +259,7 @@ export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
           <HistoryCard key={`hist-${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick} />
         ))}
       </AnimatePresence>
-      {currentFile && <BlameView key={currentFile} file={currentFile} />}
+      {currentFile && typeof (globalThis as any).VR_BASE === "undefined" && <BlameView key={currentFile} file={currentFile} />}
     </div>
   );
 }

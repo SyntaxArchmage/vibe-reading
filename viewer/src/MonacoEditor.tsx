@@ -83,18 +83,30 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
   const markerDecorationsRef = useRef<string[]>([]);
   const hoverDecorationsRef = useRef<string[]>([]);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (!window.monaco) {
-      const check = setInterval(() => {
-        if (window.monaco) {
-          clearInterval(check);
-          setReady(true);
-        }
-      }, 100);
-      return () => clearInterval(check);
+    const onReady = () => setReady(true);
+    if (window.monaco) {
+      setReady(true);
+      return;
     }
-    setReady(true);
+    window.addEventListener("monaco-ready", onReady);
+    const check = setInterval(() => {
+      if (window.monaco) {
+        clearInterval(check);
+        setReady(true);
+      }
+    }, 100);
+    const timeout = setTimeout(() => {
+      clearInterval(check);
+      if (!window.monaco) setFailed(true);
+    }, 20000);
+    return () => {
+      window.removeEventListener("monaco-ready", onReady);
+      clearInterval(check);
+      clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
@@ -270,7 +282,7 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
 
   return (
     <div style={{ width: "100%", height: "100%", overflow: "hidden", position: "relative" }}>
-      {!ready && (
+      {!ready && !failed && (
         <div style={{
           position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
           color: "#666", fontSize: 13, fontFamily: "monospace", background: "#1e1e1e",
@@ -278,7 +290,16 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
           Loading editor...
         </div>
       )}
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      {failed && (
+        <pre style={{
+          position: "absolute", inset: 0, margin: 0, padding: 12,
+          overflow: "auto", background: "#1e1e1e", color: "#ccc",
+          fontSize: 13, fontFamily: "'Cascadia Code', Consolas, monospace", lineHeight: 1.5,
+        }}>
+          {code}
+        </pre>
+      )}
+      <div ref={containerRef} style={{ width: "100%", height: "100%", visibility: ready ? "visible" : "hidden" }} />
     </div>
   );
 }

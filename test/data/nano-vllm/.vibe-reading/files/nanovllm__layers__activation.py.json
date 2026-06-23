@@ -10,27 +10,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Fused SiLU activation with gating multiplication",
+      "summary": "class: SiluAndMul",
       "detail": {
         "kind": "class",
         "name": "SiluAndMul",
         "body_lines": 6,
         "node_type": "class_definition",
-        "description": "Applies SiLU(x) * y in one operation. Used in gated MLPs where gate and value are computed together.",
-        "level": "basic",
-        "why": "Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard",
-        "takeaway": [
-          {
-            "tag": "SiLU (Swish) Activation",
-            "explain": "SiLU(x) = x * sigmoid(x). Smooth, non-monotonic. Outperforms ReLU in practice. Self-gated: no separate gate needed.",
-            "rationale": "Used here because: Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard"
-          },
-          {
-            "tag": "Gated Linear Unit",
-            "explain": "Output = activation(Wx) * Vy. The gate branch (Wx) controls information flow. Better gradient flow than plain activation.",
-            "rationale": "Used here because: Gated activations outperform plain ReLU/GeLU in modern LLMs — SwiGLU is the standard"
-          }
-        ]
+        "description": "class \"SiluAndMul\" spanning 6 lines."
       }
     },
     {
@@ -42,23 +28,58 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Split input tensor and apply SiLU gating",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 4,
         "node_type": "function_definition",
-        "description": "Splits fused [gate, value] tensor along last dim, applies SiLU to gate, multiplies with value.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Tensor Chunking",
-            "explain": "torch.chunk splits tensor into N equal parts along a dimension. Efficient way to separate fused computations without copying.",
-            "rationale": "Splits fused [gate, value] tensor along last dim, applies SiLU to gate, multiplies with value"
-          }
+        "description": "function \"forward\" spanning 4 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/activation.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 2 modules (0 local, 2 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "torch",
+          "torch"
+        ],
+        "all_names": [
+          "nn",
+          "torch.nn.functional"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/activation.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.883Z"
+  "analyzed_at": "2026-06-23T08:29:18.825Z"
 }

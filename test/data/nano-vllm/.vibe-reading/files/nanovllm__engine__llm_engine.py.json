@@ -10,26 +10,13 @@
         "end_col": 22
       },
       "type": "concept",
-      "summary": "Orchestrates inference pipeline: scheduler + model runner + API",
+      "summary": "class: LLMEngine",
       "detail": {
         "kind": "class",
         "name": "LLMEngine",
         "body_lines": 76,
         "node_type": "class_definition",
-        "description": "Facade coordinating Scheduler, ModelRunner, and user-facing API. Single entry point for all inference.",
-        "why": "User needs one simple interface, not knowledge of Scheduler + ModelRunner + BlockManager internals",
-        "takeaway": [
-          {
-            "tag": "Facade Pattern",
-            "explain": "Single interface wrapping complex subsystem. User calls one method; internally coordinates multiple components. Reduces coupling.",
-            "rationale": "Used here because: User needs one simple interface, not knowledge of Scheduler + ModelRunner + BlockManager internals",
-            "cross_lang": "Java Spring @Service classes, Go handler structs, TypeScript service classes, Rust public module API",
-            "gotcha": "Facade can become a God Object if it accumulates too many responsibilities — split by domain"
-          }
-        ],
-        "design": "Synchronous generate() wraps async step loop for API simplicity",
-        "convention": "External code only interacts with LLMEngine — never directly with Scheduler or ModelRunner",
-        "level": "basic"
+        "description": "class \"LLMEngine\" spanning 76 lines."
       }
     },
     {
@@ -41,23 +28,13 @@
         "end_col": 34
       },
       "type": "concept",
-      "summary": "Initialize all engine subsystems: scheduler, block manager, model runner",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 19,
         "node_type": "function_definition",
-        "description": "Creates and connects Scheduler, BlockManager, ModelRunner. Starts model runner process.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Composition over Inheritance",
-            "explain": "Build complex objects by composing simpler ones as fields. Each sub-component has single responsibility. Easier to test and replace.",
-            "rationale": "Creates and connects Scheduler, BlockManager, ModelRunner",
-            "cross_lang": "Go interfaces + embedding, Rust traits + composition, TypeScript interfaces + mixins, Java delegation",
-            "gotcha": "Too much composition leads to 'lasagna code' — many thin layers that are hard to trace through"
-          }
-        ]
+        "description": "function \"__init__\" spanning 19 lines."
       }
     },
     {
@@ -69,21 +46,13 @@
         "end_col": 20
       },
       "type": "concept",
-      "summary": "Graceful shutdown: stop model runner process and free resources",
+      "summary": "function: exit",
       "detail": {
         "kind": "function",
         "name": "exit",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Sends exit command to ModelRunner process, waits for termination.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Graceful Shutdown",
-            "explain": "Notify sub-processes/threads to stop, wait for completion, then release resources. Prevents zombie processes and resource leaks.",
-            "rationale": "Sends exit command to ModelRunner process, waits for termination"
-          }
-        ]
+        "description": "function \"exit\" spanning 5 lines."
       }
     },
     {
@@ -95,21 +64,13 @@
         "end_col": 31
       },
       "type": "concept",
-      "summary": "Submit new generation request to the engine",
+      "summary": "function: add_request",
       "detail": {
         "kind": "function",
         "name": "add_request",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Creates Sequence from prompt tokens and sampling params, adds to scheduler queue.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Request Queue Pattern",
-            "explain": "Decouple submission from execution. Caller submits to queue, engine processes when resources available. Enables batching and flow control.",
-            "rationale": "Creates Sequence from prompt tokens and sampling params, adds to scheduler queue"
-          }
-        ]
+        "description": "function \"add_request\" spanning 5 lines."
       }
     },
     {
@@ -121,21 +82,13 @@
         "end_col": 34
       },
       "type": "concept",
-      "summary": "Execute one scheduling + inference cycle",
+      "summary": "function: step",
       "detail": {
         "kind": "function",
         "name": "step",
         "body_lines": 7,
         "node_type": "function_definition",
-        "description": "Schedule → prepare inputs → model forward → sample → update sequences. The core engine loop body.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Step-Based Engine Loop",
-            "explain": "Break continuous processing into discrete steps. Each step: schedule, execute, update. Enables batching across requests within one step.",
-            "rationale": "Schedule → prepare inputs → model forward → sample → update sequences"
-          }
-        ]
+        "description": "function \"step\" spanning 7 lines."
       }
     },
     {
@@ -147,21 +100,13 @@
         "end_col": 43
       },
       "type": "concept",
-      "summary": "Check if all submitted requests have completed generation",
+      "summary": "function: is_finished",
       "detail": {
         "kind": "function",
         "name": "is_finished",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Returns True when scheduler has no waiting or running sequences.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Completion Predicate",
-            "explain": "Poll-based completion check. Caller loops calling step() until is_finished(). Simple synchronous API over async internals.",
-            "rationale": "Returns True when scheduler has no waiting or running sequences"
-          }
-        ]
+        "description": "function \"is_finished\" spanning 2 lines."
       }
     },
     {
@@ -173,23 +118,170 @@
         "end_col": 22
       },
       "type": "concept",
-      "summary": "Synchronous generation: submit request and loop until complete",
+      "summary": "function: generate",
       "detail": {
         "kind": "function",
         "name": "generate",
         "body_lines": 31,
         "node_type": "function_definition",
-        "description": "Convenience API: adds request, repeatedly calls step(), returns results when finished.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Synchronous Wrapper",
-            "explain": "Wrap async/step-based internals with blocking API. Simpler for users who dont need streaming. Hides the step loop.",
-            "rationale": "Convenience API: adds request, repeatedly calls step(), returns results when finished"
-          }
+        "description": "function \"generate\" spanning 31 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 10 modules (5 local, 5 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.config",
+          "nanovllm.sampling_params",
+          "nanovllm.engine.sequence",
+          "nanovllm.engine.scheduler",
+          "nanovllm.engine.model_runner"
+        ],
+        "external_deps": [
+          "atexit",
+          "dataclasses",
+          "time",
+          "tqdm.auto",
+          "transformers"
+        ],
+        "all_names": [
+          "fields",
+          "perf_counter",
+          "tqdm",
+          "AutoTokenizer",
+          "torch.multiprocessing",
+          "Config",
+          "SamplingParams",
+          "Sequence",
+          "Scheduler",
+          "ModelRunner"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 91,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 8,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/config.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/config.py",
+        "names": [
+          "Config"
+        ],
+        "reason": "Uses Config from nanovllm/config.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 9,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/sampling_params.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/sampling_params.py",
+        "names": [
+          "SamplingParams"
+        ],
+        "reason": "Uses SamplingParams from nanovllm/sampling_params.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 10,
+        "start_col": 0,
+        "end_line": 10,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/sequence.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/sequence.py",
+        "names": [
+          "Sequence"
+        ],
+        "reason": "Uses Sequence from nanovllm/engine/sequence.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 11,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/scheduler.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/scheduler.py",
+        "names": [
+          "Scheduler"
+        ],
+        "reason": "Uses Scheduler from nanovllm/engine/scheduler.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/llm_engine.py",
+        "start_line": 12,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/model_runner.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/model_runner.py",
+        "names": [
+          "ModelRunner"
+        ],
+        "reason": "Uses ModelRunner from nanovllm/engine/model_runner.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.892Z"
+  "analyzed_at": "2026-06-23T08:29:18.953Z"
 }

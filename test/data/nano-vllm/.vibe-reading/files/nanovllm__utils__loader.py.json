@@ -10,23 +10,13 @@
         "end_col": 35
       },
       "type": "concept",
-      "summary": "Simple weight copy from checkpoint tensor to model parameter",
+      "summary": "function: default_weight_loader",
       "detail": {
         "kind": "function",
         "name": "default_weight_loader",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Default strategy: direct copy. Specialized loaders override for sharding/merging.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Strategy Pattern",
-            "explain": "Define family of algorithms (weight loading strategies), make them interchangeable. Default strategy is simple copy; parallel layers override with shard logic.",
-            "rationale": "Default strategy: direct copy",
-            "cross_lang": "Java interfaces + dependency injection, Rust trait objects / generics, Go interfaces, TypeScript type parameter",
-            "gotcha": "Too many strategies with nearly identical code — consider template method or parameterization instead"
-          }
-        ]
+        "description": "function \"default_weight_loader\" spanning 2 lines."
       }
     },
     {
@@ -38,23 +28,62 @@
         "end_col": 67
       },
       "type": "concept",
-      "summary": "Load all model weights from checkpoint file into model",
+      "summary": "function: load_model",
       "detail": {
         "kind": "function",
         "name": "load_model",
         "body_lines": 17,
         "node_type": "function_definition",
-        "description": "Iterates checkpoint tensors, matches to model parameters, calls each layers weight_loader.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Weight Loading Pipeline",
-            "explain": "Open checkpoint → iterate saved tensors → find matching parameter by name → call layer-specific loader. Decouples storage format from model structure.",
-            "rationale": "Iterates checkpoint tensors, matches to model parameters, calls each layers weight_loader"
-          }
+        "description": "function \"load_model\" spanning 17 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/loader.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 5 modules (0 local, 5 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "os",
+          "glob",
+          "torch",
+          "torch",
+          "safetensors"
+        ],
+        "all_names": [
+          "glob",
+          "nn",
+          "safe_open"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/loader.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 29,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.871Z"
+  "analyzed_at": "2026-06-23T08:29:18.570Z"
 }

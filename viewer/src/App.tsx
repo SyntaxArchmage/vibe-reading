@@ -25,6 +25,9 @@ declare const CALL_GRAPH: {
 declare const VR_BASE: string | undefined;
 
 function appBase(): string {
+  if (typeof location !== "undefined" && location.protocol === "file:") {
+    return "./";
+  }
   const base = typeof VR_BASE === "string" ? VR_BASE : "";
   if (!base) return "";
   return base.endsWith("/") ? base : `${base}/`;
@@ -154,12 +157,14 @@ function useResizable(initialWidth: number, min: number, max: number) {
   const dragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
+  const widthRef = useRef(width);
+  widthRef.current = width;
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
     startX.current = e.clientX;
-    startW.current = width;
+    startW.current = widthRef.current;
 
     const onMove = (ev: MouseEvent) => {
       if (!dragging.current) return;
@@ -179,7 +184,7 @@ function useResizable(initialWidth: number, min: number, max: number) {
     document.addEventListener("mouseup", onUp);
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
-  }, [width, min, max]);
+  }, [min, max]);
 
   return { width, onMouseDown };
 }
@@ -351,13 +356,16 @@ export function App() {
       })()
     : (() => {
         const recentSet = new Set(openFiles);
-        const recent = allFiles.filter(f => recentSet.has(f.key));
-        const rest = allFiles.filter(f => !recentSet.has(f.key));
+        const recent = allFiles.filter(f => recentSet.has(f.file));
+        const rest = allFiles.filter(f => !recentSet.has(f.file));
         return [...recent, ...rest];
       })();
 
   const visibleFiles = filteredFiles.slice(0, 100);
   const remaining = filteredFiles.length - visibleFiles.length;
+
+  const navIndexRef = useRef(navIndex);
+  navIndexRef.current = navIndex;
 
   const selectFile = useCallback(
     async (key: string, skipHistory = false) => {
@@ -366,7 +374,7 @@ export function App() {
 
       if (!skipHistory) {
         setNavHistory((prev) => {
-          const trimmed = prev.slice(0, navIndex + 1);
+          const trimmed = prev.slice(0, navIndexRef.current + 1);
           return [...trimmed, data.file];
         });
         setNavIndex((prev) => prev + 1);
@@ -388,19 +396,25 @@ export function App() {
         setSourceCode(`// Failed to load source: ${data.file}`);
       }
     },
-    [navIndex]
+    []
   );
 
+  const navHistoryRef = useRef(navHistory);
+  navHistoryRef.current = navHistory;
+
   const navigateBack = useCallback(() => {
-    if (navIndex <= 0) return;
-    const newIdx = navIndex - 1;
-    const file = navHistory[newIdx];
-    const fk = allFiles.find((f) => f.file === file)?.key;
-    if (fk) {
-      setNavIndex(newIdx);
-      selectFile(fk, true);
-    }
-  }, [navIndex, navHistory, allFiles, selectFile]);
+    setNavIndex((prev) => {
+      if (prev <= 0) return prev;
+      const newIdx = prev - 1;
+      const file = navHistoryRef.current[newIdx];
+      const fk = allFiles.find((f) => f.file === file)?.key;
+      if (fk) {
+        selectFile(fk, true);
+        return newIdx;
+      }
+      return prev;
+    });
+  }, [allFiles, selectFile]);
 
   useEffect(() => {
     if (currentFile) {
@@ -414,18 +428,22 @@ export function App() {
 
   useEffect(() => {
     if (DEFAULT_FILE_KEY) selectFile(DEFAULT_FILE_KEY);
-  }, [selectFile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const navigateForward = useCallback(() => {
-    if (navIndex >= navHistory.length - 1) return;
-    const newIdx = navIndex + 1;
-    const file = navHistory[newIdx];
-    const fk = allFiles.find((f) => f.file === file)?.key;
-    if (fk) {
-      setNavIndex(newIdx);
-      selectFile(fk, true);
-    }
-  }, [navIndex, navHistory, allFiles, selectFile]);
+    setNavIndex((prev) => {
+      if (prev >= navHistoryRef.current.length - 1) return prev;
+      const newIdx = prev + 1;
+      const file = navHistoryRef.current[newIdx];
+      const fk = allFiles.find((f) => f.file === file)?.key;
+      if (fk) {
+        selectFile(fk, true);
+        return newIdx;
+      }
+      return prev;
+    });
+  }, [allFiles, selectFile]);
 
   const [closedTabs, setClosedTabs] = useState<string[]>([]);
 
@@ -663,11 +681,14 @@ export function App() {
           toggleBookmark(`${currentFile}:${breadcrumbEntity.detail.name}`);
         }
       }
-      if ((e.key === "[" || e.key === "]") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
+      if ((e.key === "[" || e.key === "]" || e.code === "BracketLeft" || e.code === "BracketRight") && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement)) {
         const idx = allFiles.findIndex(f => f.file === currentFile);
-        if (idx >= 0) {
-          const next = e.key === "]" ? idx + 1 : idx - 1;
-          if (next >= 0 && next < allFiles.length) selectFile(allFiles[next].key);
+        if (idx >= 0 && allFiles.length > 1) {
+          const forward = e.key === "]" || e.code === "BracketRight";
+          const next = forward
+            ? (idx + 1) % allFiles.length
+            : (idx - 1 + allFiles.length) % allFiles.length;
+          selectFile(allFiles[next].key);
         }
       }
 
@@ -692,8 +713,8 @@ export function App() {
         onCardClick(filtered[focusedCardIdx]);
       }
     };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
   }, [navigateBack, navigateForward, allFiles, currentFile, pickerOpen, filtered, focusedCardIdx, onCardClick, breadcrumbEntity, toggleBookmark, closeTab, reopenTab, selectFile]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -724,7 +745,7 @@ export function App() {
     switch (activeTab) {
       case "concept":
         return <ConceptTab entities={filtered} onCardClick={onCardClick} highlightEntity={breadcrumbEntity}
-                           totalLines={sourceCode ? sourceCode.split("\n").length : 0}
+                           totalLines={sourceLines.length}
                            visibleRange={visibleRange}
                            callGraph={CALL_GRAPH} currentFile={currentFile}
                            onFileSelect={(file) => {
@@ -858,7 +879,7 @@ export function App() {
                 {currentFile}
               </span>
               <span className="vr-file-count" title="entities">{entities.length}</span>
-              {sourceCode && <span className="vr-file-loc" title="lines of code">{sourceCode.split("\n").length}L</span>}
+              {sourceLines.length > 0 && <span className="vr-file-loc" title="lines of code">{sourceLines.length}L</span>}
               {(() => {
                 const hist = entities.find(e => e.type === "history" && e.detail.kind === "file_history");
                 const commits = hist?.detail.total_commits as number | undefined;
@@ -1026,7 +1047,7 @@ export function App() {
             const fi = allFiles.find(f => f.file === currentFile);
             return fi && fi.complexity > 0 ? ` · ${fi.complexity}cx` : "";
           })()}
-          {sourceCode && ` · ${sourceCode.split("\n").length} lines`}
+          {sourceLines.length > 0 && ` · ${sourceLines.length} lines`}
           {currentFile && ` · ${sourceLanguage}`}
         </span>
       </div>
@@ -1382,6 +1403,12 @@ const layoutStyles = `
     font-weight: 500;
   }
 
+  .vr-tab-item--active {
+    background: #1e1e1e;
+    color: #fff;
+    border-bottom: 2px solid #007acc;
+  }
+
   .vr-tab-item-label { pointer-events: none; }
 
   .vr-tab-item-close {
@@ -1505,7 +1532,8 @@ const layoutStyles = `
     border-bottom: 1px solid #444;
   }
 
-  .vr-picker-search {
+  .vr-picker-search,
+  .vr-picker-input {
     flex: 1;
     padding: 6px 10px;
     background: #1e1e1e;
@@ -1515,9 +1543,12 @@ const layoutStyles = `
     font-size: 12px;
     font-family: inherit;
     outline: none;
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  .vr-picker-search:focus {
+  .vr-picker-search:focus,
+  .vr-picker-input:focus {
     border-color: #007acc;
   }
 
@@ -2191,6 +2222,10 @@ const sidebarStyles = `
     margin-top: 2px;
     padding-top: 4px;
     border-top: 1px solid #3c3c3c;
+  }
+
+  .vr-concept-group-header:hover {
+    background: rgba(255,255,255,0.04);
   }
 
   .vr-no-cards {

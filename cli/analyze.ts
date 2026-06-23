@@ -149,7 +149,7 @@ async function analyzeFile(
   const content = fs.readFileSync(absPath, "utf-8");
 
   const concepts = await extractConcepts(relativePath, content);
-  const flowData = await extractFlow(relativePath, content);
+  const flowData = await extractFlow(relativePath, content, allFiles);
   const historyEntities = await extractHistory(relativePath, content, projectRoot);
   const jumpEntities = await extractJumps(relativePath, content, allFiles);
 

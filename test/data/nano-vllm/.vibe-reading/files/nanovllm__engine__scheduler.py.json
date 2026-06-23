@@ -10,33 +10,13 @@
         "end_col": 40
       },
       "type": "concept",
-      "summary": "Continuous batching scheduler with preemption for KV cache management",
+      "summary": "class: Scheduler",
       "detail": {
         "kind": "class",
         "name": "Scheduler",
         "body_lines": 85,
         "node_type": "class_definition",
-        "description": "FCFS request scheduler managing waiting and running deques. Coordinates with BlockManager for allocation.",
-        "why": "Multiple requests compete for limited GPU memory — need policy to decide who runs",
-        "pattern": "FCFS scheduling with preemption",
-        "takeaway": [
-          {
-            "tag": "Continuous Batching",
-            "explain": "Add new requests to running batch mid-generation. No waiting for entire batch to finish. Maximizes GPU utilization.",
-            "rationale": "Used here because: Multiple requests compete for limited GPU memory — need policy to decide who runs",
-            "cross_lang": "No direct equivalent — LLM serving specific. Conceptually similar to OS process scheduling",
-            "gotcha": "Preemption priority must be carefully tuned — aggressive preemption wastes computed tokens"
-          },
-          {
-            "tag": "Preemption",
-            "explain": "Forcibly pause running task to free resources for others. Preempted task re-queued. Prevents starvation.",
-            "rationale": "Used here because: Multiple requests compete for limited GPU memory — need policy to decide who runs"
-          }
-        ],
-        "design": "Two deques rather than priority queue — preemption needs O(1) removal of specific sequence",
-        "convention": "All state mutations inside schedule() — external code only calls add() and reads results",
-        "perf": "Called every step; O(waiting + running) per call",
-        "level": "advanced"
+        "description": "class \"Scheduler\" spanning 85 lines."
       }
     },
     {
@@ -48,21 +28,13 @@
         "end_col": 47
       },
       "type": "concept",
-      "summary": "Initialize waiting and running deques for FCFS scheduling",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Two deques: waiting (submitted, not yet scheduled) and running (actively generating).",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Double-Ended Queue",
-            "explain": "O(1) append/pop from both ends. Perfect for FCFS (append right, pop left) with preemption (append left for priority re-queue).",
-            "rationale": "Two deques: waiting (submitted, not yet scheduled) and running (actively generating)"
-          }
-        ]
+        "description": "function \"__init__\" spanning 8 lines."
       }
     },
     {
@@ -74,21 +46,13 @@
         "end_col": 52
       },
       "type": "concept",
-      "summary": "Check if all requests are done",
+      "summary": "function: is_finished",
       "detail": {
         "kind": "function",
         "name": "is_finished",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "True when both waiting and running deques are empty.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Drain Condition",
-            "explain": "System is done when all queues are empty. Simple but must check ALL queues — easy to miss one.",
-            "rationale": "True when both waiting and running deques are empty"
-          }
-        ]
+        "description": "function \"is_finished\" spanning 2 lines."
       }
     },
     {
@@ -100,21 +64,13 @@
         "end_col": 32
       },
       "type": "concept",
-      "summary": "Enqueue new request to waiting deque",
+      "summary": "function: add",
       "detail": {
         "kind": "function",
         "name": "add",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Adds sequence to back of waiting queue. Will be scheduled when resources available.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Enqueue Pattern",
-            "explain": "Append to queue tail. Processing order determined by queue discipline (here: FCFS). Decouples arrival from execution.",
-            "rationale": "Adds sequence to back of waiting queue"
-          }
-        ]
+        "description": "function \"add\" spanning 2 lines."
       }
     },
     {
@@ -126,26 +82,13 @@
         "end_col": 36
       },
       "type": "concept",
-      "summary": "Core scheduling loop: allocate or preempt based on block availability",
+      "summary": "function: schedule",
       "detail": {
         "kind": "function",
         "name": "schedule",
         "body_lines": 49,
         "node_type": "function_definition",
-        "description": "Iterates waiting sequences, attempts allocation. If insufficient blocks, preempts from running set.",
-        "why": "Must decide which sequences advance this step by checking block availability",
-        "takeaway": [
-          {
-            "tag": "Greedy Scheduling",
-            "explain": "Process requests front-to-back, allocate greedily. Simple but may not be globally optimal. Good enough for latency-sensitive inference.",
-            "rationale": "Used here because: Must decide which sequences advance this step by checking block availability",
-            "cross_lang": "OS CPU scheduler (CFS), Go goroutine scheduler, Java ForkJoinPool work stealing",
-            "gotcha": "Greedy can starve long-running requests — need fairness bounds or priority aging"
-          }
-        ],
-        "design": "Processes waiting front-to-back for fairness; separates prefill from decode",
-        "perf": "O(waiting * block_check) per step",
-        "level": "advanced"
+        "description": "function \"schedule\" spanning 49 lines."
       }
     },
     {
@@ -157,21 +100,13 @@
         "end_col": 36
       },
       "type": "concept",
-      "summary": "Evict a running sequence to free its KV cache blocks",
+      "summary": "function: preempt",
       "detail": {
         "kind": "function",
         "name": "preempt",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Moves sequence from running back to waiting, deallocates its blocks.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Resource Reclamation",
-            "explain": "Free resources from lower-priority work to serve higher-priority or new work. The running sequence loses its KV cache and must recompute.",
-            "rationale": "Moves sequence from running back to waiting, deallocates its blocks"
-          }
-        ]
+        "description": "function \"preempt\" spanning 5 lines."
       }
     },
     {
@@ -183,23 +118,122 @@
         "end_col": 40
       },
       "type": "concept",
-      "summary": "Finalize step: remove finished sequences, update block hashes",
+      "summary": "function: postprocess",
       "detail": {
         "kind": "function",
         "name": "postprocess",
         "body_lines": 12,
         "node_type": "function_definition",
-        "description": "Cleans up completed sequences, deallocates their blocks, updates prefix cache.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Post-Processing Sweep",
-            "explain": "After main logic, sweep to clean up completed items. Separate from main loop for clarity. Common pattern in game loops and engines.",
-            "rationale": "Cleans up completed sequences, deallocates their blocks, updates prefix cache"
-          }
+        "description": "function \"postprocess\" spanning 12 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/scheduler.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 4 modules (3 local, 1 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.config",
+          "nanovllm.engine.sequence",
+          "nanovllm.engine.block_manager"
+        ],
+        "external_deps": [
+          "collections"
+        ],
+        "all_names": [
+          "deque",
+          "Config",
+          "Sequence",
+          "SequenceStatus",
+          "BlockManager"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/scheduler.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 93,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/scheduler.py",
+        "start_line": 3,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/config.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/config.py",
+        "names": [
+          "Config"
+        ],
+        "reason": "Uses Config from nanovllm/config.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/scheduler.py",
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/sequence.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/sequence.py",
+        "names": [
+          "Sequence",
+          "SequenceStatus"
+        ],
+        "reason": "Uses Sequence, SequenceStatus from nanovllm/engine/sequence.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/scheduler.py",
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/block_manager.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/block_manager.py",
+        "names": [
+          "BlockManager"
+        ],
+        "reason": "Uses BlockManager from nanovllm/engine/block_manager.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.885Z"
+  "analyzed_at": "2026-06-23T08:29:18.882Z"
 }

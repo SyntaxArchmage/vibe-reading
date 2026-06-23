@@ -10,25 +10,83 @@
         "end_col": 89
       },
       "type": "concept",
-      "summary": "Benchmark script measuring inference throughput",
+      "summary": "function: main",
       "detail": {
         "kind": "function",
         "name": "main",
         "body_lines": 21,
         "node_type": "function_definition",
-        "description": "Runs generation with timing to report tokens/second and latency metrics.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Benchmarking Pattern",
-            "explain": "Warmup runs → timed runs → compute mean/std of metrics. Always warmup to avoid measuring one-time costs (JIT, cache cold starts).",
-            "rationale": "Runs generation with timing to report tokens/second and latency metrics",
-            "cross_lang": "Rust criterion crate, Go testing.B, Java JMH, C++ Google Benchmark",
-            "gotcha": "Without warmup, JIT/cache effects make first runs artificially slow — always discard initial iterations"
-          }
+        "description": "function \"main\" spanning 21 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "bench.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 4 modules (1 local, 3 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm"
+        ],
+        "external_deps": [
+          "os",
+          "time",
+          "random"
+        ],
+        "all_names": [
+          "randint",
+          "seed",
+          "LLM",
+          "SamplingParams"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "bench.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 33,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "bench.py",
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 4,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/__init__.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/__init__.py",
+        "names": [
+          "LLM",
+          "SamplingParams"
+        ],
+        "reason": "Uses LLM, SamplingParams from nanovllm/__init__.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.868Z"
+  "analyzed_at": "2026-06-23T08:29:18.438Z"
 }

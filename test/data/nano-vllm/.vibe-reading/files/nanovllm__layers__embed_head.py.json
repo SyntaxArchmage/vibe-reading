@@ -10,27 +10,13 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "Embedding table sharded across GPUs by vocabulary range",
+      "summary": "class: VocabParallelEmbedding",
       "detail": {
         "kind": "class",
         "name": "VocabParallelEmbedding",
         "body_lines": 34,
         "node_type": "class_definition",
-        "description": "Each GPU holds embeddings for a slice of the vocabulary. Tokens outside local range return zeros, then all-reduce.",
-        "level": "advanced",
-        "why": "Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs",
-        "takeaway": [
-          {
-            "tag": "Vocabulary Sharding",
-            "explain": "Divide vocab across GPUs. Each handles tokens in its range. All-reduce combines results. Distributes memory evenly.",
-            "rationale": "Used here because: Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs"
-          },
-          {
-            "tag": "Embedding Table",
-            "explain": "Lookup table mapping discrete token IDs to dense vectors. Foundation of all NLP — converts symbolic input to continuous representation.",
-            "rationale": "Used here because: Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs"
-          }
-        ]
+        "description": "class \"VocabParallelEmbedding\" spanning 34 lines."
       }
     },
     {
@@ -42,21 +28,13 @@
         "end_col": 54
       },
       "type": "concept",
-      "summary": "Compute local vocabulary range for this GPU shard",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 15,
         "node_type": "function_definition",
-        "description": "Calculates start/end token indices this device is responsible for. Allocates only local portion.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Range Partitioning",
-            "explain": "Divide ID space into contiguous ranges per device. Device k handles IDs [k*chunk, (k+1)*chunk). Simple and cache-friendly.",
-            "rationale": "Calculates start/end token indices this device is responsible for"
-          }
-        ]
+        "description": "function \"__init__\" spanning 15 lines."
       }
     },
     {
@@ -68,21 +46,13 @@
         "end_col": 39
       },
       "type": "concept",
-      "summary": "Load embedding weights for this device vocabulary slice",
+      "summary": "function: weight_loader",
       "detail": {
         "kind": "function",
         "name": "weight_loader",
         "body_lines": 6,
         "node_type": "function_definition",
-        "description": "Extracts rows from checkpoint corresponding to this GPU token range.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Selective Weight Loading",
-            "explain": "Only load the rows this device needs from checkpoint. Reduces peak memory during loading by num_devices×.",
-            "rationale": "Extracts rows from checkpoint corresponding to this GPU token range"
-          }
-        ]
+        "description": "function \"weight_loader\" spanning 6 lines."
       }
     },
     {
@@ -94,21 +64,13 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "Lookup embeddings with masked out-of-range tokens",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 9,
         "node_type": "function_definition",
-        "description": "Masks tokens outside local range to 0, does embedding lookup, then all-reduce across devices.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Masked Embedding Lookup",
-            "explain": "Set out-of-range indices to 0 before lookup (returns zero vector). After all-reduce, each token gets its correct embedding from the owning device.",
-            "rationale": "Masks tokens outside local range to 0, does embedding lookup, then all-reduce across devices"
-          }
-        ]
+        "description": "function \"forward\" spanning 9 lines."
       }
     },
     {
@@ -120,21 +82,13 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Output projection (logits) sharded to match embedding parallelism",
+      "summary": "class: ParallelLMHead",
       "detail": {
         "kind": "class",
         "name": "ParallelLMHead",
         "body_lines": 22,
         "node_type": "class_definition",
-        "description": "Projects hidden states to vocabulary logits. Sharded identically to embedding for weight tying.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Weight Tying",
-            "explain": "Share same weight between input embedding and output projection. Halves parameters for vocabulary. Common in LLMs.",
-            "rationale": "Projects hidden states to vocabulary logits"
-          }
-        ]
+        "description": "class \"ParallelLMHead\" spanning 22 lines."
       }
     },
     {
@@ -146,21 +100,13 @@
         "end_col": 55
       },
       "type": "concept",
-      "summary": "Initialize output head with optional weight tying to embedding",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Can reuse embedding weights directly or create separate sharded weight matrix.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Parameter Sharing",
-            "explain": "Multiple layers reference same nn.Parameter. Saves memory. Gradients summed during backprop.",
-            "rationale": "Can reuse embedding weights directly or create separate sharded weight matrix"
-          }
-        ]
+        "description": "function \"__init__\" spanning 8 lines."
       }
     },
     {
@@ -172,23 +118,81 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Compute logits via matmul with (possibly shared) embedding weights",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 11,
         "node_type": "function_definition",
-        "description": "output = hidden @ embedding_weight.T — produces raw vocabulary scores.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Logits Computation",
-            "explain": "Linear projection from hidden_dim to vocab_size. Higher logit = higher probability token after softmax.",
-            "rationale": "output = hidden @ embedding_weight"
-          }
+        "description": "function \"forward\" spanning 11 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 3 modules (1 local, 2 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.utils.context"
+        ],
+        "external_deps": [
+          "torch",
+          "torch"
+        ],
+        "all_names": [
+          "nn",
+          "torch.nn.functional",
+          "torch.distributed",
+          "get_context"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 67,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/embed_head.py",
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/utils/context.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/utils/context.py",
+        "names": [
+          "get_context"
+        ],
+        "reason": "Uses get_context from nanovllm/utils/context.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.881Z"
+  "analyzed_at": "2026-06-23T08:29:18.770Z"
 }

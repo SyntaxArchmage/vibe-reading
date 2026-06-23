@@ -118,7 +118,7 @@ function DirNode({
 
   useEffect(() => {
     if (containsCurrent && !open) setOpen(true);
-  }, [currentFile]);
+  }, [containsCurrent]);
 
   const dirs: TreeNode[] = [];
   const fileNodes: TreeNode[] = [];

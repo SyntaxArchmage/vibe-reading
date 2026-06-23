@@ -10,28 +10,13 @@
         "end_col": 48
       },
       "type": "concept",
-      "summary": "Triton kernel storing K/V vectors into paged cache blocks",
+      "summary": "function: store_kvcache_kernel",
       "detail": {
         "kind": "function",
         "name": "store_kvcache_kernel",
         "body_lines": 21,
         "node_type": "function_definition",
-        "description": "GPU kernel writing computed K/V pairs into pre-allocated cache blocks at correct positions.",
-        "level": "advanced",
-        "why": "Custom kernel avoids Python overhead for the hottest operation in inference",
-        "takeaway": [
-          {
-            "tag": "Triton Kernel",
-            "explain": "Write GPU kernels in Python with Triton. Compiles to PTX. Easier than CUDA C but same performance for memory-bound ops.",
-            "rationale": "Used here because: Custom kernel avoids Python overhead for the hottest operation in inference"
-          },
-          {
-            "tag": "Paged KV Cache Write",
-            "explain": "Store K/V at block_table[block_idx][position]. Indirection enables non-contiguous memory without copying.",
-            "rationale": "Used here because: Custom kernel avoids Python overhead for the hottest operation in inference"
-          }
-        ],
-        "perf": "Called every token for every layer — must be maximally optimized"
+        "description": "function \"store_kvcache_kernel\" spanning 21 lines."
       }
     },
     {
@@ -43,21 +28,13 @@
         "end_col": 109
       },
       "type": "concept",
-      "summary": "Python wrapper launching the Triton KV cache store kernel",
+      "summary": "function: store_kvcache",
       "detail": {
         "kind": "function",
         "name": "store_kvcache",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Sets up grid dimensions and launches the Triton kernel with correct tensor pointers.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Kernel Launch Pattern",
-            "explain": "Python sets grid/block dimensions and tensor pointers. Triton/CUDA kernel runs on GPU. Separation of orchestration from computation.",
-            "rationale": "Sets up grid dimensions and launches the Triton kernel with correct tensor pointers"
-          }
-        ]
+        "description": "function \"store_kvcache\" spanning 8 lines."
       }
     },
     {
@@ -69,30 +46,13 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "Multi-head attention with paged KV cache and flash attention",
+      "summary": "class: Attention",
       "detail": {
         "kind": "class",
         "name": "Attention",
         "body_lines": 33,
         "node_type": "class_definition",
-        "description": "Computes scaled dot-product attention using cached K/V from paged memory. Uses flash attention for efficiency.",
-        "level": "basic",
-        "why": "Attention is the core operation in transformers — must handle variable-length cached KV efficiently",
-        "takeaway": [
-          {
-            "tag": "Flash Attention",
-            "explain": "Tiled attention algorithm that never materializes full N×N attention matrix. O(N) memory instead of O(N²). Enabled by online softmax.",
-            "rationale": "Used here because: Attention is the core operation in transformers — must handle variable-length cached KV efficiently",
-            "cross_lang": "Hardware-specific: CUDA (FlashAttention), Metal (MLX attention), no direct CPU equivalent",
-            "gotcha": "Requires specific GPU architectures (Ampere+). Custom attention masks may not be supported"
-          },
-          {
-            "tag": "Paged KV Cache",
-            "explain": "K/V vectors stored in fixed-size blocks with indirection table. Avoids memory fragmentation for variable-length sequences.",
-            "rationale": "Used here because: Attention is the core operation in transformers — must handle variable-length cached KV efficiently"
-          }
-        ],
-        "design": "Prefill uses flash_attn (variable length); decode uses custom kernel (single query)"
+        "description": "class \"Attention\" spanning 33 lines."
       }
     },
     {
@@ -104,21 +64,13 @@
         "end_col": 54
       },
       "type": "concept",
-      "summary": "Configure attention heads, scaling factor, and cache parameters",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 13,
         "node_type": "function_definition",
-        "description": "Sets num_heads, head_dim, scale=1/sqrt(d), and prepares for paged KV cache access.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Attention Scaling",
-            "explain": "Divide QK^T by sqrt(head_dim) to prevent softmax saturation. Without scaling, dot products grow with dimension causing gradient vanishing.",
-            "rationale": "Sets num_heads, head_dim, scale=1/sqrt(d), and prepares for paged KV cache access"
-          }
-        ]
+        "description": "function \"__init__\" spanning 13 lines."
       }
     },
     {
@@ -130,23 +82,84 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "Execute attention: store KV, compute QK^T, apply softmax, multiply V",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 17,
         "node_type": "function_definition",
-        "description": "Writes new K/V to cache, then dispatches to flash_attn (prefill) or paged_attention (decode).",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Prefill vs Decode Split",
-            "explain": "Prefill processes all prompt tokens at once (parallel). Decode generates one token at a time (sequential). Different kernels optimal for each.",
-            "rationale": "Writes new K/V to cache, then dispatches to flash_attn (prefill) or paged_attention (decode)"
-          }
+        "description": "function \"forward\" spanning 17 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 5 modules (1 local, 4 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.utils.context"
+        ],
+        "external_deps": [
+          "torch",
+          "torch",
+          "triton",
+          "flash_attn"
+        ],
+        "all_names": [
+          "nn",
+          "triton.language",
+          "flash_attn_varlen_func",
+          "flash_attn_with_kvcache",
+          "get_context"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 76,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/attention.py",
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/utils/context.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/utils/context.py",
+        "names": [
+          "get_context"
+        ],
+        "reason": "Uses get_context from nanovllm/utils/context.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.883Z"
+  "analyzed_at": "2026-06-23T08:29:18.799Z"
 }

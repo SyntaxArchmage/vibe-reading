@@ -10,24 +10,13 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Enumeration of all valid lifecycle states for a generation request",
+      "summary": "class: SequenceStatus",
       "detail": {
         "kind": "class",
         "name": "SequenceStatus",
         "body_lines": 4,
         "node_type": "class_definition",
-        "description": "WAITING (queued), RUNNING (active on GPU), FINISHED_STOPPED, FINISHED_LENGTH, FINISHED_ABORT. Explicit states prevent invalid operations.",
-        "why": "Without explicit states, you might accidentally free blocks of a running sequence or schedule a finished one",
-        "takeaway": [
-          {
-            "tag": "Enum for State",
-            "explain": "Use an enum to define all valid states. Only declared transitions are allowed. Compiler/IDE catches illegal values.",
-            "rationale": "Boolean flags (is_running, is_finished) allow impossible combinations like running=true AND finished=true. Enum makes these impossible by construction.",
-            "cross_lang": "Rust enum (can carry data per variant), TypeScript union types, Java enum, Swift enum with associated values",
-            "gotcha": "Adding a new state later requires updating every switch/match — use exhaustive matching to catch missing cases at compile time"
-          }
-        ],
-        "level": "basic"
+        "description": "class \"SequenceStatus\" spanning 4 lines."
       }
     },
     {
@@ -39,32 +28,13 @@
         "end_col": 40
       },
       "type": "concept",
-      "summary": "Full lifecycle of one generation request: prompt tokens through generation to finish",
+      "summary": "class: Sequence",
       "detail": {
         "kind": "class",
         "name": "Sequence",
         "body_lines": 70,
         "node_type": "class_definition",
-        "description": "Tracks all per-request state: token IDs, sampling params, logical block assignments, and status transitions. Persists across scheduling steps.",
-        "level": "basic",
-        "why": "Each request has unique mutable state (tokens generated so far, KV cache blocks used) that must survive across many scheduling steps",
-        "pattern": "State machine with token-level lifecycle",
-        "takeaway": [
-          {
-            "tag": "State Machine",
-            "explain": "Object with well-defined states and transitions. Only certain state changes are allowed. Invalid transitions raise errors.",
-            "rationale": "A Sequence moves WAITING→RUNNING→FINISHED. Without SM discipline, a bug could skip RUNNING and go straight to FINISHED, leaking allocated blocks.",
-            "cross_lang": "Rust typestate pattern (different type per state), Java State pattern (GoF), TypeScript discriminated unions"
-          },
-          {
-            "tag": "Logical-Physical Mapping",
-            "explain": "Indirection layer: logical addresses map to physical locations via a table. Enables moving data without updating all references.",
-            "rationale": "Sequences use logical block indices. Physical GPU blocks can be rearranged without invalidating sequence state.",
-            "cross_lang": "OS virtual memory (page tables), database logical/physical record IDs"
-          }
-        ],
-        "design": "Separates token management from block management within same object — locality without coupling",
-        "convention": "Sequence is read-only outside engine internals"
+        "description": "class \"Sequence\" spanning 70 lines."
       }
     },
     {
@@ -76,24 +46,13 @@
         "end_col": 52
       },
       "type": "concept",
-      "summary": "Initialize sequence with prompt tokens and sampling configuration",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 14,
         "node_type": "function_definition",
-        "description": "Creates new sequence: assigns unique ID, stores prompt tokens, sets initial WAITING status, allocates first logical block.",
-        "level": "basic",
-        "why": "Every generation starts here — establishes baseline state that scheduler and block manager will operate on",
-        "takeaway": [
-          {
-            "tag": "Minimal Valid State",
-            "explain": "Constructor creates object in simplest valid state. No multi-step initialization needed. Object is usable immediately after __init__.",
-            "rationale": "If __init__ left the object half-initialized, callers would need to remember to call .setup() — fragile and error-prone.",
-            "cross_lang": "Rust: all fields must be set in struct literal (compiler enforces). Java: constructor establishes invariants.",
-            "gotcha": "Dont do heavy I/O or allocation in __init__ unless you want slow object creation. Consider factory methods for expensive setup."
-          }
-        ]
+        "description": "function \"__init__\" spanning 14 lines."
       }
     },
     {
@@ -105,21 +64,13 @@
         "end_col": 30
       },
       "type": "concept",
-      "summary": "Return total number of tokens (prompt + generated)",
+      "summary": "function: __len__",
       "detail": {
         "kind": "function",
         "name": "__len__",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Enables len(sequence) syntax. Returns prompt length + completion length.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "__len__ Protocol",
-            "explain": "Implement __len__ to make class work with len(). Part of Python sized protocol. Enables intuitive API for collection-like objects.",
-            "rationale": "Enables len(sequence) syntax"
-          }
-        ]
+        "description": "function \"__len__\" spanning 2 lines."
       }
     },
     {
@@ -131,21 +82,13 @@
         "end_col": 34
       },
       "type": "concept",
-      "summary": "Access token at position index",
+      "summary": "function: __getitem__",
       "detail": {
         "kind": "function",
         "name": "__getitem__",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Enables sequence[i] syntax for token access.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "__getitem__ Protocol",
-            "explain": "Implement __getitem__ for indexing syntax obj[i]. Part of sequence protocol. Can also enable iteration and slicing.",
-            "rationale": "Enables sequence[i] syntax for token access"
-          }
-        ]
+        "description": "function \"__getitem__\" spanning 2 lines."
       }
     },
     {
@@ -157,21 +100,13 @@
         "end_col": 53
       },
       "type": "concept",
-      "summary": "Predicate checking if generation has terminated",
+      "summary": "function: is_finished",
       "detail": {
         "kind": "function",
         "name": "is_finished",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Returns True if status is any FINISHED_ variant. Used by scheduler to know when to free resources.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Predicate Method",
-            "explain": "Method returning bool that encapsulates a business-logic check. Centralizes condition rather than repeating enum checks.",
-            "rationale": "Returns True if status is any FINISHED_ variant"
-          }
-        ]
+        "description": "function \"is_finished\" spanning 3 lines."
       }
     },
     {
@@ -183,23 +118,13 @@
         "end_col": 55
       },
       "type": "concept",
-      "summary": "Property returning count of generated tokens so far",
+      "summary": "function: num_completion_tokens",
       "detail": {
         "kind": "function",
         "name": "num_completion_tokens",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Computed property: total length minus prompt length.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Property Decorator",
-            "explain": "@property makes method accessible as attribute. Computed on access, not stored. Keeps derived values always consistent with source.",
-            "rationale": "Computed property: total length minus prompt length",
-            "cross_lang": "C# properties (get/set), Kotlin var with custom getter, Ruby attr_accessor, Java getter/setter",
-            "gotcha": "Heavy computation in a property looks like attribute access — callers wont expect it to be slow"
-          }
-        ]
+        "description": "function \"num_completion_tokens\" spanning 3 lines."
       }
     },
     {
@@ -211,21 +136,13 @@
         "end_col": 54
       },
       "type": "concept",
-      "summary": "Return the original prompt tokens",
+      "summary": "function: prompt_token_ids",
       "detail": {
         "kind": "function",
         "name": "prompt_token_ids",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Slice returning tokens[0:prompt_len].",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "View vs Copy Semantics",
-            "explain": "List slicing in Python creates a copy. For large sequences, consider memoryview or numpy views to avoid copying.",
-            "rationale": "Slice returning tokens[0:prompt_len]"
-          }
-        ]
+        "description": "function \"prompt_token_ids\" spanning 3 lines."
       }
     },
     {
@@ -237,21 +154,13 @@
         "end_col": 54
       },
       "type": "concept",
-      "summary": "Return only the generated tokens",
+      "summary": "function: completion_token_ids",
       "detail": {
         "kind": "function",
         "name": "completion_token_ids",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Slice returning tokens[prompt_len:].",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Slice Notation",
-            "explain": "list[start:end] extracts sub-sequence. Omit start for 0, omit end for len. Negative indices count from end.",
-            "rationale": "Slice returning tokens[prompt_len:]"
-          }
-        ]
+        "description": "function \"completion_token_ids\" spanning 3 lines."
       }
     },
     {
@@ -263,21 +172,13 @@
         "end_col": 73
       },
       "type": "concept",
-      "summary": "Compute number of KV cache blocks used by this sequence",
+      "summary": "function: num_blocks",
       "detail": {
         "kind": "function",
         "name": "num_blocks",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Ceiling division of total tokens by block size.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Ceiling Division",
-            "explain": "-(-a // b) or math.ceil(a/b). Computes how many fixed-size blocks needed to hold variable-size content.",
-            "rationale": "Ceiling division of total tokens by block size"
-          }
-        ]
+        "description": "function \"num_blocks\" spanning 3 lines."
       }
     },
     {
@@ -289,21 +190,13 @@
         "end_col": 72
       },
       "type": "concept",
-      "summary": "Count tokens in the last (potentially partial) block",
+      "summary": "function: last_block_num_tokens",
       "detail": {
         "kind": "function",
         "name": "last_block_num_tokens",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "total_tokens % block_size, or block_size if exactly full.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Modulo for Partial Fill",
-            "explain": "n % block_size gives fill level of last block. If 0, block is full (use block_size). Common in paged/chunked systems.",
-            "rationale": "total_tokens % block_size, or block_size if exactly full"
-          }
-        ]
+        "description": "function \"last_block_num_tokens\" spanning 3 lines."
       }
     },
     {
@@ -315,21 +208,13 @@
         "end_col": 71
       },
       "type": "concept",
-      "summary": "Get logical block index for a given token position",
+      "summary": "function: block",
       "detail": {
         "kind": "function",
         "name": "block",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Maps token position to its containing block: position // block_size.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Position to Block Mapping",
-            "explain": "block_index = position // block_size. Fundamental operation in any paged/blocked memory system. O(1) mapping.",
-            "rationale": "Maps token position to its containing block: position // block_size"
-          }
-        ]
+        "description": "function \"block\" spanning 3 lines."
       }
     },
     {
@@ -341,23 +226,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Extends sequence by one generated token, managing block boundaries",
+      "summary": "function: append_token",
       "detail": {
         "kind": "function",
         "name": "append_token",
         "body_lines": 4,
         "node_type": "function_definition",
-        "description": "Appends new token to completion, allocates new logical block if current is full.",
-        "level": "basic",
-        "why": "Token-by-token autoregressive generation — each step adds exactly one token",
-        "takeaway": [
-          {
-            "tag": "Autoregressive Generation",
-            "explain": "Model generates one token per step, using all previous tokens as context. Append loop continues until stop condition.",
-            "rationale": "Used here because: Token-by-token autoregressive generation — each step adds exactly one token"
-          }
-        ],
-        "perf": "Called once per token per sequence per step — must be O(1)"
+        "description": "function \"append_token\" spanning 4 lines."
       }
     },
     {
@@ -369,21 +244,13 @@
         "end_col": 137
       },
       "type": "concept",
-      "summary": "Custom pickle serialization excluding non-serializable fields",
+      "summary": "function: __getstate__",
       "detail": {
         "kind": "function",
         "name": "__getstate__",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Controls what gets serialized when sequence is pickled (for preemption/migration).",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Custom Pickling",
-            "explain": "__getstate__ controls serialization. Return dict of what to save. Exclude file handles, locks, GPU tensors that cant be pickled.",
-            "rationale": "Controls what gets serialized when sequence is pickled (for preemption/migration)"
-          }
-        ]
+        "description": "function \"__getstate__\" spanning 3 lines."
       }
     },
     {
@@ -395,23 +262,83 @@
         "end_col": 40
       },
       "type": "concept",
-      "summary": "Custom pickle deserialization restoring sequence state",
+      "summary": "function: __setstate__",
       "detail": {
         "kind": "function",
         "name": "__setstate__",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Restores sequence from pickled state, re-initializes transient fields.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "__setstate__ Restoration",
-            "explain": "Counterpart to __getstate__. Receives saved dict, must reconstruct full object. Re-initialize transient resources (connections, caches).",
-            "rationale": "Restores sequence from pickled state, re-initializes transient fields"
-          }
+        "description": "function \"__setstate__\" spanning 8 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 4 modules (1 local, 3 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.sampling_params"
+        ],
+        "external_deps": [
+          "copy",
+          "enum",
+          "itertools"
+        ],
+        "all_names": [
+          "copy",
+          "Enum",
+          "auto",
+          "count",
+          "SamplingParams"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 84,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/sequence.py",
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/sampling_params.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/sampling_params.py",
+        "names": [
+          "SamplingParams"
+        ],
+        "reason": "Uses SamplingParams from nanovllm/sampling_params.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.884Z"
+  "analyzed_at": "2026-06-23T08:29:18.852Z"
 }

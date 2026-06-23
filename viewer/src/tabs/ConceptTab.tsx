@@ -86,7 +86,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
   const usagesMap = useMemo(() => {
     const m = new Map<string, Array<{ file: string; names: string[] }>>();
     if (!callGraph?.files || !currentFile) return m;
-    const curEntry = callGraph.files.find(f => currentFile.includes(f.file));
+    const curEntry = callGraph.files.find(f => f.file === currentFile);
     if (!curEntry) return m;
     const exported = new Set(curEntry.exports);
     for (const f of callGraph.files) {

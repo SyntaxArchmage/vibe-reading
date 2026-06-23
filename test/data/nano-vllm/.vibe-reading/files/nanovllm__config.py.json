@@ -10,32 +10,59 @@
         "end_col": 92
       },
       "type": "concept",
-      "summary": "Model configuration dataclass holding architecture hyperparameters",
+      "summary": "class: Config",
       "detail": {
         "kind": "class",
         "name": "Config",
         "body_lines": 20,
         "node_type": "class_definition",
-        "description": "Stores num_layers, hidden_size, num_heads, vocab_size etc. Loaded from HuggingFace config.json.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Configuration Dataclass",
-            "explain": "@dataclass holding all hyperparameters. Single source of truth. Loaded from JSON/YAML. Passed to all components that need config.",
-            "rationale": "Stores num_layers, hidden_size, num_heads, vocab_size etc",
-            "cross_lang": "Kotlin data class, Rust config struct with serde, Go struct with json tags, TypeScript zod schema",
-            "gotcha": "Nested mutable defaults are shared across instances — always use field(default_factory=...)"
-          },
-          {
-            "tag": "Separation of Config from Code",
-            "explain": "Architecture defined by data (config.json), not hard-coded. Same code runs different model sizes by changing config.",
-            "rationale": "Stores num_layers, hidden_size, num_heads, vocab_size etc",
-            "cross_lang": "Java Spring @ConfigurationProperties, Rust config crate, Go viper, TypeScript dotenv + zod",
-            "gotcha": "Config sprawl — too many knobs makes system impossible to understand. Provide sensible defaults"
-          }
+        "description": "class \"Config\" spanning 20 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/config.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 3 modules (0 local, 3 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "os",
+          "dataclasses",
+          "transformers"
+        ],
+        "all_names": [
+          "dataclass",
+          "AutoConfig"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/config.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 26,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.870Z"
+  "analyzed_at": "2026-06-23T08:29:18.517Z"
 }

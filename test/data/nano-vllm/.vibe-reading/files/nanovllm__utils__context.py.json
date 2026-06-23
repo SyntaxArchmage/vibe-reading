@@ -10,27 +10,13 @@
         "end_col": 44
       },
       "type": "concept",
-      "summary": "Global inference context storing shared state across layers",
+      "summary": "class: Context",
       "detail": {
         "kind": "class",
         "name": "Context",
         "body_lines": 10,
         "node_type": "class_definition",
-        "description": "Singleton-like context holding block tables, positions, and other per-step state needed by all layers.",
-        "level": "basic",
-        "why": "Layers need shared state (positions, block tables) without threading it through every function signature",
-        "takeaway": [
-          {
-            "tag": "Context Object Pattern",
-            "explain": "Bundle related state into one object passed through the call stack. Avoids threading 10+ parameters through every function.",
-            "rationale": "Used here because: Layers need shared state (positions, block tables) without threading it through every function signature"
-          },
-          {
-            "tag": "Thread-Local Storage",
-            "explain": "Each thread gets its own copy of the variable. Enables per-request state in concurrent servers without locks.",
-            "rationale": "Used here because: Layers need shared state (positions, block tables) without threading it through every function signature"
-          }
-        ]
+        "description": "class \"Context\" spanning 10 lines."
       }
     },
     {
@@ -42,21 +28,13 @@
         "end_col": 19
       },
       "type": "concept",
-      "summary": "Retrieve the current inference context",
+      "summary": "function: get_context",
       "detail": {
         "kind": "function",
         "name": "get_context",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Returns the active Context object for this inference step.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Global Accessor",
-            "explain": "Module-level function returning shared state. Simpler than dependency injection for deeply nested access patterns.",
-            "rationale": "Returns the active Context object for this inference step"
-          }
-        ]
+        "description": "function \"get_context\" spanning 2 lines."
       }
     },
     {
@@ -68,21 +46,13 @@
         "end_col": 132
       },
       "type": "concept",
-      "summary": "Set the inference context for current step",
+      "summary": "function: set_context",
       "detail": {
         "kind": "function",
         "name": "set_context",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Called at step start to establish context. All layers read from this during forward pass.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Context Lifecycle",
-            "explain": "Set at boundary (step start), read during processing, reset at end. Clear ownership prevents stale state bugs.",
-            "rationale": "Called at step start to establish context"
-          }
-        ]
+        "description": "function \"set_context\" spanning 3 lines."
       }
     },
     {
@@ -94,23 +64,57 @@
         "end_col": 24
       },
       "type": "concept",
-      "summary": "Clear context after step completion",
+      "summary": "function: reset_context",
       "detail": {
         "kind": "function",
         "name": "reset_context",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Ensures no stale state leaks between inference steps.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Explicit Cleanup",
-            "explain": "Always reset shared state after use. Prevents one requests state from leaking into the next. Defense against subtle bugs.",
-            "rationale": "Ensures no stale state leaks between inference steps"
-          }
+        "description": "function \"reset_context\" spanning 3 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 2,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 2 modules (0 local, 2 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "dataclasses",
+          "torch"
+        ],
+        "all_names": [
+          "dataclass"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/utils/context.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 28,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.872Z"
+  "analyzed_at": "2026-06-23T08:29:18.597Z"
 }

@@ -10,26 +10,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Converts logits to token IDs via temperature and top-p sampling",
+      "summary": "class: Sampler",
       "detail": {
         "kind": "class",
         "name": "Sampler",
         "body_lines": 8,
         "node_type": "class_definition",
-        "description": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Temperature Scaling",
-            "explain": "Divide logits by temperature before softmax. T<1 = sharper (more deterministic). T>1 = flatter (more random). T=0 = argmax.",
-            "rationale": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution"
-          },
-          {
-            "tag": "Top-p (Nucleus) Sampling",
-            "explain": "Sort by probability, keep smallest set whose cumulative probability ≥ p. Dynamically adjusts candidate pool size.",
-            "rationale": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution"
-          }
-        ]
+        "description": "class \"Sampler\" spanning 8 lines."
       }
     },
     {
@@ -41,23 +28,57 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Apply temperature, top-p filter, then sample token from distribution",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 6,
         "node_type": "function_definition",
-        "description": "Pipeline: logits → temperature scale → softmax → top-p mask → multinomial sample → token ID.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Multinomial Sampling",
-            "explain": "Draw from categorical distribution defined by probabilities. torch.multinomial samples indices weighted by input probabilities.",
-            "rationale": "Pipeline: logits → temperature scale → softmax → top-p mask → multinomial sample → token ID"
-          }
+        "description": "function \"forward\" spanning 6 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/sampler.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 2,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 2 modules (0 local, 2 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "torch",
+          "torch"
+        ],
+        "all_names": [
+          "nn"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/sampler.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 13,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.877Z"
+  "analyzed_at": "2026-06-23T08:29:18.656Z"
 }

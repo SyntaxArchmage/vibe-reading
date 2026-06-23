@@ -244,7 +244,8 @@ function extractExports(rootNode: any, ext: string): string[] {
 
 export async function extractFlow(
   filePath: string,
-  content: string
+  content: string,
+  allFiles: string[] = []
 ): Promise<FlowData> {
   const parsed = await parseFile(filePath, content);
   if (!parsed) return { entities: [], imports: [], calls: [], exports: [] };
@@ -261,12 +262,16 @@ export async function extractFlow(
     const firstImport = imports[0];
     const lastImport = imports[imports.length - 1];
     const sources = imports.map((i) => i.source).filter(Boolean);
-    const localSources = sources.filter(
-      (s) => s.startsWith(".") || s.startsWith("/")
-    );
-    const externalSources = sources.filter(
-      (s) => !s.startsWith(".") && !s.startsWith("/")
-    );
+    const isLocal = (s: string) => {
+      if (s.startsWith(".") || s.startsWith("/")) return true;
+      if (ext === ".py" && allFiles.length > 0) {
+        const top = s.split(".")[0];
+        return allFiles.some(f => f.startsWith(`${top}/`) || f === `${top}.py` || f.endsWith(`/${top}.py`));
+      }
+      return false;
+    };
+    const localSources = sources.filter(isLocal);
+    const externalSources = sources.filter(s => !isLocal(s));
 
     entities.push({
       anchor: {

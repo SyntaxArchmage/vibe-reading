@@ -1,5 +1,87 @@
 {
   "file": "nanovllm/__init__.py",
-  "entities": [],
-  "analyzed_at": "2026-06-22T06:04:34.870Z"
+  "entities": [
+    {
+      "anchor": {
+        "file": "nanovllm/__init__.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 2,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 2 modules (2 local, 0 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.llm",
+          "nanovllm.sampling_params"
+        ],
+        "external_deps": [],
+        "all_names": [
+          "LLM",
+          "SamplingParams"
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/__init__.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/__init__.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/llm.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/llm.py",
+        "names": [
+          "LLM"
+        ],
+        "reason": "Uses LLM from nanovllm/llm.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/__init__.py",
+        "start_line": 2,
+        "start_col": 0,
+        "end_line": 2,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/sampling_params.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/sampling_params.py",
+        "names": [
+          "SamplingParams"
+        ],
+        "reason": "Uses SamplingParams from nanovllm/sampling_params.py"
+      }
+    }
+  ],
+  "analyzed_at": "2026-06-23T08:29:18.541Z"
 }

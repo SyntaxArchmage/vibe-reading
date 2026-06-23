@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
+import { matchesImportSource } from "../utils/import-matching";
 
 interface CallGraphFile {
   file: string;
@@ -95,12 +96,9 @@ export function JumpTab({ entities, onCardClick, callGraph, currentFile, onFileS
     if (!callGraph?.files || !currentFile) return [];
     const results: Array<{ file: string; names: string[] }> = [];
     for (const f of callGraph.files) {
-      if (currentFile.includes(f.file)) continue;
+      if (f.file === currentFile) continue;
       for (const imp of f.imports) {
-        if (!imp.source.startsWith(".")) continue;
-        const src = imp.source.replace(/^\.\//, "");
-        if (currentFile.includes(src) || currentFile.endsWith(src + ".ts") ||
-            currentFile.endsWith(src + ".js") || currentFile.endsWith(src + ".tsx")) {
+        if (matchesImportSource(imp.source, currentFile)) {
           results.push({ file: f.file, names: imp.names });
         }
       }

@@ -10,41 +10,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Single KV cache block with hash-based prefix caching identity",
+      "summary": "class: Block",
       "detail": {
         "kind": "class",
         "name": "Block",
         "body_lines": 16,
         "node_type": "class_definition",
-        "description": "Represents one fixed-size slot in the paged KV cache pool. Tracks reference count, content hash for prefix matching, and token IDs stored.",
-        "why": "GPU memory for KV cache must be managed in fixed-size pages to avoid fragmentation",
-        "pattern": "Reference-counted resource with content-addressable hashing",
-        "takeaway": [
-          {
-            "tag": "__slots__",
-            "explain": "Python: replaces __dict__ with fixed tuple of attribute names. Saves ~100 bytes per instance. Use in data-heavy classes.",
-            "rationale": "Used here because: GPU memory for KV cache must be managed in fixed-size pages to avoid fragmentation",
-            "cross_lang": "C struct (fixed fields), Java record, Rust (all structs fixed by default), Go struct",
-            "gotcha": "Cannot add attributes dynamically; breaks pickle by default — implement __getstate__/__setstate__"
-          },
-          {
-            "tag": "Reference Counting",
-            "explain": "Track how many owners share a resource. When count drops to 0, resource is freed. Used in Python GC and GPU memory.",
-            "rationale": "Used here because: GPU memory for KV cache must be managed in fixed-size pages to avoid fragmentation",
-            "cross_lang": "Rust Rc<T>/Arc<T>, Swift ARC, Objective-C retain/release, C++ shared_ptr, Python default GC",
-            "gotcha": "Circular references leak memory — need weak references (weakref in Python, Weak<T> in Rust) to break cycles"
-          },
-          {
-            "tag": "Content-Addressable Storage",
-            "explain": "Store by content hash, not location. Identical items map to same key. Enables deduplication.",
-            "rationale": "Used here because: GPU memory for KV cache must be managed in fixed-size pages to avoid fragmentation",
-            "cross_lang": "Git object store, Docker layers, IPFS, Rust content-addressed crates, Nix store paths",
-            "gotcha": "Hash collisions (however rare) can cause silent data corruption — use cryptographic hashes for critical data"
-          }
-        ],
-        "design": "Slots dataclass for minimal memory — thousands of blocks in pool",
-        "smell": "Token_ids is mutable but hash computed once — stale if tokens appended after hashing",
-        "perf": "O(1) allocation/deallocation via free list"
+        "description": "class \"Block\" spanning 16 lines."
       }
     },
     {
@@ -56,23 +28,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Initialize block with empty state and zero refcount",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Creates block with no tokens, hash=0, and refcount=0. Ready for allocation.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Zero-State Initialization",
-            "explain": "Initialize to neutral values (0, empty). Object is valid but inactive until explicitly filled. Simplifies pool reuse.",
-            "rationale": "Creates block with no tokens, hash=0, and refcount=0",
-            "cross_lang": "Rust Default trait, Go zero values, Java default constructors, C++ value initialization",
-            "gotcha": "Zero state must be distinguishable from 'not yet initialized' — consider Option/Optional pattern"
-          }
-        ]
+        "description": "function \"__init__\" spanning 5 lines."
       }
     },
     {
@@ -84,23 +46,13 @@
         "end_col": 34
       },
       "type": "concept",
-      "summary": "Record token IDs stored in this block and compute content hash",
+      "summary": "function: update",
       "detail": {
         "kind": "function",
         "name": "update",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Sets block token content and computes hash for prefix caching lookup.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Content Hashing",
-            "explain": "Hash of block contents enables O(1) lookup for duplicate blocks. Same tokens → same hash → reuse existing cached KV.",
-            "rationale": "Sets block token content and computes hash for prefix caching lookup",
-            "cross_lang": "Git content-addressed objects, Docker layer caching, Nix derivation hashing, Rust cargo fingerprinting",
-            "gotcha": "Hash computation cost must be amortized — only worthwhile if duplicates are common enough"
-          }
-        ]
+        "description": "function \"update\" spanning 3 lines."
       }
     },
     {
@@ -112,23 +64,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Return block to empty state for reuse",
+      "summary": "function: reset",
       "detail": {
         "kind": "function",
         "name": "reset",
         "body_lines": 4,
         "node_type": "function_definition",
-        "description": "Clears tokens, hash, and refcount. Block returns to free pool.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Object Recycling",
-            "explain": "Reset object to initial state instead of deallocating/reallocating. Avoids GC pressure and allocation cost.",
-            "rationale": "Clears tokens, hash, and refcount",
-            "cross_lang": "Java object reuse patterns, Rust mem::replace, Go sync.Pool, C++ placement new",
-            "gotcha": "Forgetting to reset ALL fields leaves stale state from previous use — prefer explicit reset() methods"
-          }
-        ]
+        "description": "function \"reset\" spanning 4 lines."
       }
     },
     {
@@ -140,41 +82,13 @@
         "end_col": 53
       },
       "type": "concept",
-      "summary": "Paged KV cache pool allocator with prefix caching",
+      "summary": "class: BlockManager",
       "detail": {
         "kind": "class",
         "name": "BlockManager",
         "body_lines": 95,
         "node_type": "class_definition",
-        "description": "Centralizes KV cache memory allocation. Sequences request blocks, manager allocates from pool with hash-based prefix reuse.",
-        "why": "Multiple sequences compete for limited GPU memory — need centralized allocation with deduplication",
-        "pattern": "Pool allocator with prefix-cache (hash-based block reuse)",
-        "takeaway": [
-          {
-            "tag": "Object Pool",
-            "explain": "Pre-allocate N objects at startup, hand out on demand, reclaim when done. Avoids allocation overhead in hot paths.",
-            "rationale": "Used here because: Multiple sequences compete for limited GPU memory — need centralized allocation with deduplication",
-            "cross_lang": "Java ThreadPoolExecutor / Apache Commons Pool, Go sync.Pool, Rust arena allocators, C++ boost::object_pool",
-            "gotcha": "Pool exhaustion under load requires strategy: block, grow, or reject. Stale objects must be health-checked"
-          },
-          {
-            "tag": "Content-Addressable Storage",
-            "explain": "Store by content hash. Two blocks with identical tokens get same hash, enabling deduplication.",
-            "rationale": "Used here because: Multiple sequences compete for limited GPU memory — need centralized allocation with deduplication",
-            "cross_lang": "Git object store, Docker layers, IPFS, Rust content-addressed crates, Nix store paths",
-            "gotcha": "Hash collisions (however rare) can cause silent data corruption — use cryptographic hashes for critical data"
-          },
-          {
-            "tag": "Paged Memory",
-            "explain": "Divide memory into fixed-size blocks. Allocate non-contiguously with page table for indirection. Eliminates fragmentation.",
-            "rationale": "Used here because: Multiple sequences compete for limited GPU memory — need centralized allocation with deduplication",
-            "cross_lang": "OS virtual memory (page tables), Java DirectByteBuffer pages, Rust mmap, Database B-tree pages",
-            "gotcha": "Internal fragmentation wastes the unused portion of the last page — tune page size to workload"
-          }
-        ],
-        "design": "Hash table maps content hash to existing block for O(1) prefix lookup; separate free_blocks avoids scanning",
-        "convention": "All allocation through can_allocate/allocate pairs — never allocate without checking",
-        "perf": "Hot path every scheduling step; free_blocks deque gives O(1) pop"
+        "description": "class \"BlockManager\" spanning 95 lines."
       }
     },
     {
@@ -186,23 +100,13 @@
         "end_col": 45
       },
       "type": "concept",
-      "summary": "Create pool of N blocks and initialize free list",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 6,
         "node_type": "function_definition",
-        "description": "Pre-allocates all blocks upfront. Free list tracks available blocks.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Pre-allocation",
-            "explain": "Allocate all resources at startup. Avoids runtime allocation latency and fragmentation. Fixed memory footprint.",
-            "rationale": "Pre-allocates all blocks upfront",
-            "cross_lang": "C malloc + placement, Java ArrayList(initialCapacity), Rust Vec::with_capacity, Go make([]T, 0, n)",
-            "gotcha": "Over-allocation wastes memory; under-allocation causes reallocation. Profile actual usage to size correctly"
-          }
-        ]
+        "description": "function \"__init__\" spanning 6 lines."
       }
     },
     {
@@ -214,23 +118,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Compute content hash for a sequence of token IDs",
+      "summary": "function: compute_hash",
       "detail": {
         "kind": "function",
         "name": "compute_hash",
         "body_lines": 7,
         "node_type": "function_definition",
-        "description": "Deterministic hash of token sequence for prefix cache lookup.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Deterministic Hashing",
-            "explain": "Same input always produces same hash. Required for content-addressable storage. Python hash() is NOT deterministic across runs — use hashlib.",
-            "rationale": "Deterministic hash of token sequence for prefix cache lookup",
-            "cross_lang": "Java Objects.hash (order-dependent), Rust Hash trait, Go maphash, C++ std::hash",
-            "gotcha": "Hash randomization (Python 3.3+) means hash() values differ between runs — use hashlib for persistence"
-          }
-        ]
+        "description": "function \"compute_hash\" spanning 7 lines."
       }
     },
     {
@@ -242,21 +136,13 @@
         "end_col": 23
       },
       "type": "concept",
-      "summary": "Pop a free block from pool and increment its refcount",
+      "summary": "function: _allocate_block",
       "detail": {
         "kind": "function",
         "name": "_allocate_block",
         "body_lines": 9,
         "node_type": "function_definition",
-        "description": "O(1) allocation from free list. Block transitions from free→allocated.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Free List Allocation",
-            "explain": "Maintain list of available items. Allocate = pop from list (O(1)). Deallocate = push back. No fragmentation.",
-            "rationale": "O(1) allocation from free list"
-          }
-        ]
+        "description": "function \"_allocate_block\" spanning 9 lines."
       }
     },
     {
@@ -268,23 +154,13 @@
         "end_col": 44
       },
       "type": "concept",
-      "summary": "Decrement refcount, return block to free pool if zero",
+      "summary": "function: _deallocate_block",
       "detail": {
         "kind": "function",
         "name": "_deallocate_block",
         "body_lines": 4,
         "node_type": "function_definition",
-        "description": "Reference-counted deallocation. Block only freed when no sequence references it.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Reference Counting",
-            "explain": "Track number of owners. Decrement on release. Only free when count reaches zero. Enables safe sharing.",
-            "rationale": "Reference-counted deallocation",
-            "cross_lang": "Rust Rc<T>/Arc<T>, Swift ARC, Objective-C retain/release, C++ shared_ptr, Python default GC",
-            "gotcha": "Circular references leak memory — need weak references (weakref in Python, Weak<T> in Rust) to break cycles"
-          }
-        ]
+        "description": "function \"_deallocate_block\" spanning 4 lines."
       }
     },
     {
@@ -296,21 +172,13 @@
         "end_col": 32
       },
       "type": "concept",
-      "summary": "Check if enough free blocks exist for a sequence",
+      "summary": "function: can_allocate",
       "detail": {
         "kind": "function",
         "name": "can_allocate",
         "body_lines": 16,
         "node_type": "function_definition",
-        "description": "Predicate: sufficient free blocks for sequence needs. Called before schedule decision.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Try-Before-Act Pattern",
-            "explain": "Check feasibility before attempting operation. Avoids partial failures and complex rollback. can_allocate → allocate.",
-            "rationale": "Predicate: sufficient free blocks for sequence needs"
-          }
-        ]
+        "description": "function \"can_allocate\" spanning 16 lines."
       }
     },
     {
@@ -322,23 +190,13 @@
         "end_col": 67
       },
       "type": "concept",
-      "summary": "Assign blocks to sequence, reusing cached blocks when possible",
+      "summary": "function: allocate",
       "detail": {
         "kind": "function",
         "name": "allocate",
         "body_lines": 18,
         "node_type": "function_definition",
-        "description": "Attempts prefix cache hit for each block. Falls back to fresh allocation if no cached match.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Prefix Caching",
-            "explain": "If sequence prefix matches previously computed KV, reuse those blocks. Avoids redundant computation for shared prefixes (system prompts).",
-            "rationale": "Attempts prefix cache hit for each block",
-            "cross_lang": "Trie-based caching (any language), HTTP conditional GET (ETag), memoization with partial key",
-            "gotcha": "Cache invalidation when model weights change — must version-key the cache"
-          }
-        ]
+        "description": "function \"allocate\" spanning 18 lines."
       }
     },
     {
@@ -350,21 +208,13 @@
         "end_col": 31
       },
       "type": "concept",
-      "summary": "Release all blocks held by a finished sequence",
+      "summary": "function: deallocate",
       "detail": {
         "kind": "function",
         "name": "deallocate",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Decrements refcount for each block. Blocks return to free pool when refcount hits zero.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Batch Deallocation",
-            "explain": "Release all resources of a completed unit at once. Simpler than incremental release, fewer error states.",
-            "rationale": "Decrements refcount for each block"
-          }
-        ]
+        "description": "function \"deallocate\" spanning 8 lines."
       }
     },
     {
@@ -376,21 +226,13 @@
         "end_col": 76
       },
       "type": "concept",
-      "summary": "Check if sequence can grow by one more token",
+      "summary": "function: can_append",
       "detail": {
         "kind": "function",
         "name": "can_append",
         "body_lines": 2,
         "node_type": "function_definition",
-        "description": "Returns true if current block has space or a free block is available.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Capacity Check",
-            "explain": "Before growing, verify space exists. Prevents buffer overflow in fixed-size block systems.",
-            "rationale": "Returns true if current block has space or a free block is available"
-          }
-        ]
+        "description": "function \"can_append\" spanning 2 lines."
       }
     },
     {
@@ -402,21 +244,13 @@
         "end_col": 58
       },
       "type": "concept",
-      "summary": "Allocate new block if current block is full",
+      "summary": "function: may_append",
       "detail": {
         "kind": "function",
         "name": "may_append",
         "body_lines": 3,
         "node_type": "function_definition",
-        "description": "Lazy allocation: only allocates new block when current one fills up.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Lazy Allocation",
-            "explain": "Defer allocation until actually needed. Reduces waste when actual size < max size. Common in dynamic data structures.",
-            "rationale": "Lazy allocation: only allocates new block when current one fills up"
-          }
-        ]
+        "description": "function \"may_append\" spanning 3 lines."
       }
     },
     {
@@ -428,23 +262,80 @@
         "end_col": 53
       },
       "type": "concept",
-      "summary": "Compute and store content hashes for all blocks of a sequence",
+      "summary": "function: hash_blocks",
       "detail": {
         "kind": "function",
         "name": "hash_blocks",
         "body_lines": 11,
         "node_type": "function_definition",
-        "description": "Updates hash table for prefix caching after sequence content changes.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Index Maintenance",
-            "explain": "Keep lookup structures (hash tables) updated as content changes. Enables O(1) prefix lookup at cost of O(blocks) update.",
-            "rationale": "Updates hash table for prefix caching after sequence content changes"
-          }
+        "description": "function \"hash_blocks\" spanning 11 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 3 modules (1 local, 2 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.engine.sequence"
+        ],
+        "external_deps": [
+          "collections",
+          "xxhash"
+        ],
+        "all_names": [
+          "deque",
+          "numpy",
+          "Sequence"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 121,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/block_manager.py",
+        "start_line": 5,
+        "start_col": 0,
+        "end_line": 5,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/sequence.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/sequence.py",
+        "names": [
+          "Sequence"
+        ],
+        "reason": "Uses Sequence from nanovllm/engine/sequence.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.893Z"
+  "analyzed_at": "2026-06-23T08:29:18.985Z"
 }

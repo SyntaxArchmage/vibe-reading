@@ -10,27 +10,13 @@
         "end_col": 50
       },
       "type": "concept",
-      "summary": "Apply rotary position encoding to query/key tensors",
+      "summary": "function: apply_rotary_emb",
       "detail": {
         "kind": "function",
         "name": "apply_rotary_emb",
         "body_lines": 9,
         "node_type": "function_definition",
-        "description": "Rotates Q/K vectors by position-dependent angle. Encodes relative position information into attention scores.",
-        "level": "basic",
-        "why": "Transformers have no inherent position sense — RoPE injects position via rotation",
-        "takeaway": [
-          {
-            "tag": "Rotary Position Embedding",
-            "explain": "Encode position by rotating vector pairs. Attention dot product then naturally encodes relative distance. No learned position embeddings needed.",
-            "rationale": "Used here because: Transformers have no inherent position sense — RoPE injects position via rotation"
-          },
-          {
-            "tag": "Complex Number Rotation",
-            "explain": "Treat pairs of dimensions as complex numbers. Multiply by e^(iθ) to rotate. Equivalent to 2D rotation matrix but more elegant.",
-            "rationale": "Used here because: Transformers have no inherent position sense — RoPE injects position via rotation"
-          }
-        ]
+        "description": "function \"apply_rotary_emb\" spanning 9 lines."
       }
     },
     {
@@ -42,22 +28,13 @@
         "end_col": 25
       },
       "type": "concept",
-      "summary": "Precomputes rotation frequencies for all positions",
+      "summary": "class: RotaryEmbedding",
       "detail": {
         "kind": "class",
         "name": "RotaryEmbedding",
         "body_lines": 32,
         "node_type": "class_definition",
-        "description": "Computes cos/sin tables at initialization for fast lookup during forward pass.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Frequency Precomputation",
-            "explain": "Compute expensive trig functions once at init, store as buffer. Forward pass is just a table lookup — O(1) vs O(n) per call.",
-            "rationale": "Computes cos/sin tables at initialization for fast lookup during forward pass"
-          }
-        ],
-        "perf": "Precomputed tables avoid recomputing cos/sin every forward pass"
+        "description": "class \"RotaryEmbedding\" spanning 32 lines."
       }
     },
     {
@@ -69,21 +46,13 @@
         "end_col": 70
       },
       "type": "concept",
-      "summary": "Initialize frequency bands and precompute rotation tables",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 17,
         "node_type": "function_definition",
-        "description": "Creates geometric frequency sequence (θ_i = base^(-2i/d)) and precomputes cos/sin for max_position.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Geometric Frequency Spacing",
-            "explain": "Lower dimensions rotate faster (high frequency), higher dimensions slower. Creates multi-scale position encoding.",
-            "rationale": "Creates geometric frequency sequence (θ_i = base^(-2i/d)) and precomputes cos/sin for max_position"
-          }
-        ]
+        "description": "function \"__init__\" spanning 17 lines."
       }
     },
     {
@@ -95,21 +64,13 @@
         "end_col": 25
       },
       "type": "concept",
-      "summary": "Look up precomputed rotations for given positions",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 12,
         "node_type": "function_definition",
-        "description": "Index into cos/sin tables with position indices. Returns rotation vectors ready for apply_rotary_emb.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Position-Indexed Lookup",
-            "explain": "Forward pass is just tensor indexing into precomputed tables. No computation — pure memory access. Maximum throughput.",
-            "rationale": "Index into cos/sin tables with position indices"
-          }
-        ]
+        "description": "function \"forward\" spanning 12 lines."
       }
     },
     {
@@ -121,25 +82,59 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Factory function creating RotaryEmbedding with model config",
+      "summary": "function: get_rope",
       "detail": {
         "kind": "function",
         "name": "get_rope",
         "body_lines": 9,
         "node_type": "function_definition",
-        "description": "Convenience constructor extracting rope parameters from model config dict.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Factory Function",
-            "explain": "Function that creates and configures objects. Simpler than constructor when configuration comes from external sources (config dicts, files).",
-            "rationale": "Convenience constructor extracting rope parameters from model config dict",
-            "cross_lang": "Java static factory method, Rust ::new() convention, Go NewXxx() functions, TypeScript create functions",
-            "gotcha": "Over-abstracting with factories hides what's being created — use only when construction logic is non-trivial"
-          }
+        "description": "function \"get_rope\" spanning 9 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/rotary_embedding.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 3,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 3 modules (0 local, 3 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "functools",
+          "torch",
+          "torch"
+        ],
+        "all_names": [
+          "lru_cache",
+          "nn"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/layers/rotary_embedding.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 60,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.877Z"
+  "analyzed_at": "2026-06-23T08:29:18.683Z"
 }

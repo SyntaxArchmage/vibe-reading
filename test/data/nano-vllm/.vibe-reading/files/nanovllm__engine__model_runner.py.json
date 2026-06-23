@@ -10,33 +10,13 @@
         "end_col": 9
       },
       "type": "concept",
-      "summary": "GPU worker process: executes model forward passes isolated from scheduling",
+      "summary": "class: ModelRunner",
       "detail": {
         "kind": "class",
         "name": "ModelRunner",
         "body_lines": 243,
         "node_type": "class_definition",
-        "description": "Actor-pattern worker in separate process. Receives commands via shared memory, executes on GPU.",
-        "why": "Isolates GPU execution from scheduling — avoids GIL contention",
-        "pattern": "Actor with shared memory IPC",
-        "takeaway": [
-          {
-            "tag": "Actor Pattern",
-            "explain": "Isolated process with own state. Communicates only via messages. No shared mutable state. Eliminates race conditions.",
-            "rationale": "Used here because: Isolates GPU execution from scheduling — avoids GIL contention",
-            "cross_lang": "Erlang/Elixir processes, Akka actors (Java/Scala), Go goroutines+channels, Rust actix",
-            "gotcha": "Unbounded mailbox/queue leads to OOM under pressure — always set capacity limits and back-pressure"
-          },
-          {
-            "tag": "GIL Avoidance",
-            "explain": "Python GIL prevents true parallelism in threads. Separate process sidesteps GIL entirely. Required for CPU+GPU parallelism.",
-            "rationale": "Used here because: Isolates GPU execution from scheduling — avoids GIL contention"
-          }
-        ],
-        "design": "Separate process avoids GIL; shared memory avoids serialization vs pipes",
-        "convention": "All GPU operations exclusively inside ModelRunner — scheduler never touches CUDA",
-        "perf": "CUDA graphs eliminate kernel launch overhead for decode; prefill remains dynamic",
-        "level": "advanced"
+        "description": "class \"ModelRunner\" spanning 243 lines."
       }
     },
     {
@@ -48,21 +28,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Load model weights, allocate KV cache, set up shared memory",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 32,
         "node_type": "function_definition",
-        "description": "Heavy initialization: loads checkpoint, creates model, allocates GPU buffers, connects shared memory.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Heavy Initialization Pattern",
-            "explain": "Do all expensive work (model loading, GPU allocation) at startup. Runtime operations are then fast and predictable.",
-            "rationale": "Heavy initialization: loads checkpoint, creates model, allocates GPU buffers, connects shared memory"
-          }
-        ]
+        "description": "function \"__init__\" spanning 32 lines."
       }
     },
     {
@@ -74,21 +46,13 @@
         "end_col": 36
       },
       "type": "concept",
-      "summary": "Signal model runner process to terminate",
+      "summary": "function: exit",
       "detail": {
         "kind": "function",
         "name": "exit",
         "body_lines": 10,
         "node_type": "function_definition",
-        "description": "Sends shutdown command via shared memory, waits for process cleanup.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Cooperative Shutdown",
-            "explain": "Send termination signal, let process clean up its own resources (free GPU memory, close handles). Never force-kill if avoidable.",
-            "rationale": "Sends shutdown command via shared memory, waits for process cleanup"
-          }
-        ]
+        "description": "function \"exit\" spanning 10 lines."
       }
     },
     {
@@ -100,21 +64,13 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Main event loop: poll for commands, dispatch to handlers",
+      "summary": "function: loop",
       "detail": {
         "kind": "function",
         "name": "loop",
         "body_lines": 6,
         "node_type": "function_definition",
-        "description": "Infinite loop reading commands from shared memory. Dispatches to warmup/run/exit handlers.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Event Loop Pattern",
-            "explain": "Infinite loop: poll for events → dispatch to handler → repeat. Foundation of servers, game engines, UI frameworks.",
-            "rationale": "Infinite loop reading commands from shared memory"
-          }
-        ]
+        "description": "function \"loop\" spanning 6 lines."
       }
     },
     {
@@ -126,21 +82,13 @@
         "end_col": 32
       },
       "type": "concept",
-      "summary": "Deserialize command tensor from shared memory",
+      "summary": "function: read_shm",
       "detail": {
         "kind": "function",
         "name": "read_shm",
         "body_lines": 7,
         "node_type": "function_definition",
-        "description": "Reads command type and payload from shared memory buffer.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Shared Memory Protocol",
-            "explain": "Define fixed layout in shared memory: header (command type) + payload. Both processes agree on format. Zero-copy data exchange.",
-            "rationale": "Reads command type and payload from shared memory buffer"
-          }
-        ]
+        "description": "function \"read_shm\" spanning 7 lines."
       }
     },
     {
@@ -152,21 +100,13 @@
         "end_col": 23
       },
       "type": "concept",
-      "summary": "Serialize result tensor into shared memory for scheduler",
+      "summary": "function: write_shm",
       "detail": {
         "kind": "function",
         "name": "write_shm",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Writes output tokens/logits to shared memory for scheduler to read.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Zero-Copy IPC",
-            "explain": "Write directly to shared buffer. Reader accesses same physical memory. No serialization/deserialization, no copies. Fastest possible IPC.",
-            "rationale": "Writes output tokens/logits to shared memory for scheduler to read"
-          }
-        ]
+        "description": "function \"write_shm\" spanning 8 lines."
       }
     },
     {
@@ -178,21 +118,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Send command to model runner and wait for result",
+      "summary": "function: call",
       "detail": {
         "kind": "function",
         "name": "call",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Writes command to shared memory, signals process, blocks until result ready.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Synchronous RPC over Shared Memory",
-            "explain": "Write request → signal → wait for response. Looks like function call but executes in another process. Shared memory avoids copy overhead.",
-            "rationale": "Writes command to shared memory, signals process, blocks until result ready"
-          }
-        ]
+        "description": "function \"call\" spanning 5 lines."
       }
     },
     {
@@ -204,21 +136,13 @@
         "end_col": 32
       },
       "type": "concept",
-      "summary": "Run dummy forward pass to trigger CUDA lazy initialization",
+      "summary": "function: warmup_model",
       "detail": {
         "kind": "function",
         "name": "warmup_model",
         "body_lines": 11,
         "node_type": "function_definition",
-        "description": "First CUDA call is slow (context creation, JIT compilation). Warmup pays this cost before serving.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "CUDA Warmup",
-            "explain": "First GPU operation triggers driver init, JIT compile, memory allocation. Run dummy input at startup so first real request isn not slow.",
-            "rationale": "First CUDA call is slow (context creation, JIT compilation)"
-          }
-        ]
+        "description": "function \"warmup_model\" spanning 11 lines."
       }
     },
     {
@@ -230,21 +154,13 @@
         "end_col": 29
       },
       "type": "concept",
-      "summary": "Pre-allocate GPU memory for KV cache blocks",
+      "summary": "function: allocate_kv_cache",
       "detail": {
         "kind": "function",
         "name": "allocate_kv_cache",
         "body_lines": 19,
         "node_type": "function_definition",
-        "description": "Allocates fixed pool of GPU tensors for KV cache. Size determined by available GPU memory.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "GPU Memory Budgeting",
-            "explain": "Query available GPU memory, subtract model weights, divide remainder into KV cache blocks. Fixed budget prevents OOM during serving.",
-            "rationale": "Allocates fixed pool of GPU tensors for KV cache"
-          }
-        ]
+        "description": "function \"allocate_kv_cache\" spanning 19 lines."
       }
     },
     {
@@ -256,21 +172,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Build physical block mapping tensor for attention kernel",
+      "summary": "function: prepare_block_tables",
       "detail": {
         "kind": "function",
         "name": "prepare_block_tables",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Converts logical block indices to physical GPU addresses for paged attention kernel.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Page Table Construction",
-            "explain": "Build indirection table mapping logical pages to physical addresses. Kernel uses table to find correct memory locations. Like OS page tables.",
-            "rationale": "Converts logical block indices to physical GPU addresses for paged attention kernel"
-          }
-        ]
+        "description": "function \"prepare_block_tables\" spanning 5 lines."
       }
     },
     {
@@ -282,21 +190,13 @@
         "end_col": 35
       },
       "type": "concept",
-      "summary": "Batch multiple prefill requests into single padded tensor",
+      "summary": "function: prepare_prefill",
       "detail": {
         "kind": "function",
         "name": "prepare_prefill",
         "body_lines": 42,
         "node_type": "function_definition",
-        "description": "Packs variable-length prompts into one tensor with padding for batch GPU processing.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Dynamic Batching with Padding",
-            "explain": "Variable-length inputs padded to max length in batch. Trades compute waste (padding) for parallelism benefit. Core inference optimization.",
-            "rationale": "Packs variable-length prompts into one tensor with padding for batch GPU processing"
-          }
-        ]
+        "description": "function \"prepare_prefill\" spanning 42 lines."
       }
     },
     {
@@ -308,21 +208,13 @@
         "end_col": 35
       },
       "type": "concept",
-      "summary": "Batch single-token decode steps for multiple sequences",
+      "summary": "function: prepare_decode",
       "detail": {
         "kind": "function",
         "name": "prepare_decode",
         "body_lines": 17,
         "node_type": "function_definition",
-        "description": "Each sequence contributes one token. Batch together for GPU-efficient parallel decode.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Decode Batching",
-            "explain": "During generation, each sequence needs only 1 forward pass for 1 new token. Batch N sequences decode steps together for GPU efficiency.",
-            "rationale": "Each sequence contributes one token"
-          }
-        ]
+        "description": "function \"prepare_decode\" spanning 17 lines."
       }
     },
     {
@@ -334,21 +226,13 @@
         "end_col": 27
       },
       "type": "concept",
-      "summary": "Prepare sampling parameters tensor for batched sampling",
+      "summary": "function: prepare_sample",
       "detail": {
         "kind": "function",
         "name": "prepare_sample",
         "body_lines": 4,
         "node_type": "function_definition",
-        "description": "Collects temperature and top_p values for each sequence in batch.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Parameter Vectorization",
-            "explain": "Instead of per-item loops, collect parameters into tensors. GPU applies them in parallel across the batch.",
-            "rationale": "Collects temperature and top_p values for each sequence in batch"
-          }
-        ]
+        "description": "function \"prepare_sample\" spanning 4 lines."
       }
     },
     {
@@ -360,21 +244,13 @@
         "end_col": 72
       },
       "type": "concept",
-      "summary": "Execute model forward pass on prepared batch",
+      "summary": "function: run_model",
       "detail": {
         "kind": "function",
         "name": "run_model",
         "body_lines": 18,
         "node_type": "function_definition",
-        "description": "Runs the actual neural network forward: embeddings → layers → logits.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Forward Pass Execution",
-            "explain": "Feed prepared input tensors through model. Output is logits tensor. The core computation step in each engine iteration.",
-            "rationale": "Runs the actual neural network forward: embeddings → layers → logits"
-          }
-        ]
+        "description": "function \"run_model\" spanning 18 lines."
       }
     },
     {
@@ -386,21 +262,13 @@
         "end_col": 24
       },
       "type": "concept",
-      "summary": "Full step: prepare inputs → forward → sample → return tokens",
+      "summary": "function: run",
       "detail": {
         "kind": "function",
         "name": "run",
         "body_lines": 7,
         "node_type": "function_definition",
-        "description": "Orchestrates one complete inference step for a batch of sequences.",
-        "level": "advanced",
-        "takeaway": [
-          {
-            "tag": "Inference Pipeline",
-            "explain": "prepare_inputs → model_forward → sample_tokens → return_results. Each step separated for profiling and optimization.",
-            "rationale": "Orchestrates one complete inference step for a batch of sequences"
-          }
-        ]
+        "description": "function \"run\" spanning 7 lines."
       }
     },
     {
@@ -412,28 +280,192 @@
         "end_col": 9
       },
       "type": "concept",
-      "summary": "Record GPU operations into CUDA graph for zero-overhead replay",
+      "summary": "function: capture_cudagraph",
       "detail": {
         "kind": "function",
         "name": "capture_cudagraph",
         "body_lines": 36,
         "node_type": "function_definition",
-        "description": "Records decode forward pass into CUDA graph. Replay eliminates per-kernel CPU launch overhead.",
-        "why": "CUDA graphs eliminate ~50% of decode latency by removing kernel launch overhead",
-        "takeaway": [
-          {
-            "tag": "CUDA Graph Capture",
-            "explain": "Record sequence of GPU ops, then replay as single unit. CPU does not re-launch each kernel. Only works with fixed tensor shapes (decode, not prefill).",
-            "rationale": "Used here because: CUDA graphs eliminate ~50% of decode latency by removing kernel launch overhead",
-            "cross_lang": "Metal command buffers (Apple), Vulkan command buffers, DirectX command lists, OpenCL command queues",
-            "gotcha": "Only works with fixed tensor shapes — dynamic shapes (variable-length prefill) cannot use graphs"
-          }
+        "description": "function \"capture_cudagraph\" spanning 36 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 10 modules (6 local, 4 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.config",
+          "nanovllm.engine.sequence",
+          "nanovllm.models.qwen3",
+          "nanovllm.layers.sampler",
+          "nanovllm.utils.context",
+          "nanovllm.utils.loader"
         ],
-        "design": "Only decode path (fixed batch size) can be graphed — prefill has variable shapes",
-        "perf": "Most impactful single optimization in the codebase",
-        "level": "advanced"
+        "external_deps": [
+          "pickle",
+          "torch",
+          "multiprocessing.synchronize",
+          "multiprocessing.shared_memory"
+        ],
+        "all_names": [
+          "torch.distributed",
+          "Event",
+          "SharedMemory",
+          "Config",
+          "Sequence",
+          "Qwen3ForCausalLM",
+          "Sampler",
+          "set_context",
+          "get_context",
+          "reset_context",
+          "load_model"
+        ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 258,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/config.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/config.py",
+        "names": [
+          "Config"
+        ],
+        "reason": "Uses Config from nanovllm/config.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 8,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/sequence.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/sequence.py",
+        "names": [
+          "Sequence"
+        ],
+        "reason": "Uses Sequence from nanovllm/engine/sequence.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 9,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/models/qwen3.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/models/qwen3.py",
+        "names": [
+          "Qwen3ForCausalLM"
+        ],
+        "reason": "Uses Qwen3ForCausalLM from nanovllm/models/qwen3.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 10,
+        "start_col": 0,
+        "end_line": 10,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/sampler.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/sampler.py",
+        "names": [
+          "Sampler"
+        ],
+        "reason": "Uses Sampler from nanovllm/layers/sampler.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 11,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/utils/context.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/utils/context.py",
+        "names": [
+          "set_context",
+          "get_context",
+          "reset_context"
+        ],
+        "reason": "Uses set_context, get_context, reset_context from nanovllm/utils/context.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/engine/model_runner.py",
+        "start_line": 12,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/utils/loader.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/utils/loader.py",
+        "names": [
+          "load_model"
+        ],
+        "reason": "Uses load_model from nanovllm/utils/loader.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.890Z"
+  "analyzed_at": "2026-06-23T08:29:18.922Z"
 }

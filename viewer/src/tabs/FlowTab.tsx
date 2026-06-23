@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
+import { matchesImportSource, isLocalSource } from "../utils/import-matching";
 
 interface CallGraphFile {
   file: string;
@@ -178,10 +179,7 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
 
   const importers = callGraph.files
     .map(f => {
-      const matchingImps = f.imports.filter(imp => {
-        const source = imp.source.replace(/^\.\//, "");
-        return currentFile.endsWith(source) || currentFile.endsWith(source + ".ts") || currentFile.endsWith(source + ".js");
-      });
+      const matchingImps = f.imports.filter(imp => matchesImportSource(imp.source, currentFile));
       if (matchingImps.length === 0) return null;
       const names = matchingImps.flatMap(imp => imp.names);
       return { file: f.file, names };
@@ -189,12 +187,9 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
     .filter((x): x is { file: string; names: string[] } => x !== null);
 
   const dependencies = cgEntry.imports
-    .filter(imp => imp.source.startsWith("."))
+    .filter(imp => isLocalSource(imp.source, callGraph.files))
     .map(imp => {
-      const resolved = callGraph.files.find(f => {
-        const source = imp.source.replace(/^\.\//, "");
-        return f.file.endsWith(source) || f.file.endsWith(source + ".ts") || f.file.endsWith(source + ".js") || f.file.endsWith(source + ".tsx");
-      });
+      const resolved = callGraph.files.find(f => matchesImportSource(imp.source, f.file));
       return { source: imp.source, names: imp.names, resolved: resolved?.file };
     });
 

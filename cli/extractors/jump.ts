@@ -65,7 +65,7 @@ function collectImportTargets(rootNode: any, ext: string): ImportTarget[] {
           (c: any) => c.type === "dotted_name" || c.type === "relative_import"
         );
         const source = moduleNode?.text ?? "";
-        if (source.startsWith(".")) {
+        if (source) {
           const names: string[] = [];
           for (const child of node.children) {
             if (child.type === "dotted_name" && child !== moduleNode) {
@@ -79,6 +79,22 @@ function collectImportTargets(rootNode: any, ext: string): ImportTarget[] {
             }
           }
           targets.push({ source, names, line: node.startPosition.row + 1 });
+        }
+        return;
+      }
+      if (node.type === "import_statement") {
+        for (const child of node.children) {
+          if (child.type === "dotted_name") {
+            targets.push({ source: child.text, names: [], line: node.startPosition.row + 1 });
+          } else if (child.type === "aliased_import") {
+            const nameNode = child.children.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (c: any) => c.type === "dotted_name"
+            );
+            if (nameNode) {
+              targets.push({ source: nameNode.text, names: [], line: node.startPosition.row + 1 });
+            }
+          }
         }
         return;
       }
@@ -124,12 +140,38 @@ function collectImportTargets(rootNode: any, ext: string): ImportTarget[] {
   return targets;
 }
 
+function isLocalImport(source: string, allFiles: string[]): boolean {
+  if (source.startsWith(".")) return true;
+  const top = source.split(".")[0];
+  return allFiles.some(
+    (f) => f.startsWith(`${top}/`) || f === `${top}.py` || f.endsWith(`/${top}.py`)
+  );
+}
+
+function resolvePythonModule(source: string, allFiles: string[]): string | null {
+  const modulePath = source.replace(/\./g, "/");
+  const candidates = [
+    `${modulePath}.py`,
+    path.join(modulePath, "__init__.py"),
+  ];
+  for (const c of candidates) {
+    const normalized = path.normalize(c);
+    if (allFiles.includes(normalized)) return normalized;
+  }
+  return null;
+}
+
 function resolveImport(
   source: string,
   currentFile: string,
   allFiles: string[],
   ext: string
 ): string | null {
+  if (ext === ".py" && !source.startsWith(".")) {
+    if (!isLocalImport(source, allFiles)) return null;
+    return resolvePythonModule(source, allFiles);
+  }
+
   const currentDir = path.dirname(currentFile);
   const resolved = path.normalize(path.join(currentDir, source));
 

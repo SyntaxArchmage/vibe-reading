@@ -10,28 +10,56 @@
         "end_col": 75
       },
       "type": "concept",
-      "summary": "Dataclass holding generation sampling parameters",
+      "summary": "class: SamplingParams",
       "detail": {
         "kind": "class",
         "name": "SamplingParams",
         "body_lines": 8,
         "node_type": "class_definition",
-        "description": "Stores temperature, top_p, max_tokens, stop tokens. Passed to Sampler to control generation behavior.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Parameter Object",
-            "explain": "Bundle related parameters into one typed object instead of passing many loose arguments. Easier to validate, extend, and document.",
-            "rationale": "Stores temperature, top_p, max_tokens, stop tokens"
-          },
-          {
-            "tag": "Sampling Hyperparameters",
-            "explain": "temperature (randomness), top_p (nucleus filtering), max_tokens (length limit). Together control quality-diversity tradeoff in generation.",
-            "rationale": "Stores temperature, top_p, max_tokens, stop tokens"
-          }
+        "description": "class \"SamplingParams\" spanning 8 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/sampling_params.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 1 modules (0 local, 1 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [],
+        "external_deps": [
+          "dataclasses"
+        ],
+        "all_names": [
+          "dataclass"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/sampling_params.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.869Z"
+  "analyzed_at": "2026-06-23T08:29:18.464Z"
 }

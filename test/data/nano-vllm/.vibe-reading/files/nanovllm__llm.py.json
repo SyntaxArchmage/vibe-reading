@@ -10,30 +10,75 @@
         "end_col": 8
       },
       "type": "concept",
-      "summary": "User-facing API class for simple text generation",
+      "summary": "class: LLM",
       "detail": {
         "kind": "class",
         "name": "LLM",
         "body_lines": 2,
         "node_type": "class_definition",
-        "description": "High-level interface wrapping LLMEngine. Handles tokenization, generation, and detokenization in one call.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "API Gateway Class",
-            "explain": "Simplest possible interface for end users. Hides tokenization, batching, scheduling complexity. One method: generate(prompt) → text.",
-            "rationale": "High-level interface wrapping LLMEngine"
-          },
-          {
-            "tag": "Facade Pattern",
-            "explain": "Single entry point wrapping multiple subsystems. User doesnt need to know about Engine, Scheduler, or ModelRunner.",
-            "rationale": "High-level interface wrapping LLMEngine",
-            "cross_lang": "Java Spring @Service classes, Go handler structs, TypeScript service classes, Rust public module API",
-            "gotcha": "Facade can become a God Object if it accumulates too many responsibilities — split by domain"
-          }
+        "description": "class \"LLM\" spanning 2 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/llm.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 1 modules (1 local, 0 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.engine.llm_engine"
+        ],
+        "external_deps": [],
+        "all_names": [
+          "LLMEngine"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/llm.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/llm.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/engine/llm_engine.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/engine/llm_engine.py",
+        "names": [
+          "LLMEngine"
+        ],
+        "reason": "Uses LLMEngine from nanovllm/engine/llm_engine.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.869Z"
+  "analyzed_at": "2026-06-23T08:29:18.490Z"
 }

@@ -10,26 +10,13 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Multi-head attention module with GQA, RoPE, and paged KV cache",
+      "summary": "class: Qwen3Attention",
       "detail": {
         "kind": "class",
         "name": "Qwen3Attention",
         "body_lines": 75,
         "node_type": "class_definition",
-        "description": "Core attention layer. Implements grouped-query attention with rotary embeddings and paged KV cache for efficient inference.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Multi-Head Attention",
-            "explain": "Split representation into H heads, compute attention independently per head, concatenate. Each head learns different relationship patterns.",
-            "rationale": "Core attention layer"
-          },
-          {
-            "tag": "Grouped Query Attention",
-            "explain": "Share K/V heads across multiple Q heads (e.g., 8 Q heads per 1 KV head). Reduces KV cache size without significant quality loss.",
-            "rationale": "Core attention layer"
-          }
-        ]
+        "description": "class \"Qwen3Attention\" spanning 75 lines."
       }
     },
     {
@@ -41,21 +28,13 @@
         "end_col": 66
       },
       "type": "concept",
-      "summary": "Configure attention heads, projections, and RoPE parameters",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 55,
         "node_type": "function_definition",
-        "description": "Creates Q/K/V projections (fused), output projection, and rotary embedding. Handles GQA head ratios.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Head Dimension",
-            "explain": "hidden_size / num_heads = head_dim. Each head operates on head_dim dimensions independently. Typical: 128.",
-            "rationale": "Creates Q/K/V projections (fused), output projection, and rotary embedding"
-          }
-        ]
+        "description": "function \"__init__\" spanning 55 lines."
       }
     },
     {
@@ -67,21 +46,13 @@
         "end_col": 21
       },
       "type": "concept",
-      "summary": "Full attention forward: project, rotate, cache, attend, project back",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 17,
         "node_type": "function_definition",
-        "description": "QKV projection → RoPE → store KV cache → attention → output projection.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Attention Forward Pipeline",
-            "explain": "Q,K,V = project(x) → apply RoPE to Q,K → store K,V in cache → attention(Q, cached_K, cached_V) → project output.",
-            "rationale": "QKV projection → RoPE → store KV cache → attention → output projection"
-          }
-        ]
+        "description": "function \"forward\" spanning 17 lines."
       }
     },
     {
@@ -93,21 +64,13 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "SwiGLU MLP block with tensor-parallel gate/up/down projections",
+      "summary": "class: Qwen3MLP",
       "detail": {
         "kind": "class",
         "name": "Qwen3MLP",
         "body_lines": 27,
         "node_type": "class_definition",
-        "description": "Two-stage MLP: fused gate+up projection → SiLU activation with gating → down projection.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "SwiGLU MLP",
-            "explain": "gate = SiLU(W_gate @ x); output = (gate * W_up @ x) @ W_down. Gated activation improves over plain FFN. Standard in modern LLMs.",
-            "rationale": "Two-stage MLP: fused gate+up projection → SiLU activation with gating → down projection"
-          }
-        ]
+        "description": "class \"Qwen3MLP\" spanning 27 lines."
       }
     },
     {
@@ -119,21 +82,13 @@
         "end_col": 34
       },
       "type": "concept",
-      "summary": "Create gate/up (merged) and down projection layers",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 19,
         "node_type": "function_definition",
-        "description": "MergedColumnParallel for gate+up, RowParallel for down. Parallelism is transparent to forward pass.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "MLP Parallelism Strategy",
-            "explain": "First linear: column-parallel (no communication). Activation: local. Second linear: row-parallel (all-reduce after). One all-reduce per MLP.",
-            "rationale": "MergedColumnParallel for gate+up, RowParallel for down"
-          }
-        ]
+        "description": "function \"__init__\" spanning 19 lines."
       }
     },
     {
@@ -145,21 +100,13 @@
         "end_col": 16
       },
       "type": "concept",
-      "summary": "Gate+up projection → SiLU gating → down projection",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Fused gate_up matmul, split and apply SiLU*gate, then down projection with all-reduce.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Gated MLP Forward",
-            "explain": "x → merged(gate,up) → chunk → SiLU(gate)*up → down_proj. The gating controls information flow through the MLP.",
-            "rationale": "Fused gate_up matmul, split and apply SiLU*gate, then down projection with all-reduce"
-          }
-        ]
+        "description": "function \"forward\" spanning 5 lines."
       }
     },
     {
@@ -171,26 +118,13 @@
         "end_col": 38
       },
       "type": "concept",
-      "summary": "Single transformer block: attention + MLP with residual connections",
+      "summary": "class: Qwen3DecoderLayer",
       "detail": {
         "kind": "class",
         "name": "Qwen3DecoderLayer",
         "body_lines": 40,
         "node_type": "class_definition",
-        "description": "LayerNorm → Attention → residual → LayerNorm → MLP → residual. Repeated N times in the model.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Pre-Norm Architecture",
-            "explain": "Apply LayerNorm before (not after) attention/MLP. Stabilizes training. Used by GPT-2+, LLaMA, Qwen, most modern LLMs.",
-            "rationale": "LayerNorm → Attention → residual → LayerNorm → MLP → residual"
-          },
-          {
-            "tag": "Residual Connection",
-            "explain": "output = layer(x) + x. Gradient flows directly through addition. Enables training of very deep networks (100+ layers).",
-            "rationale": "LayerNorm → Attention → residual → LayerNorm → MLP → residual"
-          }
-        ]
+        "description": "class \"Qwen3DecoderLayer\" spanning 40 lines."
       }
     },
     {
@@ -202,21 +136,13 @@
         "end_col": 92
       },
       "type": "concept",
-      "summary": "Compose attention, MLP, and layer norms into one transformer block",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 23,
         "node_type": "function_definition",
-        "description": "Creates self_attn, mlp, input_layernorm, post_attention_layernorm as submodules.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Module Composition",
-            "explain": "Complex layers built by composing simpler nn.Modules. Each sub-module manages its own parameters. Clean separation of concerns.",
-            "rationale": "Creates self_attn, mlp, input_layernorm, post_attention_layernorm as submodules"
-          }
-        ]
+        "description": "function \"__init__\" spanning 23 lines."
       }
     },
     {
@@ -228,21 +154,13 @@
         "end_col": 38
       },
       "type": "concept",
-      "summary": "Pre-norm attention → residual → pre-norm MLP → residual",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 14,
         "node_type": "function_definition",
-        "description": "Standard transformer block forward: norm, attend, add residual, norm, MLP, add residual.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Transformer Block Forward",
-            "explain": "h = x + attn(norm(x)); output = h + mlp(norm(h)). Two residual streams. Each sub-layer adds to the residual.",
-            "rationale": "Standard transformer block forward: norm, attend, add residual, norm, MLP, add residual"
-          }
-        ]
+        "description": "function \"forward\" spanning 14 lines."
       }
     },
     {
@@ -254,21 +172,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Stack of transformer decoder layers with embeddings",
+      "summary": "class: Qwen3Model",
       "detail": {
         "kind": "class",
         "name": "Qwen3Model",
         "body_lines": 22,
         "node_type": "class_definition",
-        "description": "Composes embedding + N decoder layers + final norm. The backbone without the language model head.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Model vs Head Separation",
-            "explain": "Model = embedding + layers + norm (reusable backbone). Head = task-specific output layer. Separation enables weight sharing and fine-tuning flexibility.",
-            "rationale": "Composes embedding + N decoder layers + final norm"
-          }
-        ]
+        "description": "class \"Qwen3Model\" spanning 22 lines."
       }
     },
     {
@@ -280,21 +190,13 @@
         "end_col": 72
       },
       "type": "concept",
-      "summary": "Instantiate embedding, all decoder layers, and final normalization",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 8,
         "node_type": "function_definition",
-        "description": "Creates ModuleList of decoder layers, plus embedding and final RMSNorm.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "nn.ModuleList",
-            "explain": "Ordered list of modules. Unlike Python list, properly registers sub-modules for parameter tracking, serialization, and device placement.",
-            "rationale": "Creates ModuleList of decoder layers, plus embedding and final RMSNorm"
-          }
-        ]
+        "description": "function \"__init__\" spanning 8 lines."
       }
     },
     {
@@ -306,21 +208,13 @@
         "end_col": 28
       },
       "type": "concept",
-      "summary": "Embed tokens then pass through all transformer layers sequentially",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 11,
         "node_type": "function_definition",
-        "description": "tokens → embedding → layer[0] → layer[1] → ... → layer[N] → final_norm → hidden_states.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Sequential Layer Processing",
-            "explain": "Each layer transforms hidden state in place. Output shape identical to input. Enables arbitrary depth without architecture changes.",
-            "rationale": "tokens → embedding → layer[0] → layer[1] →"
-          }
-        ]
+        "description": "function \"forward\" spanning 11 lines."
       }
     },
     {
@@ -332,21 +226,13 @@
         "end_col": 42
       },
       "type": "concept",
-      "summary": "Complete causal language model: backbone + LM head for next-token prediction",
+      "summary": "class: Qwen3ForCausalLM",
       "detail": {
         "kind": "class",
         "name": "Qwen3ForCausalLM",
         "body_lines": 31,
         "node_type": "class_definition",
-        "description": "Wraps Qwen3Model with parallel LM head. The full model used for text generation.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Causal Language Model",
-            "explain": "Predicts next token given all previous tokens. Unidirectional attention mask ensures each position only sees past. Foundation of GPT-style models.",
-            "rationale": "Wraps Qwen3Model with parallel LM head"
-          }
-        ]
+        "description": "class \"Qwen3ForCausalLM\" spanning 31 lines."
       }
     },
     {
@@ -358,21 +244,13 @@
         "end_col": 74
       },
       "type": "concept",
-      "summary": "Combine backbone model with output language model head",
+      "summary": "function: __init__",
       "detail": {
         "kind": "function",
         "name": "__init__",
         "body_lines": 9,
         "node_type": "function_definition",
-        "description": "Creates Qwen3Model + ParallelLMHead. Optionally ties embedding weights.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Model Architecture Composition",
-            "explain": "CausalLM = backbone(embed + layers + norm) + head(logits). Clean two-level hierarchy.",
-            "rationale": "Creates Qwen3Model + ParallelLMHead"
-          }
-        ]
+        "description": "function \"__init__\" spanning 9 lines."
       }
     },
     {
@@ -384,21 +262,13 @@
         "end_col": 47
       },
       "type": "concept",
-      "summary": "Full forward pass: embed → decode → logits",
+      "summary": "function: forward",
       "detail": {
         "kind": "function",
         "name": "forward",
         "body_lines": 6,
         "node_type": "function_definition",
-        "description": "Runs backbone to get hidden states, then computes logits for sampling.",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Full Forward Pipeline",
-            "explain": "input_ids → backbone.forward() → hidden_states → compute_logits() → vocabulary scores. End-to-end differentiable.",
-            "rationale": "Runs backbone to get hidden states, then computes logits for sampling"
-          }
-        ]
+        "description": "function \"forward\" spanning 6 lines."
       }
     },
     {
@@ -410,23 +280,193 @@
         "end_col": 42
       },
       "type": "concept",
-      "summary": "Project final hidden states to vocabulary logits",
+      "summary": "function: compute_logits",
       "detail": {
         "kind": "function",
         "name": "compute_logits",
         "body_lines": 5,
         "node_type": "function_definition",
-        "description": "Applies LM head to hidden states. Only computes logits for positions that need sampling (optimization).",
-        "level": "basic",
-        "takeaway": [
-          {
-            "tag": "Selective Logit Computation",
-            "explain": "During generation, only the last token position needs logits. Skip computing logits for cached positions. Saves one full vocab-size matmul per cached token.",
-            "rationale": "Applies LM head to hidden states"
-          }
+        "description": "function \"compute_logits\" spanning 5 lines."
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 0
+      },
+      "type": "flow",
+      "summary": "Imports: 9 modules (6 local, 3 external)",
+      "detail": {
+        "kind": "imports",
+        "local_deps": [
+          "nanovllm.layers.activation",
+          "nanovllm.layers.attention",
+          "nanovllm.layers.layernorm",
+          "nanovllm.layers.linear",
+          "nanovllm.layers.rotary_embedding",
+          "nanovllm.layers.embed_head"
+        ],
+        "external_deps": [
+          "torch",
+          "torch",
+          "transformers"
+        ],
+        "all_names": [
+          "nn",
+          "torch.distributed",
+          "Qwen3Config",
+          "SiluAndMul",
+          "Attention",
+          "RMSNorm",
+          "QKVParallelLinear",
+          "MergedColumnParallelLinear",
+          "RowParallelLinear",
+          "get_rope",
+          "VocabParallelEmbedding",
+          "ParallelLMHead"
         ]
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 217,
+        "end_col": 0
+      },
+      "type": "history",
+      "summary": "1 commits over 1d",
+      "detail": {
+        "kind": "file_history",
+        "total_commits": 1,
+        "created_at": "2026-06-22T14:32:32+08:00",
+        "last_modified": "2026-06-22T14:32:32+08:00",
+        "last_author": "heng shi",
+        "last_message": "feat: knowledge-rich concept cards with structured teaches and quality gates",
+        "age_days": 1
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 6,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/activation.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/activation.py",
+        "names": [
+          "SiluAndMul"
+        ],
+        "reason": "Uses SiluAndMul from nanovllm/layers/activation.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 7,
+        "start_col": 0,
+        "end_line": 7,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/attention.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/attention.py",
+        "names": [
+          "Attention"
+        ],
+        "reason": "Uses Attention from nanovllm/layers/attention.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 8,
+        "start_col": 0,
+        "end_line": 8,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/layernorm.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/layernorm.py",
+        "names": [
+          "RMSNorm"
+        ],
+        "reason": "Uses RMSNorm from nanovllm/layers/layernorm.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 9,
+        "start_col": 0,
+        "end_line": 9,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/linear.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/linear.py",
+        "names": [
+          "QKVParallelLinear",
+          "MergedColumnParallelLinear",
+          "RowParallelLinear"
+        ],
+        "reason": "Uses QKVParallelLinear, MergedColumnParallelLinear, RowParallelLinear from nanovllm/layers/linear.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 10,
+        "start_col": 0,
+        "end_line": 10,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/rotary_embedding.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/rotary_embedding.py",
+        "names": [
+          "get_rope"
+        ],
+        "reason": "Uses get_rope from nanovllm/layers/rotary_embedding.py"
+      }
+    },
+    {
+      "anchor": {
+        "file": "nanovllm/models/qwen3.py",
+        "start_line": 11,
+        "start_col": 0,
+        "end_line": 11,
+        "end_col": 0
+      },
+      "type": "jump",
+      "summary": "Jump → nanovllm/layers/embed_head.py",
+      "detail": {
+        "kind": "import_jump",
+        "target_file": "nanovllm/layers/embed_head.py",
+        "names": [
+          "VocabParallelEmbedding",
+          "ParallelLMHead"
+        ],
+        "reason": "Uses VocabParallelEmbedding, ParallelLMHead from nanovllm/layers/embed_head.py"
       }
     }
   ],
-  "analyzed_at": "2026-06-22T06:04:34.876Z"
+  "analyzed_at": "2026-06-23T08:29:18.631Z"
 }
