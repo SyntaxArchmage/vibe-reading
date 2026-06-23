@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "Stores num_layers, hidden_size, num_heads, vocab_size etc. Loaded from HuggingFace config.json.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Configuration Dataclass",
             "explain": "@dataclass holding all hyperparameters. Single source of truth. Loaded from JSON/YAML. Passed to all components that need config.",

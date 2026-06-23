@@ -198,13 +198,51 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
       ctx.fill();
       ctx.stroke();
 
-      // File label
       const shortName = file.split("/").pop() || file;
       ctx.font = "9px -apple-system, sans-serif";
       ctx.fillStyle = file === currentFile ? "rgba(0, 122, 204, 0.5)" : "rgba(255, 255, 255, 0.2)";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
       ctx.fillText(shortName, minX - pad + 4, minY - pad + 3);
+    }
+
+    // Draw class container groupings
+    const classGroups = new Map<string, LayoutNode[]>();
+    for (const ln of layoutNodes) {
+      if (ln.node.class) {
+        const key = `${ln.node.file}::${ln.node.class}`;
+        const group = classGroups.get(key) || [];
+        group.push(ln);
+        classGroups.set(key, group);
+      }
+    }
+
+    for (const [key, nodes] of classGroups) {
+      if (nodes.length < 2) continue;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const n of nodes) {
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + n.width);
+        maxY = Math.max(maxY, n.y + n.height);
+      }
+      const pad = 8;
+      ctx.beginPath();
+      ctx.roundRect(minX - pad, minY - pad - 12, maxX - minX + pad * 2, maxY - minY + pad * 2 + 12, 5);
+      ctx.fillStyle = "rgba(220, 220, 170, 0.03)";
+      ctx.strokeStyle = "rgba(220, 220, 170, 0.15)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const className = key.split("::").pop() || "";
+      ctx.font = "bold 9px -apple-system, sans-serif";
+      ctx.fillStyle = "rgba(220, 220, 170, 0.5)";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(`class ${className}`, minX - pad + 4, minY - pad - 10);
     }
 
     // Draw edges
@@ -239,11 +277,22 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
       ctx.fill();
     }
 
+    // Architecture layer color derived from path
+    function getLayerColor(file: string): string {
+      if (file.includes("/layers/") || file.includes("/modules/")) return "#4ec9b0";
+      if (file.includes("/engine/") || file.includes("/core/")) return "#dcdcaa";
+      if (file.includes("/models/") || file.includes("/model/")) return "#9cdcfe";
+      if (file.includes("/api/") || file.includes("/server/")) return "#c586c0";
+      if (file.includes("/utils/") || file.includes("/lib/")) return "#ce9178";
+      return "#888";
+    }
+
     // Draw nodes
     for (const ln of layoutNodes) {
       const inSegment = segmentPath.has(ln.id);
       const isHovered = hoveredNode === ln.id;
       const isFileLocal = ln.node.file === currentFile;
+      const layerColor = getLayerColor(ln.node.file);
 
       ctx.beginPath();
       ctx.roundRect(ln.x, ln.y, ln.width, ln.height, 6);
@@ -281,9 +330,8 @@ export function FlowTab({ flowData, currentFile, onNodeClick }: Props) {
       ctx.textBaseline = "middle";
       ctx.fillText(displayLabel, ln.x + ln.width / 2, ln.y + ln.height / 2);
 
-      // Kind indicator
-      const kindColor = ln.node.kind === "method" ? "#4ec9b0" : ln.node.kind === "class" ? "#dcdcaa" : "#9cdcfe";
-      ctx.fillStyle = kindColor;
+      // Architecture layer indicator (left bar)
+      ctx.fillStyle = layerColor;
       ctx.fillRect(ln.x, ln.y, 3, ln.height);
     }
 

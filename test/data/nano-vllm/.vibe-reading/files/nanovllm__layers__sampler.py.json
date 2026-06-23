@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "Applies temperature scaling and nucleus (top-p) filtering before sampling from probability distribution.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Temperature Scaling",
             "explain": "Divide logits by temperature before softmax. T<1 = sharper (more deterministic). T>1 = flatter (more random). T=0 = argmax.",
@@ -49,7 +49,7 @@
         "node_type": "function_definition",
         "description": "Pipeline: logits → temperature scale → softmax → top-p mask → multinomial sample → token ID.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Multinomial Sampling",
             "explain": "Draw from categorical distribution defined by probabilities. torch.multinomial samples indices weighted by input probabilities.",

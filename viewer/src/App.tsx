@@ -14,6 +14,34 @@ declare const PREVIEW_DATA: Record<
 
 declare const GLOBAL_DATA: Record<string, unknown> | undefined;
 
+function sourceStaticPath(file: string): string {
+  return `source/${file.replace(/\//g, "__")}.json`;
+}
+
+async function loadSourceContent(file: string): Promise<string> {
+  try {
+    const resp = await fetch(sourceStaticPath(file));
+    if (resp.ok) {
+      const json = await resp.json();
+      if (typeof json.content === "string") return json.content;
+    }
+  } catch {
+    /* static source unavailable — try dev server */
+  }
+
+  try {
+    const resp = await fetch(`/api/source?file=${encodeURIComponent(file)}`);
+    if (resp.ok) {
+      const json = await resp.json();
+      if (typeof json.content === "string") return json.content;
+    }
+  } catch {
+    /* dev server unavailable */
+  }
+
+  return `// Source file not found: ${file}`;
+}
+
 const TABS: { id: TabId; label: string }[] = [
   { id: "concept", label: "Concept" },
   { id: "flow", label: "Flow" },
@@ -111,15 +139,8 @@ export function App() {
       setSourceLanguage(detectLanguage(data.file));
 
       try {
-        const resp = await fetch(
-          `/api/source?file=${encodeURIComponent(data.file)}`
-        );
-        if (resp.ok) {
-          const json = await resp.json();
-          setSourceCode(json.content);
-        } else {
-          setSourceCode(`// Source file not found: ${data.file}`);
-        }
+        const content = await loadSourceContent(data.file);
+        setSourceCode(content);
       } catch {
         setSourceCode(`// Failed to load source: ${data.file}`);
       }
@@ -146,6 +167,17 @@ export function App() {
       }
     }
   }, [currentFile, selectFile]);
+
+  const onJumpToFile = useCallback((file: string, line?: number) => {
+    const key = Object.keys(PREVIEW_DATA).find(k => PREVIEW_DATA[k].file === file);
+    if (key) {
+      selectFile(key).then(() => {
+        if (line) {
+          setTimeout(() => setHighlightRange({ startLine: line, endLine: line + 5 }), 100);
+        }
+      });
+    }
+  }, [selectFile]);
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -286,7 +318,7 @@ export function App() {
       case "concept": return <ConceptTab {...props} />;
       case "flow": return <FlowTab {...props} flowData={flowData} currentFile={currentFile} onNodeClick={onFlowNodeClick} />;
       case "history": return <HistoryTab {...props} historyData={historyData as any} currentFile={currentFile} />;
-      case "jump": return <JumpTab {...props} />;
+      case "jump": return <JumpTab {...props} flowData={flowData} currentFile={currentFile} onJumpToFile={onJumpToFile} />;
     }
   };
 
@@ -1010,7 +1042,7 @@ const sidebarStyles = `
     opacity: 0.9;
   }
 
-  .vr-card-kteaches {
+  .vr-card-ktakeaway {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -1067,12 +1099,12 @@ const sidebarStyles = `
     opacity: 1;
   }
 
-  .vr-card-krow--teaches {
+  .vr-card-krow--takeaway {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .vr-card-kteaches-wrap {
+  .vr-card-ktakeaway-wrap {
     display: flex;
     flex-direction: column;
     gap: 4px;

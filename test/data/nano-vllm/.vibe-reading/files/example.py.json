@@ -18,7 +18,7 @@
         "node_type": "function_definition",
         "description": "Shows simplest possible usage: create LLM, call generate, print result.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Example-Driven Documentation",
             "explain": "A working minimal example teaches more than pages of docs. Show the happy path first, explain edge cases later.",

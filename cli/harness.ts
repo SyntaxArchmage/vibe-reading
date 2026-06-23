@@ -71,14 +71,13 @@ function assessKnowledgeFields(projectRoot: string): KnowledgeReport {
       const d = (entity?.detail ?? {}) as Record<string, unknown>;
       const hasLevel = typeof d.level === "string" && (d.level === "basic" || d.level === "advanced");
       const hasWhy = typeof d.why === "string" && (d.why as string).length > 10;
-      const teaches = d.teaches as unknown[] | undefined;
-      const hasTeaches = Array.isArray(teaches) && teaches.length > 0;
-      // At least one teaches entry should have explain (not all plain strings)
-      const hasExplainedTeach = hasTeaches && teaches!.some(
+      const takeaway = d.takeaway as unknown[] | undefined;
+      const hasTakeaway = Array.isArray(takeaway) && takeaway.length > 0;
+      const hasExplainedTakeaway = hasTakeaway && takeaway!.some(
         (t) => typeof t === "object" && t !== null && "explain" in (t as Record<string, unknown>)
       );
 
-      if (hasLevel && (hasWhy || hasExplainedTeach)) {
+      if (hasLevel && (hasWhy || hasExplainedTakeaway)) {
         report.withKnowledge++;
       } else {
         report.missing.push({
@@ -266,7 +265,7 @@ function main() {
   const knowledgePass = knowledgeRatio >= knowledgeThreshold;
 
   console.log(`\n[harness] Knowledge fields:`);
-  console.log(`  With knowledge (level + why/teaches): ${knowledgeReport.withKnowledge}/${knowledgeReport.total} (${(knowledgeRatio * 100).toFixed(0)}%)`);
+  console.log(`  With knowledge (level + why/takeaway): ${knowledgeReport.withKnowledge}/${knowledgeReport.total} (${(knowledgeRatio * 100).toFixed(0)}%)`);
 
   if (!knowledgePass && knowledgeReport.missing.length > 0) {
     const showMax = Math.min(knowledgeReport.missing.length, 15);
@@ -277,8 +276,8 @@ function main() {
     console.log(`  ✗ Knowledge coverage ${(knowledgeRatio * 100).toFixed(0)}% < threshold ${(knowledgeThreshold * 100).toFixed(0)}%.`);
   }
 
-  // --- Teaches Quality Report (informational) ---
-  let totalTeaches = 0;
+  // --- Takeaway Quality Report (informational) ---
+  let totalTakeaway = 0;
   let withRationale = 0;
   let withCrossLang = 0;
   const tFilesDir = path.join(projectRoot, ".vibe-reading", "files");
@@ -288,11 +287,11 @@ function main() {
         const data: FileAnalysis = JSON.parse(fs.readFileSync(path.join(tFilesDir, f), "utf-8"));
         if (!Array.isArray(data.entities)) continue;
         for (const entity of data.entities) {
-          const teaches = (entity?.detail as Record<string, unknown>)?.teaches;
-          if (!Array.isArray(teaches)) continue;
-          for (const t of teaches) {
+          const takeaway = (entity?.detail as Record<string, unknown>)?.takeaway;
+          if (!Array.isArray(takeaway)) continue;
+          for (const t of takeaway) {
             if (typeof t === "object" && t !== null && "explain" in (t as Record<string, unknown>)) {
-              totalTeaches++;
+              totalTakeaway++;
               const obj = t as Record<string, unknown>;
               if (obj.rationale && typeof obj.rationale === "string") withRationale++;
               if (obj.cross_lang && typeof obj.cross_lang === "string") withCrossLang++;
@@ -303,11 +302,11 @@ function main() {
     }
   }
 
-  if (totalTeaches > 0) {
-    console.log(`\n[harness] Teaches quality:`);
-    console.log(`  Total teaches entries: ${totalTeaches}`);
-    console.log(`  With rationale: ${withRationale}/${totalTeaches} (${(100 * withRationale / totalTeaches).toFixed(0)}%)`);
-    console.log(`  With cross_lang: ${withCrossLang}/${totalTeaches} (${(100 * withCrossLang / totalTeaches).toFixed(0)}%)`);
+  if (totalTakeaway > 0) {
+    console.log(`\n[harness] Takeaway quality:`);
+    console.log(`  Total takeaway entries: ${totalTakeaway}`);
+    console.log(`  With rationale: ${withRationale}/${totalTakeaway} (${(100 * withRationale / totalTakeaway).toFixed(0)}%)`);
+    console.log(`  With cross_lang: ${withCrossLang}/${totalTakeaway} (${(100 * withCrossLang / totalTakeaway).toFixed(0)}%)`);
   }
 
   const totalErrors = failedFiles.length + missingCount + schemaErrors.length;

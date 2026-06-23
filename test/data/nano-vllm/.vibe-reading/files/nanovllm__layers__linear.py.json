@@ -18,7 +18,7 @@
         "node_type": "function_definition",
         "description": "Utility ensuring tensor dimensions divide evenly for parallel sharding.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Assertion-Based Programming",
             "explain": "Assert preconditions at boundaries. Fail loudly on invalid input rather than silently producing wrong results.",
@@ -44,7 +44,7 @@
         "node_type": "class_definition",
         "description": "Defines interface (forward, weight_loader) that all parallel linear classes implement.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Template Method Pattern",
             "explain": "Base class defines skeleton; subclasses override specific steps. Enforces consistent interface while allowing variation.",
@@ -70,7 +70,7 @@
         "node_type": "function_definition",
         "description": "Sets up weight tensor dimensions accounting for tensor parallel world size.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Lazy Initialization",
             "explain": "Declare shape/config in __init__, but defer heavy allocation (like CUDA tensors) to a later explicit step. Separates config from resource acquisition.",
@@ -98,7 +98,7 @@
         "node_type": "function_definition",
         "description": "Core linear transformation. Subclasses may add all-reduce or other communication after this.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Forward Method Convention",
             "explain": "PyTorch modules implement forward() for computation. Called implicitly via module(input). Never call forward() directly.",
@@ -124,7 +124,7 @@
         "node_type": "class_definition",
         "description": "No sharding — every GPU has the full weight. Used when parallelism is unnecessary for small layers.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Data Replication",
             "explain": "Every device holds identical copy. Simple but wastes memory. Use for small weights where sharding overhead exceeds benefit.",
@@ -150,7 +150,7 @@
         "node_type": "function_definition",
         "description": "Creates weight with full input_size × output_size dimensions.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Super Delegation",
             "explain": "Call parent __init__ to reuse base class setup. Subclass only adds what differs.",
@@ -176,7 +176,7 @@
         "node_type": "function_definition",
         "description": "Copy checkpoint tensor directly into module parameter. No reshaping needed for replicated weights.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Weight Loading Pattern",
             "explain": "Separate weight loading from model construction. Model defines shapes; loader fills values from checkpoint file.",
@@ -202,7 +202,7 @@
         "node_type": "function_definition",
         "description": "Direct matmul — no all-reduce needed since weight is fully replicated.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Method Override",
             "explain": "Subclass replaces parent method. Here ReplicatedLinear overrides to skip communication that parallel variants would add.",
@@ -230,7 +230,7 @@
         "level": "advanced",
         "why": "Models too large for one GPU — split weight matrices across devices",
         "pattern": "Tensor parallel sharding (Megatron-LM column split)",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Tensor Parallelism",
             "explain": "Split weight matrices across GPUs. Each computes partial result. Combine with all-reduce. Scales to models larger than single GPU memory.",
@@ -265,7 +265,7 @@
         "node_type": "function_definition",
         "description": "Divides output_size by world_size to determine this device shard size.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Shard Size Calculation",
             "explain": "total_size // num_devices gives per-device allocation. Must assert divisibility to avoid shape mismatches.",
@@ -291,7 +291,7 @@
         "node_type": "function_definition",
         "description": "Slices the full checkpoint weight to extract columns belonging to this device.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Tensor Slicing for Sharding",
             "explain": "checkpoint_weight[:, shard_start:shard_end] extracts this GPU portion. Avoids loading full weight into GPU memory.",
@@ -317,7 +317,7 @@
         "node_type": "function_definition",
         "description": "Each GPU multiplies full input by its weight shard. Output is partial — communication happens at paired RowParallel layer.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Deferred Communication",
             "explain": "Delay inter-GPU communication until necessary. Column-parallel output needs no sync until paired with row-parallel layer.",
@@ -343,7 +343,7 @@
         "node_type": "class_definition",
         "description": "Gate and up projections in MLP merged into one weight matrix. Single GEMM then split output by section.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Operator Fusion",
             "explain": "Combine separate operations into one kernel. Reduces memory bandwidth and kernel launch overhead. Common in inference optimization.",
@@ -370,7 +370,7 @@
         "node_type": "function_definition",
         "description": "Stores output_sizes list to know where to split after the fused GEMM.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Fused Projection Config",
             "explain": "Store section boundaries so fused output can be split back into logical parts (gate, up) after single matmul.",
@@ -396,7 +396,7 @@
         "node_type": "function_definition",
         "description": "Handles loading gate_proj and up_proj weights into correct positions of the fused weight matrix.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Packed Weight Layout",
             "explain": "Multiple logical weights stored contiguously in one tensor. Loader must compute correct offset for each section.",
@@ -422,7 +422,7 @@
         "node_type": "class_definition",
         "description": "Single matrix produces concatenated Q,K,V. Sharded so each GPU gets complete attention heads.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Per-Head Sharding",
             "explain": "Distribute complete attention heads across GPUs. Each GPU computes full attention for its heads without cross-device communication.",
@@ -454,7 +454,7 @@
         "node_type": "function_definition",
         "description": "Handles different num_heads for Q vs K/V (grouped-query attention) when computing shard sizes.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Grouped Query Attention",
             "explain": "K/V have fewer heads than Q. Reduces KV cache size by head_ratio×. Each K/V head shared across multiple Q heads.",
@@ -480,7 +480,7 @@
         "node_type": "function_definition",
         "description": "Three-section loader: places Q, K, V weights at correct offsets in the merged weight tensor.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Multi-Section Weight Loading",
             "explain": "Fused weight has Q|K|V sections. Loader computes offset per section, handles different shard sizes for GQA.",
@@ -506,7 +506,7 @@
         "node_type": "class_definition",
         "description": "Splits weight along input dimension. Each GPU computes partial output, then all-reduce to sum.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "All-Reduce",
             "explain": "Collective operation: every device contributes partial result, all receive the global sum. O(data_size) per device regardless of device count.",
@@ -538,7 +538,7 @@
         "node_type": "function_definition",
         "description": "Divides input_size by world_size for this device row shard.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Input Sharding",
             "explain": "Divide along input dimension. Each device holds weight[:, shard_start:shard_end] and receives corresponding input slice.",
@@ -564,7 +564,7 @@
         "node_type": "function_definition",
         "description": "Extracts rows belonging to this device from the full checkpoint weight.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Row Extraction",
             "explain": "For row-parallel: slice along dim=1 of checkpoint. Each GPU holds different rows of the weight matrix.",
@@ -590,7 +590,7 @@
         "node_type": "function_definition",
         "description": "Computes partial output from this device row shard, then all-reduce sums across all devices.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "All-Reduce Synchronization",
             "explain": "After each device computes partial matmul, all-reduce sums results so every device has the complete output. Required for row-parallel.",

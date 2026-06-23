@@ -18,7 +18,7 @@ export interface DataEntity {
 
 export type KnowledgeLevel = "basic" | "advanced";
 
-export interface TeachEntry {
+export interface TakeawayEntry {
   tag: string;
   explain: string;
   rationale?: string;
@@ -35,7 +35,7 @@ export interface EntityDetail {
   level?: KnowledgeLevel;
   why?: string;
   pattern?: string;
-  teaches?: (string | TeachEntry)[];
+  takeaway?: (string | TakeawayEntry)[];
   analogy?: string;
   design?: string;
   convention?: string;

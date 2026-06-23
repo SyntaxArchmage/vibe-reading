@@ -19,7 +19,7 @@
         "description": "Actor-pattern worker in separate process. Receives commands via shared memory, executes on GPU.",
         "why": "Isolates GPU execution from scheduling — avoids GIL contention",
         "pattern": "Actor with shared memory IPC",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Actor Pattern",
             "explain": "Isolated process with own state. Communicates only via messages. No shared mutable state. Eliminates race conditions.",
@@ -56,7 +56,7 @@
         "node_type": "function_definition",
         "description": "Heavy initialization: loads checkpoint, creates model, allocates GPU buffers, connects shared memory.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Heavy Initialization Pattern",
             "explain": "Do all expensive work (model loading, GPU allocation) at startup. Runtime operations are then fast and predictable.",
@@ -82,7 +82,7 @@
         "node_type": "function_definition",
         "description": "Sends shutdown command via shared memory, waits for process cleanup.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Cooperative Shutdown",
             "explain": "Send termination signal, let process clean up its own resources (free GPU memory, close handles). Never force-kill if avoidable.",
@@ -108,7 +108,7 @@
         "node_type": "function_definition",
         "description": "Infinite loop reading commands from shared memory. Dispatches to warmup/run/exit handlers.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Event Loop Pattern",
             "explain": "Infinite loop: poll for events → dispatch to handler → repeat. Foundation of servers, game engines, UI frameworks.",
@@ -134,7 +134,7 @@
         "node_type": "function_definition",
         "description": "Reads command type and payload from shared memory buffer.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Shared Memory Protocol",
             "explain": "Define fixed layout in shared memory: header (command type) + payload. Both processes agree on format. Zero-copy data exchange.",
@@ -160,7 +160,7 @@
         "node_type": "function_definition",
         "description": "Writes output tokens/logits to shared memory for scheduler to read.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Zero-Copy IPC",
             "explain": "Write directly to shared buffer. Reader accesses same physical memory. No serialization/deserialization, no copies. Fastest possible IPC.",
@@ -186,7 +186,7 @@
         "node_type": "function_definition",
         "description": "Writes command to shared memory, signals process, blocks until result ready.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Synchronous RPC over Shared Memory",
             "explain": "Write request → signal → wait for response. Looks like function call but executes in another process. Shared memory avoids copy overhead.",
@@ -212,7 +212,7 @@
         "node_type": "function_definition",
         "description": "First CUDA call is slow (context creation, JIT compilation). Warmup pays this cost before serving.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "CUDA Warmup",
             "explain": "First GPU operation triggers driver init, JIT compile, memory allocation. Run dummy input at startup so first real request isn not slow.",
@@ -238,7 +238,7 @@
         "node_type": "function_definition",
         "description": "Allocates fixed pool of GPU tensors for KV cache. Size determined by available GPU memory.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "GPU Memory Budgeting",
             "explain": "Query available GPU memory, subtract model weights, divide remainder into KV cache blocks. Fixed budget prevents OOM during serving.",
@@ -264,7 +264,7 @@
         "node_type": "function_definition",
         "description": "Converts logical block indices to physical GPU addresses for paged attention kernel.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Page Table Construction",
             "explain": "Build indirection table mapping logical pages to physical addresses. Kernel uses table to find correct memory locations. Like OS page tables.",
@@ -290,7 +290,7 @@
         "node_type": "function_definition",
         "description": "Packs variable-length prompts into one tensor with padding for batch GPU processing.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Dynamic Batching with Padding",
             "explain": "Variable-length inputs padded to max length in batch. Trades compute waste (padding) for parallelism benefit. Core inference optimization.",
@@ -316,7 +316,7 @@
         "node_type": "function_definition",
         "description": "Each sequence contributes one token. Batch together for GPU-efficient parallel decode.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Decode Batching",
             "explain": "During generation, each sequence needs only 1 forward pass for 1 new token. Batch N sequences decode steps together for GPU efficiency.",
@@ -342,7 +342,7 @@
         "node_type": "function_definition",
         "description": "Collects temperature and top_p values for each sequence in batch.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Parameter Vectorization",
             "explain": "Instead of per-item loops, collect parameters into tensors. GPU applies them in parallel across the batch.",
@@ -368,7 +368,7 @@
         "node_type": "function_definition",
         "description": "Runs the actual neural network forward: embeddings → layers → logits.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Forward Pass Execution",
             "explain": "Feed prepared input tensors through model. Output is logits tensor. The core computation step in each engine iteration.",
@@ -394,7 +394,7 @@
         "node_type": "function_definition",
         "description": "Orchestrates one complete inference step for a batch of sequences.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Inference Pipeline",
             "explain": "prepare_inputs → model_forward → sample_tokens → return_results. Each step separated for profiling and optimization.",
@@ -420,7 +420,7 @@
         "node_type": "function_definition",
         "description": "Records decode forward pass into CUDA graph. Replay eliminates per-kernel CPU launch overhead.",
         "why": "CUDA graphs eliminate ~50% of decode latency by removing kernel launch overhead",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "CUDA Graph Capture",
             "explain": "Record sequence of GPU ops, then replay as single unit. CPU does not re-launch each kernel. Only works with fixed tensor shapes (decode, not prefill).",

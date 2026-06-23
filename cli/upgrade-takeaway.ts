@@ -1,15 +1,15 @@
 /**
- * Upgrade existing teaches entries to include rationale, cross_lang, gotcha fields.
+ * Upgrade existing takeaway entries to include rationale, cross_lang, gotcha fields.
  * Uses a knowledge-base approach: maps common concept tags to their cross-language
  * equivalents and common gotchas.
  *
- * Usage: npx tsx upgrade-teaches.ts <project-root>
+ * Usage: npx tsx upgrade-takeaway.ts <project-root>
  */
 import * as fs from "fs";
 import * as path from "path";
 import type { FileAnalysis } from "./types.js";
 
-interface TeachEntry {
+interface TakeawayEntry {
   tag: string;
   explain: string;
   rationale?: string;
@@ -254,30 +254,30 @@ function upgradeFile(jsonPath: string): { upgraded: number; total: number } {
   
   for (const entity of analysis.entities) {
     const detail = entity.detail as Record<string, unknown>;
-    const teaches = detail.teaches as unknown[];
-    if (!Array.isArray(teaches)) continue;
+    const takeaway = detail.takeaway as unknown[];
+    if (!Array.isArray(takeaway)) continue;
     
     let entityModified = false;
-    const newTeaches: unknown[] = [];
+    const newTakeaway: unknown[] = [];
     
-    for (const t of teaches) {
+    for (const t of takeaway) {
       if (typeof t === "string") {
-        newTeaches.push(t);
+        newTakeaway.push(t);
         continue;
       }
       if (typeof t !== "object" || t === null) {
-        newTeaches.push(t);
+        newTakeaway.push(t);
         continue;
       }
       
-      const entry = t as TeachEntry;
+      const entry = t as TakeawayEntry;
       if (entry.rationale && entry.cross_lang) {
-        newTeaches.push(entry);
+        newTakeaway.push(entry);
         continue;
       }
       
       const knowledge = findKnowledge(entry.tag);
-      const updated: TeachEntry = { ...entry };
+      const updated: TakeawayEntry = { ...entry };
       
       if (!updated.rationale) {
         const inferred = inferRationale(detail, entry.tag);
@@ -300,11 +300,11 @@ function upgradeFile(jsonPath: string): { upgraded: number; total: number } {
         entityModified = true;
       }
       
-      newTeaches.push(updated);
+      newTakeaway.push(updated);
     }
     
     if (entityModified) {
-      detail.teaches = newTeaches;
+      detail.takeaway = newTakeaway;
       upgraded++;
     }
   }
@@ -324,7 +324,7 @@ function main() {
   
   const filesDir = path.join(projectRoot, ".vibe-reading", "files");
   if (!fs.existsSync(filesDir)) {
-    console.error(`[upgrade-teaches] No .vibe-reading/files/ found.`);
+    console.error(`[upgrade-takeaway] No .vibe-reading/files/ found.`);
     process.exit(1);
   }
   
@@ -342,7 +342,7 @@ function main() {
     }
   }
   
-  console.log(`\n[upgrade-teaches] Done: ${totalUpgraded}/${totalEntities} entities upgraded with rationale/cross_lang/gotcha`);
+  console.log(`\n[upgrade-takeaway] Done: ${totalUpgraded}/${totalEntities} entities upgraded with rationale/cross_lang/gotcha`);
 }
 
 main();

@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "Core attention layer. Implements grouped-query attention with rotary embeddings and paged KV cache for efficient inference.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Multi-Head Attention",
             "explain": "Split representation into H heads, compute attention independently per head, concatenate. Each head learns different relationship patterns.",
@@ -49,7 +49,7 @@
         "node_type": "function_definition",
         "description": "Creates Q/K/V projections (fused), output projection, and rotary embedding. Handles GQA head ratios.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Head Dimension",
             "explain": "hidden_size / num_heads = head_dim. Each head operates on head_dim dimensions independently. Typical: 128.",
@@ -75,7 +75,7 @@
         "node_type": "function_definition",
         "description": "QKV projection → RoPE → store KV cache → attention → output projection.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Attention Forward Pipeline",
             "explain": "Q,K,V = project(x) → apply RoPE to Q,K → store K,V in cache → attention(Q, cached_K, cached_V) → project output.",
@@ -101,7 +101,7 @@
         "node_type": "class_definition",
         "description": "Two-stage MLP: fused gate+up projection → SiLU activation with gating → down projection.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "SwiGLU MLP",
             "explain": "gate = SiLU(W_gate @ x); output = (gate * W_up @ x) @ W_down. Gated activation improves over plain FFN. Standard in modern LLMs.",
@@ -127,7 +127,7 @@
         "node_type": "function_definition",
         "description": "MergedColumnParallel for gate+up, RowParallel for down. Parallelism is transparent to forward pass.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "MLP Parallelism Strategy",
             "explain": "First linear: column-parallel (no communication). Activation: local. Second linear: row-parallel (all-reduce after). One all-reduce per MLP.",
@@ -153,7 +153,7 @@
         "node_type": "function_definition",
         "description": "Fused gate_up matmul, split and apply SiLU*gate, then down projection with all-reduce.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Gated MLP Forward",
             "explain": "x → merged(gate,up) → chunk → SiLU(gate)*up → down_proj. The gating controls information flow through the MLP.",
@@ -179,7 +179,7 @@
         "node_type": "class_definition",
         "description": "LayerNorm → Attention → residual → LayerNorm → MLP → residual. Repeated N times in the model.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Pre-Norm Architecture",
             "explain": "Apply LayerNorm before (not after) attention/MLP. Stabilizes training. Used by GPT-2+, LLaMA, Qwen, most modern LLMs.",
@@ -210,7 +210,7 @@
         "node_type": "function_definition",
         "description": "Creates self_attn, mlp, input_layernorm, post_attention_layernorm as submodules.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Module Composition",
             "explain": "Complex layers built by composing simpler nn.Modules. Each sub-module manages its own parameters. Clean separation of concerns.",
@@ -236,7 +236,7 @@
         "node_type": "function_definition",
         "description": "Standard transformer block forward: norm, attend, add residual, norm, MLP, add residual.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Transformer Block Forward",
             "explain": "h = x + attn(norm(x)); output = h + mlp(norm(h)). Two residual streams. Each sub-layer adds to the residual.",
@@ -262,7 +262,7 @@
         "node_type": "class_definition",
         "description": "Composes embedding + N decoder layers + final norm. The backbone without the language model head.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Model vs Head Separation",
             "explain": "Model = embedding + layers + norm (reusable backbone). Head = task-specific output layer. Separation enables weight sharing and fine-tuning flexibility.",
@@ -288,7 +288,7 @@
         "node_type": "function_definition",
         "description": "Creates ModuleList of decoder layers, plus embedding and final RMSNorm.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "nn.ModuleList",
             "explain": "Ordered list of modules. Unlike Python list, properly registers sub-modules for parameter tracking, serialization, and device placement.",
@@ -314,7 +314,7 @@
         "node_type": "function_definition",
         "description": "tokens → embedding → layer[0] → layer[1] → ... → layer[N] → final_norm → hidden_states.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Sequential Layer Processing",
             "explain": "Each layer transforms hidden state in place. Output shape identical to input. Enables arbitrary depth without architecture changes.",
@@ -340,7 +340,7 @@
         "node_type": "class_definition",
         "description": "Wraps Qwen3Model with parallel LM head. The full model used for text generation.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Causal Language Model",
             "explain": "Predicts next token given all previous tokens. Unidirectional attention mask ensures each position only sees past. Foundation of GPT-style models.",
@@ -366,7 +366,7 @@
         "node_type": "function_definition",
         "description": "Creates Qwen3Model + ParallelLMHead. Optionally ties embedding weights.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Model Architecture Composition",
             "explain": "CausalLM = backbone(embed + layers + norm) + head(logits). Clean two-level hierarchy.",
@@ -392,7 +392,7 @@
         "node_type": "function_definition",
         "description": "Runs backbone to get hidden states, then computes logits for sampling.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Full Forward Pipeline",
             "explain": "input_ids → backbone.forward() → hidden_states → compute_logits() → vocabulary scores. End-to-end differentiable.",
@@ -418,7 +418,7 @@
         "node_type": "function_definition",
         "description": "Applies LM head to hidden states. Only computes logits for positions that need sampling (optimization).",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Selective Logit Computation",
             "explain": "During generation, only the last token position needs logits. Skip computing logits for cached positions. Saves one full vocab-size matmul per cached token.",

@@ -19,7 +19,7 @@
         "description": "GPU kernel writing computed K/V pairs into pre-allocated cache blocks at correct positions.",
         "level": "advanced",
         "why": "Custom kernel avoids Python overhead for the hottest operation in inference",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Triton Kernel",
             "explain": "Write GPU kernels in Python with Triton. Compiles to PTX. Easier than CUDA C but same performance for memory-bound ops.",
@@ -51,7 +51,7 @@
         "node_type": "function_definition",
         "description": "Sets up grid dimensions and launches the Triton kernel with correct tensor pointers.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Kernel Launch Pattern",
             "explain": "Python sets grid/block dimensions and tensor pointers. Triton/CUDA kernel runs on GPU. Separation of orchestration from computation.",
@@ -78,7 +78,7 @@
         "description": "Computes scaled dot-product attention using cached K/V from paged memory. Uses flash attention for efficiency.",
         "level": "basic",
         "why": "Attention is the core operation in transformers — must handle variable-length cached KV efficiently",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Flash Attention",
             "explain": "Tiled attention algorithm that never materializes full N×N attention matrix. O(N) memory instead of O(N²). Enabled by online softmax.",
@@ -112,7 +112,7 @@
         "node_type": "function_definition",
         "description": "Sets num_heads, head_dim, scale=1/sqrt(d), and prepares for paged KV cache access.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Attention Scaling",
             "explain": "Divide QK^T by sqrt(head_dim) to prevent softmax saturation. Without scaling, dot products grow with dimension causing gradient vanishing.",
@@ -138,7 +138,7 @@
         "node_type": "function_definition",
         "description": "Writes new K/V to cache, then dispatches to flash_attn (prefill) or paged_attention (decode).",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Prefill vs Decode Split",
             "explain": "Prefill processes all prompt tokens at once (parallel). Decode generates one token at a time (sequential). Different kernels optimal for each.",

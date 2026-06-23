@@ -19,7 +19,7 @@
         "description": "Normalizes by RMS of activations without mean subtraction. Fewer ops than LayerNorm, similar quality.",
         "level": "basic",
         "why": "RMSNorm is standard in modern LLMs (LLaMA, Qwen) — simpler and faster than full LayerNorm",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "RMSNorm vs LayerNorm",
             "explain": "LayerNorm: subtract mean, divide by std. RMSNorm: just divide by RMS (root mean square). Saves the mean computation. Works equally well in practice.",
@@ -50,7 +50,7 @@
         "node_type": "function_definition",
         "description": "Creates weight parameter (scale) initialized to ones. Epsilon prevents division by zero.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Learnable Scale",
             "explain": "After normalizing to unit RMS, multiply by learnable weight. Allows network to undo normalization where needed. Per-dimension scaling.",
@@ -76,7 +76,7 @@
         "node_type": "function_definition",
         "description": "Compute x / sqrt(mean(x²) + eps) * weight. Pure normalization path.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "RMS Computation",
             "explain": "RMS = sqrt(mean(x²)). Normalize: x_norm = x / RMS. Simpler than std (no mean subtraction needed). Numerically stable with epsilon.",
@@ -102,7 +102,7 @@
         "node_type": "function_definition",
         "description": "Combines x = x + residual and normalization in one pass. Saves memory bandwidth.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Fused Residual + Norm",
             "explain": "Combine residual add and normalization into one kernel. Reads input once instead of twice. Saves memory bandwidth — the bottleneck for normalization ops.",
@@ -129,7 +129,7 @@
         "node_type": "function_definition",
         "description": "If residual tensor provided, uses fused path. Otherwise plain RMS normalization.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Conditional Dispatch",
             "explain": "Choose optimized code path based on runtime conditions. Fused kernel when possible, fallback otherwise. Common optimization strategy.",

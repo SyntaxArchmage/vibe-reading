@@ -32,9 +32,16 @@ interface Props {
 
 type SortKey = "name" | "age" | "modifications" | "authors";
 
+function getActivityLevel(ent: EntityHistory): { label: string; icon: string; color: string } {
+  if (ent.age_days < 30 || ent.modification_count >= 10) return { label: "Active", icon: "🔥", color: "#e06c4c" };
+  if (ent.age_days < 90 || ent.modification_count >= 5) return { label: "Recent", icon: "⚡", color: "#dcdcaa" };
+  return { label: "Stable", icon: "💤", color: "#6a9955" };
+}
+
 export function HistoryTab({ entities, historyData, currentFile, onCardClick }: Props) {
   const [sortBy, setSortBy] = useState<SortKey>("modifications");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedCommit, setExpandedCommit] = useState<string | null>(null);
 
   const fileEntities = useMemo(() => {
     if (!historyData || !currentFile) return [];
@@ -99,6 +106,7 @@ export function HistoryTab({ entities, historyData, currentFile, onCardClick }: 
       <div className="vr-history-list">
         {fileEntities.map(ent => {
           const isExpanded = expandedId === ent.id;
+          const activity = getActivityLevel(ent);
           const matchingEntity = entities.find(e =>
             e.anchor.start_line === ent.line_range[0] && (e.detail?.name as string) === ent.name
           );
@@ -107,6 +115,7 @@ export function HistoryTab({ entities, historyData, currentFile, onCardClick }: 
             <div
               key={ent.id}
               className={`vr-history-item ${isExpanded ? "vr-history-item--expanded" : ""}`}
+              style={{ borderLeftColor: activity.color }}
             >
               <div
                 className="vr-history-item-header"
@@ -116,6 +125,7 @@ export function HistoryTab({ entities, historyData, currentFile, onCardClick }: 
                 }}
               >
                 <div className="vr-history-item-left">
+                  <span className="vr-history-item-activity" title={activity.label}>{activity.icon}</span>
                   <span className="vr-history-item-name">{ent.name}</span>
                   <span className="vr-history-item-line">L{ent.line_range[0]}</span>
                 </div>
@@ -167,9 +177,32 @@ export function HistoryTab({ entities, historyData, currentFile, onCardClick }: 
                       {ent.key_changes.map((kc, i) => (
                         <div key={i} className="vr-history-timeline-item">
                           <span className="vr-history-tl-dot" />
-                          <span className="vr-history-tl-date">{kc.date}</span>
+                          <span
+                            className="vr-history-tl-date vr-history-tl-clickable"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedCommit(expandedCommit === kc.commit ? null : kc.commit);
+                            }}
+                            title="Click to expand"
+                          >{kc.date}</span>
                           <span className="vr-history-tl-commit">{kc.commit}</span>
                           <span className="vr-history-tl-msg">{kc.message}</span>
+                          {expandedCommit === kc.commit && (
+                            <div className="vr-history-tl-expanded">
+                              <div className="vr-history-tl-detail-row">
+                                <span className="vr-history-tl-detail-label">Author</span>
+                                <span>{kc.author}</span>
+                              </div>
+                              <div className="vr-history-tl-detail-row">
+                                <span className="vr-history-tl-detail-label">Message</span>
+                                <span>{kc.message}</span>
+                              </div>
+                              <div className="vr-history-tl-detail-row">
+                                <span className="vr-history-tl-detail-label">SHA</span>
+                                <code>{kc.commit}</code>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -242,6 +275,7 @@ const historyStyles = `
 
   .vr-history-item {
     border: 1px solid #333;
+    border-left: 3px solid #555;
     border-radius: 6px;
     margin-bottom: 6px;
     overflow: hidden;
@@ -266,8 +300,13 @@ const historyStyles = `
   .vr-history-item-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
+  }
+
+  .vr-history-item-activity {
+    font-size: 12px;
+    flex-shrink: 0;
   }
 
   .vr-history-item-name {
@@ -346,15 +385,6 @@ const historyStyles = `
     border-left: 2px solid #3c3c3c;
   }
 
-  .vr-history-timeline-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0;
-    font-size: 10px;
-    position: relative;
-  }
-
   .vr-history-tl-dot {
     width: 6px;
     height: 6px;
@@ -381,5 +411,62 @@ const historyStyles = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .vr-history-tl-clickable {
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 0 3px;
+    transition: background 0.15s;
+  }
+
+  .vr-history-tl-clickable:hover {
+    background: rgba(220, 220, 170, 0.12);
+    color: #dcdcaa;
+  }
+
+  .vr-history-timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: 10px;
+    position: relative;
+    flex-wrap: wrap;
+  }
+
+  .vr-history-tl-expanded {
+    width: 100%;
+    margin-top: 4px;
+    margin-left: 6px;
+    padding: 6px 8px;
+    background: rgba(220, 220, 170, 0.04);
+    border: 1px solid rgba(220, 220, 170, 0.15);
+    border-radius: 4px;
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .vr-history-tl-detail-row {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    color: #aaa;
+  }
+
+  .vr-history-tl-detail-label {
+    color: #666;
+    font-size: 9px;
+    text-transform: uppercase;
+    min-width: 48px;
+    flex-shrink: 0;
+  }
+
+  .vr-history-tl-detail-row code {
+    font-family: monospace;
+    color: #4ec9b0;
+    font-size: 10px;
   }
 `;

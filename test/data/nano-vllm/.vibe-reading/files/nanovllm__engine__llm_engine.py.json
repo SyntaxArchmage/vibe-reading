@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "Facade coordinating Scheduler, ModelRunner, and user-facing API. Single entry point for all inference.",
         "why": "User needs one simple interface, not knowledge of Scheduler + ModelRunner + BlockManager internals",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Facade Pattern",
             "explain": "Single interface wrapping complex subsystem. User calls one method; internally coordinates multiple components. Reduces coupling.",
@@ -49,7 +49,7 @@
         "node_type": "function_definition",
         "description": "Creates and connects Scheduler, BlockManager, ModelRunner. Starts model runner process.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Composition over Inheritance",
             "explain": "Build complex objects by composing simpler ones as fields. Each sub-component has single responsibility. Easier to test and replace.",
@@ -77,7 +77,7 @@
         "node_type": "function_definition",
         "description": "Sends exit command to ModelRunner process, waits for termination.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Graceful Shutdown",
             "explain": "Notify sub-processes/threads to stop, wait for completion, then release resources. Prevents zombie processes and resource leaks.",
@@ -103,7 +103,7 @@
         "node_type": "function_definition",
         "description": "Creates Sequence from prompt tokens and sampling params, adds to scheduler queue.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Request Queue Pattern",
             "explain": "Decouple submission from execution. Caller submits to queue, engine processes when resources available. Enables batching and flow control.",
@@ -129,7 +129,7 @@
         "node_type": "function_definition",
         "description": "Schedule → prepare inputs → model forward → sample → update sequences. The core engine loop body.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Step-Based Engine Loop",
             "explain": "Break continuous processing into discrete steps. Each step: schedule, execute, update. Enables batching across requests within one step.",
@@ -155,7 +155,7 @@
         "node_type": "function_definition",
         "description": "Returns True when scheduler has no waiting or running sequences.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Completion Predicate",
             "explain": "Poll-based completion check. Caller loops calling step() until is_finished(). Simple synchronous API over async internals.",
@@ -181,7 +181,7 @@
         "node_type": "function_definition",
         "description": "Convenience API: adds request, repeatedly calls step(), returns results when finished.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Synchronous Wrapper",
             "explain": "Wrap async/step-based internals with blocking API. Simpler for users who dont need streaming. Hides the step loop.",

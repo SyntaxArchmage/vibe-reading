@@ -31,7 +31,7 @@ interface Enrichment {
   level?: "basic" | "advanced";
   why?: string;
   pattern?: string;
-  teaches?: (string | TeachEntry)[];
+  takeaway?: (string | TeachEntry)[];
   analogy?: string;
   design?: string;
   convention?: string;
@@ -113,7 +113,7 @@ function main() {
       if (enrichment.level) detail.level = enrichment.level;
       if (enrichment.why) detail.why = enrichment.why;
       if (enrichment.pattern) detail.pattern = enrichment.pattern;
-      if (enrichment.teaches && enrichment.teaches.length > 0) detail.teaches = enrichment.teaches;
+      if (enrichment.takeaway && enrichment.takeaway.length > 0) detail.takeaway = enrichment.takeaway;
       if (enrichment.analogy) detail.analogy = enrichment.analogy;
       if (enrichment.design) detail.design = enrichment.design;
       if (enrichment.convention) detail.convention = enrichment.convention;

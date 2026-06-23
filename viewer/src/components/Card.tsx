@@ -39,7 +39,8 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
 
   const expanded = manualExpanded || !!isHighlighted;
 
-  const hasBasic = d.why || d.pattern || (d.teaches && (d.teaches as string[]).length > 0) || d.analogy;
+  const takeawayItems = (d.takeaway ?? (d as Record<string, unknown>).teaches) as unknown[] | undefined;
+  const hasBasic = d.why || d.pattern || (takeawayItems && takeawayItems.length > 0) || d.analogy;
   const hasAdvanced = d.design || d.convention || d.smell || d.edge_cases || d.perf;
 
   useEffect(() => {
@@ -114,12 +115,12 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
                     <span className="vr-card-ktext">{d.pattern as string}</span>
                   </div>
                 )}
-                {d.teaches && (d.teaches as unknown[]).length > 0 && (
-                  <div className="vr-card-krow vr-card-krow--teaches">
-                    <span className="vr-card-klabel">Teaches</span>
-                    <div className="vr-card-kteaches-wrap">
-                      <span className="vr-card-kteaches">
-                        {(d.teaches as unknown[]).map((t, i) => {
+                {takeawayItems && takeawayItems.length > 0 && (
+                  <div className="vr-card-krow vr-card-krow--takeaway">
+                    <span className="vr-card-klabel">Takeaway</span>
+                    <div className="vr-card-ktakeaway-wrap">
+                      <span className="vr-card-ktakeaway">
+                        {takeawayItems.map((t, i) => {
                           const isObj = typeof t === "object" && t !== null;
                           const tag = isObj ? (t as { tag: string }).tag : String(t);
                           const explain = isObj ? (t as { explain?: string }).explain : undefined;
@@ -140,7 +141,7 @@ export function Card({ entity, onClick, isHighlighted, onHover, sourceLines }: C
                         })}
                       </span>
                       {expandedTeach !== null && (() => {
-                        const t = (d.teaches as unknown[])[expandedTeach];
+                        const t = takeawayItems[expandedTeach];
                         if (typeof t !== "object" || t === null) return null;
                         const obj = t as { explain?: string; rationale?: string; cross_lang?: string; gotcha?: string };
                         if (!obj.explain) return null;

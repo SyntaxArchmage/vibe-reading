@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "Stores temperature, top_p, max_tokens, stop tokens. Passed to Sampler to control generation behavior.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Parameter Object",
             "explain": "Bundle related parameters into one typed object instead of passing many loose arguments. Easier to validate, extend, and document.",

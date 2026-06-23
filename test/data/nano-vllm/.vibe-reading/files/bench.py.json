@@ -18,7 +18,7 @@
         "node_type": "function_definition",
         "description": "Runs generation with timing to report tokens/second and latency metrics.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Benchmarking Pattern",
             "explain": "Warmup runs → timed runs → compute mean/std of metrics. Always warmup to avoid measuring one-time costs (JIT, cache cold starts).",

@@ -19,7 +19,7 @@
         "description": "Each GPU holds embeddings for a slice of the vocabulary. Tokens outside local range return zeros, then all-reduce.",
         "level": "advanced",
         "why": "Vocabulary embeddings are huge (vocab_size × hidden_dim) — must shard across GPUs",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Vocabulary Sharding",
             "explain": "Divide vocab across GPUs. Each handles tokens in its range. All-reduce combines results. Distributes memory evenly.",
@@ -50,7 +50,7 @@
         "node_type": "function_definition",
         "description": "Calculates start/end token indices this device is responsible for. Allocates only local portion.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Range Partitioning",
             "explain": "Divide ID space into contiguous ranges per device. Device k handles IDs [k*chunk, (k+1)*chunk). Simple and cache-friendly.",
@@ -76,7 +76,7 @@
         "node_type": "function_definition",
         "description": "Extracts rows from checkpoint corresponding to this GPU token range.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Selective Weight Loading",
             "explain": "Only load the rows this device needs from checkpoint. Reduces peak memory during loading by num_devices×.",
@@ -102,7 +102,7 @@
         "node_type": "function_definition",
         "description": "Masks tokens outside local range to 0, does embedding lookup, then all-reduce across devices.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Masked Embedding Lookup",
             "explain": "Set out-of-range indices to 0 before lookup (returns zero vector). After all-reduce, each token gets its correct embedding from the owning device.",
@@ -128,7 +128,7 @@
         "node_type": "class_definition",
         "description": "Projects hidden states to vocabulary logits. Sharded identically to embedding for weight tying.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Weight Tying",
             "explain": "Share same weight between input embedding and output projection. Halves parameters for vocabulary. Common in LLMs.",
@@ -154,7 +154,7 @@
         "node_type": "function_definition",
         "description": "Can reuse embedding weights directly or create separate sharded weight matrix.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Parameter Sharing",
             "explain": "Multiple layers reference same nn.Parameter. Saves memory. Gradients summed during backprop.",
@@ -180,7 +180,7 @@
         "node_type": "function_definition",
         "description": "output = hidden @ embedding_weight.T — produces raw vocabulary scores.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Logits Computation",
             "explain": "Linear projection from hidden_dim to vocab_size. Higher logit = higher probability token after softmax.",

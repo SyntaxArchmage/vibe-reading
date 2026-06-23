@@ -19,7 +19,7 @@
         "description": "Singleton-like context holding block tables, positions, and other per-step state needed by all layers.",
         "level": "basic",
         "why": "Layers need shared state (positions, block tables) without threading it through every function signature",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Context Object Pattern",
             "explain": "Bundle related state into one object passed through the call stack. Avoids threading 10+ parameters through every function.",
@@ -50,7 +50,7 @@
         "node_type": "function_definition",
         "description": "Returns the active Context object for this inference step.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Global Accessor",
             "explain": "Module-level function returning shared state. Simpler than dependency injection for deeply nested access patterns.",
@@ -76,7 +76,7 @@
         "node_type": "function_definition",
         "description": "Called at step start to establish context. All layers read from this during forward pass.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Context Lifecycle",
             "explain": "Set at boundary (step start), read during processing, reset at end. Clear ownership prevents stale state bugs.",
@@ -102,7 +102,7 @@
         "node_type": "function_definition",
         "description": "Ensures no stale state leaks between inference steps.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Explicit Cleanup",
             "explain": "Always reset shared state after use. Prevents one requests state from leaking into the next. Defense against subtle bugs.",

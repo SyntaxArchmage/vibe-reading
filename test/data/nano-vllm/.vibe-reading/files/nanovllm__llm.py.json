@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "High-level interface wrapping LLMEngine. Handles tokenization, generation, and detokenization in one call.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "API Gateway Class",
             "explain": "Simplest possible interface for end users. Hides tokenization, batching, scheduling complexity. One method: generate(prompt) → text.",

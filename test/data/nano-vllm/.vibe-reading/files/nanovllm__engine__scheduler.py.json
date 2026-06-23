@@ -19,7 +19,7 @@
         "description": "FCFS request scheduler managing waiting and running deques. Coordinates with BlockManager for allocation.",
         "why": "Multiple requests compete for limited GPU memory — need policy to decide who runs",
         "pattern": "FCFS scheduling with preemption",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Continuous Batching",
             "explain": "Add new requests to running batch mid-generation. No waiting for entire batch to finish. Maximizes GPU utilization.",
@@ -56,7 +56,7 @@
         "node_type": "function_definition",
         "description": "Two deques: waiting (submitted, not yet scheduled) and running (actively generating).",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Double-Ended Queue",
             "explain": "O(1) append/pop from both ends. Perfect for FCFS (append right, pop left) with preemption (append left for priority re-queue).",
@@ -82,7 +82,7 @@
         "node_type": "function_definition",
         "description": "True when both waiting and running deques are empty.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Drain Condition",
             "explain": "System is done when all queues are empty. Simple but must check ALL queues — easy to miss one.",
@@ -108,7 +108,7 @@
         "node_type": "function_definition",
         "description": "Adds sequence to back of waiting queue. Will be scheduled when resources available.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Enqueue Pattern",
             "explain": "Append to queue tail. Processing order determined by queue discipline (here: FCFS). Decouples arrival from execution.",
@@ -134,7 +134,7 @@
         "node_type": "function_definition",
         "description": "Iterates waiting sequences, attempts allocation. If insufficient blocks, preempts from running set.",
         "why": "Must decide which sequences advance this step by checking block availability",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Greedy Scheduling",
             "explain": "Process requests front-to-back, allocate greedily. Simple but may not be globally optimal. Good enough for latency-sensitive inference.",
@@ -165,7 +165,7 @@
         "node_type": "function_definition",
         "description": "Moves sequence from running back to waiting, deallocates its blocks.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Resource Reclamation",
             "explain": "Free resources from lower-priority work to serve higher-priority or new work. The running sequence loses its KV cache and must recompute.",
@@ -191,7 +191,7 @@
         "node_type": "function_definition",
         "description": "Cleans up completed sequences, deallocates their blocks, updates prefix cache.",
         "level": "advanced",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Post-Processing Sweep",
             "explain": "After main logic, sweep to clean up completed items. Separate from main loop for clarity. Common pattern in game loops and engines.",

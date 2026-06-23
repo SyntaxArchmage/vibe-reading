@@ -72,7 +72,7 @@ Enrichments JSON format:
     "description": "Priority-based scheduler. Sorted queue, higher priority first. Sequential execution — each task awaits before next starts.",
     "why": "Multiple tasks compete for single execution thread — need ordering policy",
     "pattern": "Priority Queue + sequential consumer",
-    "teaches": [
+    "takeaway": [
       {"tag": "Object Pool", "explain": "Pre-allocate N objects at startup, hand them out on request, reclaim when done. Avoids allocation overhead in hot paths."},
       {"tag": "FCFS Scheduling", "explain": "First-Come-First-Served: process in arrival order. Fair but can cause head-of-line blocking."}
     ],
@@ -92,7 +92,7 @@ Every entity MUST include these fields alongside summary/description:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `why` | YES | Why this entity exists — the problem it solves. 1-2 sentences. |
-| `teaches` | YES | Array of `{tag, explain}` objects — real programming concepts the reader can learn here. |
+| `takeaway` | YES | Array of `{tag, explain}` objects — real programming concepts the reader can learn here. |
 | `level` | YES | `"basic"` (entry-level/data/helpers) or `"advanced"` (architecture/optimization/internals). |
 | `pattern` | No | Design pattern or architectural approach used. |
 | `analogy` | No | Real-world analogy for complex concepts. |
@@ -101,31 +101,31 @@ Every entity MUST include these fields alongside summary/description:
 | `smell` | No | Known tradeoffs, tech debt, or scalability limits. |
 | `perf` | No | Performance characteristics (complexity, hot path, memory). |
 
-#### Teaches Rules (CRITICAL)
+#### Takeaway Rules (CRITICAL)
 
-`teaches` entries MUST be **real programming knowledge concepts**, NOT code identifiers:
+`takeaway` entries MUST be **real programming knowledge concepts**, NOT code identifiers:
 
-✅ Good teaches (with all optional context fields):
+✅ Good takeaway (with all optional context fields):
 - `{"tag": "Object Pool", "explain": "Pre-allocate N objects, hand out on demand. Avoids allocation overhead.", "rationale": "GPU memory allocation is extremely slow. Pool amortizes this cost.", "cross_lang": "Go sync.Pool, Java ThreadPoolExecutor, Rust arena allocator", "gotcha": "Pool exhaustion under load — must handle 'no available objects' gracefully"}`
 - `{"tag": "__slots__", "explain": "Python: replaces __dict__ with fixed tuple. Saves ~100 bytes per instance.", "rationale": "Thousands of Block instances created — memory savings compound.", "cross_lang": "C struct (fixed fields by default), Java record, Rust (default behavior)"}`
 - `{"tag": "CUDA Graph", "explain": "Record GPU ops, replay without CPU. Eliminates kernel launch overhead.", "rationale": "Decode path has fixed tensor shapes, making it graphable. ~50% latency reduction.", "gotcha": "Only works with fixed shapes — dynamic prefill cannot use graphs"}`
 
-Teaches entry fields:
+Takeaway entry fields:
 - `tag` (required): Name of the concept being taught
 - `explain` (required): 1-3 sentences explaining the concept independently
 - `rationale` (MANDATORY): Why THIS code uses this concept. What would happen without it. Never skip this.
 - `cross_lang` (MANDATORY for known patterns): Equivalent in other languages (Java, Rust, Go, TS, C++). Only skip for truly domain-specific concepts with no equivalent.
 - `gotcha` (encouraged): Common pitfall or trap related to this concept in this context. Include if there's a non-obvious trap.
 
-**Every teaches entry MUST have rationale.** A teaches without rationale is useless — it tells the reader "what" but not "why here". The harness will validate this in future versions.
+**Every takeaway entry MUST have rationale.** A takeaway without rationale is useless — it tells the reader "what" but not "why here". The harness will validate this in future versions.
 
-❌ Bad teaches (BANNED):
+❌ Bad takeaway (BANNED):
 - `"ColumnParallelLinear"` — this is a code class name, not a concept
 - `"nn.Module forward contract"` — too vague, doesn't teach anything
 - `"constructor pattern"` — meaningless without explanation
 - Any string without `explain` — BANNED for core concepts
 
-Categories of valid teaches:
+Categories of valid takeaway:
 1. **Language features**: `__slots__`, `@property`, `dataclass`, `generator`, `contextmanager`
 2. **Design patterns**: Object Pool, Facade, Actor, Observer, Strategy
 3. **CS fundamentals**: Reference Counting, Content-Addressable Storage, Paged Memory
@@ -138,7 +138,7 @@ Each `explain` should be 1-3 sentences that teach the concept **independently of
 
 When enriching entities, the agent MUST explore ALL applicable dimensions from the knowledge taxonomy. See `docs/brainstorm-knowledge-dimensions.md` for the full reference. Key dimensions to check for EVERY entity:
 
-1. **Language features**: Does this code demonstrate a language-specific feature (dunder methods, decorators, type hints, context managers, slots, enums)? If yes → teaches it with cross-language equivalents.
+1. **Language features**: Does this code demonstrate a language-specific feature (dunder methods, decorators, type hints, context managers, slots, enums)? If yes → add takeaway with cross-language equivalents.
 2. **Design patterns**: Is there a recognizable pattern (Facade, Object Pool, Actor, Strategy, Factory, State Machine, Composition)? If yes → explain the pattern with name origin, when to use, and anti-patterns.
 3. **Data structures**: Does it use a specific data structure choice (deque, dict, set, priority queue)? If yes → explain what it is + complexity.
 4. **Engineering practices**: Is there a notable practice (graceful shutdown, idempotency, warmup, benchmarking, config-driven)? If yes → explain why.
@@ -173,15 +173,15 @@ The viewer will automatically display illustrations in concept cards when the fi
 
 See `docs/brainstorm-knowledge-dimensions.md` "Concept Illustrations" section for full guidance.
 
-### Step 3.6: Teaches Quality Upgrade (Safety Net)
+### Step 3.6: Takeaway Quality Upgrade (Safety Net)
 
 ```bash
-cd <vibe-reading-repo>/cli && npx tsx upgrade-teaches.ts <target-project-root>
+cd <vibe-reading-repo>/cli && npx tsx upgrade-takeaway.ts <target-project-root>
 ```
 
-This is a **post-processing safety net** — it uses a built-in knowledge base to add `cross_lang` and `gotcha` fields to any teaches entries that are missing them. It does NOT replace the agent's judgment but fills gaps for well-known concepts (Object Pool, State Machine, CUDA Graph, etc.).
+This is a **post-processing safety net** — it uses a built-in knowledge base to add `cross_lang` and `gotcha` fields to any takeaway entries that are missing them. It does NOT replace the agent's judgment but fills gaps for well-known concepts (Object Pool, State Machine, CUDA Graph, etc.).
 
-Run this AFTER deep enrichment to boost coverage. It only touches teaches entries that lack `rationale`/`cross_lang`/`gotcha` and won't overwrite agent-generated content.
+Run this AFTER deep enrichment to boost coverage. It only touches takeaway entries that lack `rationale`/`cross_lang`/`gotcha` and won't overwrite agent-generated content.
 
 ### Step 3.7: Flow Extraction
 
@@ -206,13 +206,13 @@ Must report:
 - 100% coverage (all files analyzed)
 - Valid schema (no structural errors)
 - **≥90% enrichment quality** (deep-enriched entities vs shallow/template)
-- **≥90% knowledge coverage** (entities with `level` + `why`/`teaches` fields)
+- **≥90% knowledge coverage** (entities with `level` + `why`/`takeaway` fields)
 
 If ANY gate fails, go back to Step 3 and fix the listed entities. Repeat until the harness passes ALL gates.
 
 **Harness environment variables:**
 - `ENRICH_THRESHOLD=0.9` — minimum ratio of deep-enriched descriptions
-- `KNOWLEDGE_THRESHOLD=0.9` — minimum ratio of entities with knowledge fields (level + why/teaches)
+- `KNOWLEDGE_THRESHOLD=0.9` — minimum ratio of entities with knowledge fields (level + why/takeaway)
 
 For WIP/draft runs you can lower thresholds. Without these env vars, harness only checks structure.
 
@@ -253,7 +253,7 @@ cd ~/workspace/vibe-reading/cli && npx tsx enrich.ts ~/workspace/my-project src/
    "description": "Priority-based scheduler. Sorted queue, higher priority first.",
    "why": "Multiple tasks compete for single execution thread",
    "level": "advanced",
-   "teaches": [{"tag": "Priority Queue", "explain": "Elements dequeued by priority, not arrival order.",
+   "takeaway": [{"tag": "Priority Queue", "explain": "Elements dequeued by priority, not arrival order.",
      "rationale": "Urgent tasks (preemption) must bypass waiting requests",
      "cross_lang": "Java PriorityBlockingQueue, Rust BinaryHeap, Go heap interface",
      "gotcha": "Priority inversion — low-priority task holding a lock blocks high-priority"}]}

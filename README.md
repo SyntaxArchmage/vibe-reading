@@ -61,6 +61,18 @@ cd viewer && PORT=3460 npx tsx server.ts /path/to/your/project
 
 Open http://localhost:3460 to browse code with knowledge cards.
 
+**Live demo (GitHub Pages):** https://syntaxarchmage.github.io/vibe-reading/
+
+The demo showcases the nano-vllm analysis results. To rebuild locally:
+
+```bash
+node scripts/build-github-pages.mjs
+python3 test/e2e/test_pages.py      # static asset checks
+python3 test/e2e/test_pages_ui.py   # browser smoke test
+```
+
+Pages deploys automatically via `.github/workflows/deploy-pages.yml` on push to `main`.
+
 ### 5. Verify
 
 ```bash

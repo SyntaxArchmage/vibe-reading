@@ -19,7 +19,7 @@
         "description": "Rotates Q/K vectors by position-dependent angle. Encodes relative position information into attention scores.",
         "level": "basic",
         "why": "Transformers have no inherent position sense — RoPE injects position via rotation",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Rotary Position Embedding",
             "explain": "Encode position by rotating vector pairs. Attention dot product then naturally encodes relative distance. No learned position embeddings needed.",
@@ -50,7 +50,7 @@
         "node_type": "class_definition",
         "description": "Computes cos/sin tables at initialization for fast lookup during forward pass.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Frequency Precomputation",
             "explain": "Compute expensive trig functions once at init, store as buffer. Forward pass is just a table lookup — O(1) vs O(n) per call.",
@@ -77,7 +77,7 @@
         "node_type": "function_definition",
         "description": "Creates geometric frequency sequence (θ_i = base^(-2i/d)) and precomputes cos/sin for max_position.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Geometric Frequency Spacing",
             "explain": "Lower dimensions rotate faster (high frequency), higher dimensions slower. Creates multi-scale position encoding.",
@@ -103,7 +103,7 @@
         "node_type": "function_definition",
         "description": "Index into cos/sin tables with position indices. Returns rotation vectors ready for apply_rotary_emb.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Position-Indexed Lookup",
             "explain": "Forward pass is just tensor indexing into precomputed tables. No computation — pure memory access. Maximum throughput.",
@@ -129,7 +129,7 @@
         "node_type": "function_definition",
         "description": "Convenience constructor extracting rope parameters from model config dict.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Factory Function",
             "explain": "Function that creates and configures objects. Simpler than constructor when configuration comes from external sources (config dicts, files).",

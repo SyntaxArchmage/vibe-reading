@@ -18,7 +18,7 @@
         "node_type": "class_definition",
         "description": "WAITING (queued), RUNNING (active on GPU), FINISHED_STOPPED, FINISHED_LENGTH, FINISHED_ABORT. Explicit states prevent invalid operations.",
         "why": "Without explicit states, you might accidentally free blocks of a running sequence or schedule a finished one",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Enum for State",
             "explain": "Use an enum to define all valid states. Only declared transitions are allowed. Compiler/IDE catches illegal values.",
@@ -49,7 +49,7 @@
         "level": "basic",
         "why": "Each request has unique mutable state (tokens generated so far, KV cache blocks used) that must survive across many scheduling steps",
         "pattern": "State machine with token-level lifecycle",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "State Machine",
             "explain": "Object with well-defined states and transitions. Only certain state changes are allowed. Invalid transitions raise errors.",
@@ -85,7 +85,7 @@
         "description": "Creates new sequence: assigns unique ID, stores prompt tokens, sets initial WAITING status, allocates first logical block.",
         "level": "basic",
         "why": "Every generation starts here — establishes baseline state that scheduler and block manager will operate on",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Minimal Valid State",
             "explain": "Constructor creates object in simplest valid state. No multi-step initialization needed. Object is usable immediately after __init__.",
@@ -113,7 +113,7 @@
         "node_type": "function_definition",
         "description": "Enables len(sequence) syntax. Returns prompt length + completion length.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "__len__ Protocol",
             "explain": "Implement __len__ to make class work with len(). Part of Python sized protocol. Enables intuitive API for collection-like objects.",
@@ -139,7 +139,7 @@
         "node_type": "function_definition",
         "description": "Enables sequence[i] syntax for token access.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "__getitem__ Protocol",
             "explain": "Implement __getitem__ for indexing syntax obj[i]. Part of sequence protocol. Can also enable iteration and slicing.",
@@ -165,7 +165,7 @@
         "node_type": "function_definition",
         "description": "Returns True if status is any FINISHED_ variant. Used by scheduler to know when to free resources.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Predicate Method",
             "explain": "Method returning bool that encapsulates a business-logic check. Centralizes condition rather than repeating enum checks.",
@@ -191,7 +191,7 @@
         "node_type": "function_definition",
         "description": "Computed property: total length minus prompt length.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Property Decorator",
             "explain": "@property makes method accessible as attribute. Computed on access, not stored. Keeps derived values always consistent with source.",
@@ -219,7 +219,7 @@
         "node_type": "function_definition",
         "description": "Slice returning tokens[0:prompt_len].",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "View vs Copy Semantics",
             "explain": "List slicing in Python creates a copy. For large sequences, consider memoryview or numpy views to avoid copying.",
@@ -245,7 +245,7 @@
         "node_type": "function_definition",
         "description": "Slice returning tokens[prompt_len:].",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Slice Notation",
             "explain": "list[start:end] extracts sub-sequence. Omit start for 0, omit end for len. Negative indices count from end.",
@@ -271,7 +271,7 @@
         "node_type": "function_definition",
         "description": "Ceiling division of total tokens by block size.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Ceiling Division",
             "explain": "-(-a // b) or math.ceil(a/b). Computes how many fixed-size blocks needed to hold variable-size content.",
@@ -297,7 +297,7 @@
         "node_type": "function_definition",
         "description": "total_tokens % block_size, or block_size if exactly full.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Modulo for Partial Fill",
             "explain": "n % block_size gives fill level of last block. If 0, block is full (use block_size). Common in paged/chunked systems.",
@@ -323,7 +323,7 @@
         "node_type": "function_definition",
         "description": "Maps token position to its containing block: position // block_size.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Position to Block Mapping",
             "explain": "block_index = position // block_size. Fundamental operation in any paged/blocked memory system. O(1) mapping.",
@@ -350,7 +350,7 @@
         "description": "Appends new token to completion, allocates new logical block if current is full.",
         "level": "basic",
         "why": "Token-by-token autoregressive generation — each step adds exactly one token",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Autoregressive Generation",
             "explain": "Model generates one token per step, using all previous tokens as context. Append loop continues until stop condition.",
@@ -377,7 +377,7 @@
         "node_type": "function_definition",
         "description": "Controls what gets serialized when sequence is pickled (for preemption/migration).",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Custom Pickling",
             "explain": "__getstate__ controls serialization. Return dict of what to save. Exclude file handles, locks, GPU tensors that cant be pickled.",
@@ -403,7 +403,7 @@
         "node_type": "function_definition",
         "description": "Restores sequence from pickled state, re-initializes transient fields.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "__setstate__ Restoration",
             "explain": "Counterpart to __getstate__. Receives saved dict, must reconstruct full object. Re-initialize transient resources (connections, caches).",

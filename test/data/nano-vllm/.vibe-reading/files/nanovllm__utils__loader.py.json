@@ -18,7 +18,7 @@
         "node_type": "function_definition",
         "description": "Default strategy: direct copy. Specialized loaders override for sharding/merging.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Strategy Pattern",
             "explain": "Define family of algorithms (weight loading strategies), make them interchangeable. Default strategy is simple copy; parallel layers override with shard logic.",
@@ -46,7 +46,7 @@
         "node_type": "function_definition",
         "description": "Iterates checkpoint tensors, matches to model parameters, calls each layers weight_loader.",
         "level": "basic",
-        "teaches": [
+        "takeaway": [
           {
             "tag": "Weight Loading Pipeline",
             "explain": "Open checkpoint → iterate saved tensors → find matching parameter by name → call layer-specific loader. Decouples storage format from model structure.",
