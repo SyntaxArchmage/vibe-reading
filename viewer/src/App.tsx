@@ -6,6 +6,7 @@ import { JumpTab } from "./tabs/JumpTab";
 import { OutlineTab } from "./tabs/OutlineTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree, fileTreeStyles } from "./components/FileTree";
+import { FileHeatmap, fileHeatmapStyles } from "./components/FileHeatmap";
 import type { DataEntity, TabId, CallGraph } from "./shared-types";
 import { layoutStyles, sidebarStyles } from "./styles";
 
@@ -230,6 +231,7 @@ export function App() {
   const [entitySearch, setEntitySearch] = useState("");
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
+  const [heatmapOpen, setHeatmapOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
   const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
@@ -870,6 +872,7 @@ export function App() {
       <style>{layoutStyles}</style>
       <style>{sidebarStyles}</style>
       <style>{fileTreeStyles}</style>
+      <style>{fileHeatmapStyles}</style>
 
       {/* Activity bar — icon strip */}
       <div className="vr-activity-bar">
@@ -886,6 +889,13 @@ export function App() {
           title="Search Entities"
         >
           &#x1F50D;
+        </button>
+        <button
+          className={`vr-activity-btn ${heatmapOpen ? "vr-activity-btn--active" : ""}`}
+          onClick={() => setHeatmapOpen(!heatmapOpen)}
+          title="File Heatmap"
+        >
+          &#x1F525;
         </button>
       </div>
 
@@ -985,6 +995,13 @@ export function App() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* File heatmap panel */}
+      {heatmapOpen && (
+        <div className="vr-heatmap-panel">
+          <FileHeatmap files={allFiles} currentFile={currentFile} onSelect={selectFile} />
         </div>
       )}
 

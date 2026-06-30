@@ -263,6 +263,34 @@ def main() -> int:
         check("Back button", page.locator(".vr-nav-btn").first.count() > 0)
         check("Forward button", page.locator(".vr-nav-btn").nth(1).count() > 0)
 
+        # 20b. File Heatmap
+        print("\n--- 20b. File Heatmap ---")
+        heatmap_btn = page.locator(".vr-activity-btn", has_text="\U0001F525")
+        check("Heatmap button exists", heatmap_btn.count() > 0)
+        heatmap_btn.click()
+        page.wait_for_timeout(800)
+        check("Heatmap panel opens", page.locator(".vr-heatmap-panel").count() > 0)
+        check("Heatmap SVG renders", page.locator(".vr-heatmap-svg").count() > 0)
+        svg_rects = page.locator(".vr-heatmap-svg rect")
+        check("Heatmap has file rects", svg_rects.count() >= 5, f"count={svg_rects.count()}")
+        check("Heatmap header", page.locator(".vr-heatmap-header").count() > 0)
+        check("Heatmap legend", page.locator(".vr-heatmap-legend").count() > 0)
+        mode_btns = page.locator(".vr-heatmap-mode-btn")
+        check("Color mode buttons", mode_btns.count() == 3)
+        mode_btns.nth(1).click()
+        page.wait_for_timeout(300)
+        check("Mode switch works", mode_btns.nth(1).evaluate("el => getComputedStyle(el).opacity") == "1")
+        first_rect = svg_rects.first
+        first_rect.hover()
+        page.wait_for_timeout(500)
+        check("Tooltip on hover", page.locator(".vr-heatmap-tooltip").count() > 0)
+        first_rect.click()
+        page.wait_for_timeout(1000)
+        check("Click navigates to file", page.locator(".vr-file-path").count() > 0)
+        heatmap_btn.click()
+        page.wait_for_timeout(300)
+        check("Heatmap panel closes", page.locator(".vr-heatmap-panel").count() == 0)
+
         # 21. Source Content
         print("\n--- 21. Source Content ---")
         src = page.evaluate(

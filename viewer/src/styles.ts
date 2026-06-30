@@ -60,6 +60,16 @@ export const layoutStyles = `
   overflow: hidden;
   flex-shrink: 0;
 }
+.vr-heatmap-panel {
+  width: 340px;
+  min-width: 260px;
+  background: #252526;
+  border-right: 1px solid #3c3c3c;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
 .vr-entity-search-header {
   padding: 8px;
   border-bottom: 1px solid #3c3c3c;
