@@ -16,6 +16,7 @@ interface Props {
   bookmarks?: Set<string>;
   onBookmark?: (key: string) => void;
   showGraph?: boolean;
+  sourceLines?: string[];
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
@@ -74,7 +75,7 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   );
 }
 
-export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect, bookmarks, onBookmark, showGraph }: Props) {
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect, bookmarks, onBookmark, showGraph, sourceLines }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
@@ -209,7 +210,8 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
                   usages={usagesMap.get(e.detail.name as string)}
                   onFileSelect={onFileSelect}
                   bookmarked={bookmarks?.has(`${currentFile}:${e.detail.name}`)}
-                  onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined} />
+                  onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined}
+                  sourceLines={sourceLines?.slice(e.anchor.start_line - 1, e.anchor.end_line)} />
           ))}
         </AnimatePresence>
       </div>
@@ -256,7 +258,8 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
                       usages={usagesMap.get(e.detail.name as string)}
                       onFileSelect={onFileSelect}
                       bookmarked={bookmarks?.has(`${currentFile}:${e.detail.name}`)}
-                      onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined} />
+                      onBookmark={onBookmark ? () => onBookmark(`${currentFile}:${e.detail.name}`) : undefined}
+                      sourceLines={sourceLines?.slice(e.anchor.start_line - 1, e.anchor.end_line)} />
               ))}
             </AnimatePresence>
           )}

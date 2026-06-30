@@ -285,7 +285,14 @@ export const layoutStyles = `
   flex-shrink: 0;
 }
 
-.vr-statusbar-right { opacity: 0.85; }
+.vr-statusbar-right { opacity: 0.85; display: flex; align-items: center; gap: 4px; }
+.vr-statusbar-help {
+  background: none; border: 1px solid rgba(255,255,255,0.3); color: inherit;
+  border-radius: 3px; font-size: 10px; width: 16px; height: 16px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
+  margin-left: 6px; opacity: 0.7; font-weight: bold;
+}
+.vr-statusbar-help:hover { opacity: 1; border-color: rgba(255,255,255,0.6); }
 
 .vr-breadcrumb { color: var(--vr-fg-dim); font-size: 11px; }
 .vr-breadcrumb strong { color: #dcdcaa; }
@@ -415,34 +422,10 @@ export const layoutStyles = `
 .vr-help-footer { margin-top: 12px; font-size: 11px; color: #666; }
 .vr-help-footer code { background: #3c3c3c; padding: 1px 4px; border-radius: 2px; font-size: 10px; }
 
-/* ── Light theme ── */
-.vr-layout--light {
-  background: #f3f3f3;
-  color: #333;
-}
-.vr-layout--light .vr-activity-bar {
-  background: #e8e8e8;
-  border-right-color: #d4d4d4;
-}
-.vr-layout--light .vr-file-panel,
-.vr-layout--light .vr-entity-search-panel,
-.vr-layout--light .vr-heatmap-panel,
-.vr-layout--light .vr-sidebar {
-  background: #f9f9f9;
-  border-right-color: #d4d4d4;
-}
-.vr-layout--light .vr-tab-bar {
-  background: #f0f0f0;
-  border-bottom-color: #d4d4d4;
-}
-.vr-layout--light .vr-tab-item {
-  color: #555;
-  border-right-color: #d4d4d4;
-}
-.vr-layout--light .vr-tab-item--active {
-  background: #fff;
-  color: #333;
-}
+/* ── Light theme overrides (values that differ from CSS variable defaults) ── */
+.vr-layout--light .vr-tab-bar { background: #f0f0f0; }
+.vr-layout--light .vr-tab-item { color: #555; }
+.vr-layout--light .vr-tab-item--active { background: #fff; }
 .vr-layout--light .vr-statusbar {
   background: #2678ca;
 }
@@ -457,10 +440,6 @@ export const layoutStyles = `
   border-color: #0078d4;
   background: #e8f0ff;
 }
-.vr-layout--light .vr-card-name { color: #333; }
-.vr-layout--light .vr-card-summary,
-.vr-layout--light .vr-card-loc,
-.vr-layout--light .vr-card-detail { color: #666; }
 .vr-layout--light .vr-card-code-preview {
   background: #f5f5f5;
   border-color: #e0e0e0;
@@ -491,19 +470,11 @@ export const layoutStyles = `
   border-color: #d4d4d4;
 }
 .vr-layout--light .vr-help-grid kbd { background: #e8e8e8; border-color: #d4d4d4; color: #333; }
-.vr-layout--light .vr-entity-search-input {
-  background: #fff;
-  color: #333;
-  border-color: #d4d4d4;
-}
 .vr-layout--light .vr-entity-search-item:hover { background: #e8f0ff; }
 .vr-layout--light .vr-entity-search-item--active { background: #cce0ff; }
-.vr-layout--light .vr-entity-search-type { background: #e8e8e8; color: #666; }
-.vr-layout--light .vr-entity-search-name { color: #333; }
 .vr-layout--light .vr-file-header { border-bottom-color: #e0e0e0; color: #666; }
 .vr-layout--light .vr-file-path { color: #333; }
 .vr-layout--light .vr-file-path:hover { color: #111; }
-.vr-layout--light .vr-card-detail { border-top-color: #e0e0e0; }
 .vr-layout--light .vr-tabs { border-bottom-color: #e0e0e0; }
 .vr-layout--light .vr-tab { color: #555; }
 .vr-layout--light .vr-tab--active { background: rgba(0,0,0,0.06); }
@@ -671,8 +642,8 @@ export const sidebarStyles = `
 .vr-card-code::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
 .vr-card-code-line { display: flex; padding: 0 8px 0 0; white-space: pre; }
-.vr-card-code-num { color: #555; text-align: right; width: 32px; padding-right: 8px; flex-shrink: 0; user-select: none; }
-.vr-card-code-text { color: #ccc; }
+.vr-card-code-num { color: var(--vr-fg-dimmer); text-align: right; width: 32px; padding-right: 8px; flex-shrink: 0; user-select: none; }
+.vr-card-code-text { color: var(--vr-fg); }
 .vr-card-code-more { color: var(--vr-fg-dimmer); font-style: italic; }
 
 .vr-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -863,6 +834,11 @@ export const sidebarStyles = `
 }
 .vr-dep-graph-btn:hover { border-color: var(--vr-accent); }
 .vr-dep-graph-btn--active { background: rgba(0,122,204,0.15); border-color: var(--vr-accent); color: var(--vr-accent); }
+
+/* Jump tab */
+.vr-jump-reason { padding: 0 10px 8px; font-size: 11px; color: var(--vr-fg-dimmer); }
+.vr-jump-heading { font-size: 11px; color: var(--vr-fg-dim); padding: 4px 8px 2px; font-weight: 600; }
+.vr-jump-overview { padding: 4px 8px; border-bottom: 1px solid var(--vr-border); }
 
 /* Responsive layout */
 @media (max-width: 900px) {

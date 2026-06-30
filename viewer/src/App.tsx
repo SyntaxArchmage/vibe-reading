@@ -930,7 +930,8 @@ export function App() {
                            onFileSelect={selectByFile}
                            bookmarks={bookmarks}
                            onBookmark={toggleBookmark}
-                           showGraph={showEntityGraph} />;
+                           showGraph={showEntityGraph}
+                           sourceLines={sourceLines} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={selectByFile} />;
       case "history":
@@ -1007,10 +1008,24 @@ export function App() {
               onKeyDown={(e) => {
                 if (e.key === "ArrowDown") {
                   e.preventDefault();
-                  setEntitySearchIdx(i => Math.min(i + 1, entitySearchResults.length - 1));
+                  setEntitySearchIdx(i => {
+                    const next = Math.min(i + 1, entitySearchResults.length - 1);
+                    const hit = entitySearchResults[next];
+                    if (hit && (hit as SearchableEntity)._file === currentFile) {
+                      setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
+                    }
+                    return next;
+                  });
                 } else if (e.key === "ArrowUp") {
                   e.preventDefault();
-                  setEntitySearchIdx(i => Math.max(i - 1, 0));
+                  setEntitySearchIdx(i => {
+                    const next = Math.max(i - 1, 0);
+                    const hit = entitySearchResults[next];
+                    if (hit && (hit as SearchableEntity)._file === currentFile) {
+                      setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
+                    }
+                    return next;
+                  });
                 } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
                   const hit = entitySearchResults[entitySearchIdx];
                   addSearchHistory(entitySearch.trim());
@@ -1322,6 +1337,7 @@ export function App() {
           })()}
           {sourceLines.length > 0 && ` · ${sourceLines.length} lines`}
           {currentFile && ` · ${sourceLanguage}`}
+          <button className="vr-statusbar-help" onClick={() => setHelpOpen(h => !h)} title="Keyboard shortcuts (?)">?</button>
         </span>
       </div>
 

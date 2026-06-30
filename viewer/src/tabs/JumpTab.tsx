@@ -44,7 +44,7 @@ function JumpCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
         </div>
       </div>
       {reason && (
-        <div style={{ padding: "0 10px 8px", fontSize: 11, color: "#666" }}>
+        <div className="vr-jump-reason">
           {reason}
         </div>
       )}
@@ -111,11 +111,42 @@ export function JumpTab({ entities, onCardClick, callGraph, currentFile, onFileS
     );
   }
 
+  const hasConnections = entities.length > 0 || importedBy.length > 0;
+  const shortName = currentFile?.split("/").pop() || "file";
+
   return (
     <div>
+      {hasConnections && (
+        <div className="vr-jump-overview">
+          <svg width="100%" height={48} viewBox="0 0 300 48">
+            {entities.length > 0 && (
+              <>
+                <text x={30} y={28} fontSize={9} fill="var(--vr-fg-dim)" textAnchor="middle">{entities.length} dep{entities.length > 1 ? "s" : ""}</text>
+                <line x1={60} y1={24} x2={120} y2={24} stroke="#c586c0" strokeWidth={1.5} markerEnd="url(#jump-arrow-out)" />
+              </>
+            )}
+            <rect x={120} y={10} width={60} height={28} rx={4} fill="var(--vr-bg-tertiary)" stroke="var(--vr-accent)" strokeWidth={1.5} />
+            <text x={150} y={28} fontSize={9} fill="var(--vr-fg)" textAnchor="middle" fontWeight="bold">{shortName.length > 10 ? shortName.slice(0, 9) + "…" : shortName}</text>
+            {importedBy.length > 0 && (
+              <>
+                <line x1={180} y1={24} x2={240} y2={24} stroke="#4ec9b0" strokeWidth={1.5} markerEnd="url(#jump-arrow-in)" />
+                <text x={270} y={28} fontSize={9} fill="var(--vr-fg-dim)" textAnchor="middle">{importedBy.length} user{importedBy.length > 1 ? "s" : ""}</text>
+              </>
+            )}
+            <defs>
+              <marker id="jump-arrow-out" viewBox="0 0 10 10" refX="10" refY="5" markerWidth={5} markerHeight={5} orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#c586c0" />
+              </marker>
+              <marker id="jump-arrow-in" viewBox="0 0 10 10" refX="10" refY="5" markerWidth={5} markerHeight={5} orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#4ec9b0" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      )}
       {entities.length > 0 && (
         <>
-          <div style={{ fontSize: 11, color: "#888", padding: "4px 8px 2px", fontWeight: 600 }}>
+          <div className="vr-jump-heading">
             Imports from ({entities.length})
           </div>
           <AnimatePresence mode="popLayout">
@@ -127,7 +158,7 @@ export function JumpTab({ entities, onCardClick, callGraph, currentFile, onFileS
       )}
       {importedBy.length > 0 && (
         <>
-          <div style={{ fontSize: 11, color: "#888", padding: "8px 8px 2px", fontWeight: 600 }}>
+          <div className="vr-jump-heading" style={{ paddingTop: 8 }}>
             Imported by ({importedBy.length})
           </div>
           <AnimatePresence mode="popLayout">

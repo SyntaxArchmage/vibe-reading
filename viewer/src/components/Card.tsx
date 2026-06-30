@@ -10,6 +10,7 @@ interface CardProps {
   onFileSelect?: (file: string) => void;
   bookmarked?: boolean;
   onBookmark?: () => void;
+  sourceLines?: string[];
 }
 
 const KIND_COLORS: Record<string, string> = {
@@ -35,6 +36,7 @@ export function Card({
   onFileSelect,
   bookmarked,
   onBookmark,
+  sourceLines,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -290,6 +292,22 @@ export function Card({
                     <span className="vr-card-ktext">{d.perf as string}</span>
                   </div>
                 )}
+              </div>
+            )}
+
+            {sourceLines && sourceLines.length > 0 && (
+              <div className="vr-card-code-preview">
+                <div className="vr-card-code">
+                  {sourceLines.slice(0, 6).map((line, i) => (
+                    <div key={i} className="vr-card-code-line">
+                      <span className="vr-card-code-num">{entity.anchor.start_line + i}</span>
+                      <span className="vr-card-code-text">{line || " "}</span>
+                    </div>
+                  ))}
+                  {sourceLines.length > 6 && (
+                    <div className="vr-card-code-more">… {sourceLines.length - 6} more lines</div>
+                  )}
+                </div>
               </div>
             )}
 
