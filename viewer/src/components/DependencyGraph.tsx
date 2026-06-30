@@ -319,18 +319,10 @@ export function DependencyGraph({ callGraph, currentFile, onFileSelect }: Props)
         x: panStart.current.panX + (e.clientX - panStart.current.x),
         y: panStart.current.panY + (e.clientY - panStart.current.y),
       });
-      return;
-    }
-    if (dragNode) {
-      const dx = (e.clientX - dragStart.current.x) / zoom;
-      const dy = (e.clientY - dragStart.current.y) / zoom;
-      setNodeOffsets((prev) => ({
-        ...prev,
-        [dragNode]: {
-          dx: (prev[dragNode]?.dx ?? 0) + dx - (prev[dragNode]?.dx ?? 0) + dragStart.current.nodeX,
-          dy: (prev[dragNode]?.dy ?? 0) + dy - (prev[dragNode]?.dy ?? 0) + dragStart.current.nodeY,
-        },
-      }));
+    } else if (dragNode) {
+      const dx = (e.clientX - dragStart.current.x) / zoom + dragStart.current.nodeX;
+      const dy = (e.clientY - dragStart.current.y) / zoom + dragStart.current.nodeY;
+      setNodeOffsets((prev) => ({ ...prev, [dragNode]: { dx, dy } }));
     }
   }, [isPanning, dragNode, zoom]);
 
@@ -339,7 +331,6 @@ export function DependencyGraph({ callGraph, currentFile, onFileSelect }: Props)
     setDragNode(null);
   }, []);
 
-  // Node drag start
   const handleNodeDragStart = useCallback((e: React.MouseEvent, nodeId: string) => {
     if (e.button !== 0 || e.ctrlKey || e.metaKey) return;
     e.stopPropagation();
@@ -347,13 +338,6 @@ export function DependencyGraph({ callGraph, currentFile, onFileSelect }: Props)
     const off = nodeOffsets[nodeId] ?? { dx: 0, dy: 0 };
     dragStart.current = { x: e.clientX, y: e.clientY, nodeX: off.dx, nodeY: off.dy };
   }, [nodeOffsets]);
-
-  const handleNodeDrag = useCallback((e: React.MouseEvent) => {
-    if (!dragNode) return;
-    const dx = (e.clientX - dragStart.current.x) / zoom + dragStart.current.nodeX;
-    const dy = (e.clientY - dragStart.current.y) / zoom + dragStart.current.nodeY;
-    setNodeOffsets((prev) => ({ ...prev, [dragNode]: { dx, dy } }));
-  }, [dragNode, zoom]);
 
   // Clear offsets when layout changes
   useEffect(() => {
@@ -432,7 +416,7 @@ export function DependencyGraph({ callGraph, currentFile, onFileSelect }: Props)
         ref={containerRef}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
-        onMouseMove={(e) => { handleMouseMove(e); handleNodeDrag(e); }}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         style={{
