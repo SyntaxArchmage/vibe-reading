@@ -143,6 +143,21 @@ export const layoutStyles = `
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.vr-entity-search-count {
+  font-size: 10px; color: var(--vr-fg-dimmer); padding: 2px 0 0;
+}
+.vr-entity-search-recent-label {
+  font-size: 9px; color: var(--vr-fg-dimmer); text-transform: uppercase; margin-bottom: 4px;
+}
+.vr-entity-search-history-item {
+  font-size: 11px; color: var(--vr-fg-dim);
+}
+.vr-entity-search-empty {
+  color: var(--vr-fg-dim); font-size: 12px; padding: 8px;
+}
+.vr-entity-search-kind {
+  font-size: 10px; color: var(--vr-fg-dim);
+}
 
 .vr-resize-handle {
   width: 4px;
@@ -394,33 +409,81 @@ export const layoutStyles = `
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #252526;
-  border: 1px solid #444;
+  background: var(--vr-bg-secondary);
+  border: 1px solid var(--vr-border);
   border-radius: 8px;
   padding: 20px 24px;
   z-index: 200;
   min-width: 300px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-.vr-help-title { font-size: 14px; font-weight: 600; color: #d4d4d4; margin-bottom: 12px; }
+.vr-help-title { font-size: 14px; font-weight: 600; color: var(--vr-fg); margin-bottom: 12px; }
 .vr-help-grid {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 6px 16px;
   font-size: 12px;
-  color: #bbb;
+  color: var(--vr-fg-dim);
 }
 .vr-help-grid kbd {
-  background: #3c3c3c;
-  border: 1px solid #555;
+  background: var(--vr-input-bg);
+  border: 1px solid var(--vr-border);
   border-radius: 3px;
   padding: 1px 6px;
   font-family: monospace;
   font-size: 11px;
-  color: #d4d4d4;
+  color: var(--vr-fg);
 }
-.vr-help-footer { margin-top: 12px; font-size: 11px; color: #666; }
-.vr-help-footer code { background: #3c3c3c; padding: 1px 4px; border-radius: 2px; font-size: 10px; }
+.vr-help-footer { margin-top: 12px; font-size: 11px; color: var(--vr-fg-dimmer); }
+.vr-help-footer code { background: var(--vr-input-bg); padding: 1px 4px; border-radius: 2px; font-size: 10px; }
+.vr-help-label { color: var(--vr-fg); }
+.vr-help-entity-types { margin-top: 8px; font-size: 11px; color: var(--vr-fg-dim); }
+.vr-help-entity-types-title { font-weight: 600; margin-bottom: 4px; }
+.vr-help-entity-types-list { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Entity kind colors */
+.vr-kind-fn { color: #4ec9b0; }
+.vr-kind-class { color: #dcdcaa; }
+.vr-kind-iface { color: #9cdcfe; }
+.vr-kind-var { color: #ce9178; }
+.vr-kind-enum { color: #b5cea8; }
+.vr-kind-deco { color: #c586c0; }
+.vr-layout--light .vr-kind-fn { color: #16825d; }
+.vr-layout--light .vr-kind-class { color: #795e26; }
+.vr-layout--light .vr-kind-iface { color: #267f99; }
+.vr-layout--light .vr-kind-var { color: #a31515; }
+.vr-layout--light .vr-kind-enum { color: #098658; }
+.vr-layout--light .vr-kind-deco { color: #af00db; }
+
+/* Complexity badges */
+.vr-cx-badge {
+  font-size: 10px; padding: 0 4px; border-radius: 3px; margin-left: 2px;
+}
+.vr-cx-high { background: #4a2020; color: #f44747; }
+.vr-cx-mid { background: #3a3a20; color: #dcdcaa; }
+.vr-cx-low { background: #1a2a1a; color: #4ec9b0; }
+.vr-layout--light .vr-cx-high { background: #fde2e2; color: #c72e2e; }
+.vr-layout--light .vr-cx-mid { background: #fdf4e2; color: #8b6914; }
+.vr-layout--light .vr-cx-low { background: #e2fde8; color: #16825d; }
+.vr-cx-badge-inline { /* inline variant without background */ }
+.vr-cx-badge-inline.vr-cx-high { color: #f44747; }
+.vr-cx-badge-inline.vr-cx-mid { color: #dcdcaa; }
+.vr-cx-badge-inline.vr-cx-low { color: #4ec9b0; }
+.vr-layout--light .vr-cx-badge-inline.vr-cx-high { color: #c72e2e; }
+.vr-layout--light .vr-cx-badge-inline.vr-cx-mid { color: #8b6914; }
+.vr-layout--light .vr-cx-badge-inline.vr-cx-low { color: #16825d; }
+
+/* Picker stats */
+.vr-picker-stats {
+  margin-left: auto; display: flex; gap: 6px; font-size: 10px; color: var(--vr-fg-dimmer); flex-shrink: 0;
+}
+
+/* Symbol picker */
+.vr-symbol-kind { font-size: 10px; color: var(--vr-fg-dim); margin-right: 4px; }
+.vr-symbol-line { margin-left: auto; font-size: 10px; color: var(--vr-fg-dimmer); }
+
+/* Breadcrumb */
+.vr-breadcrumb-dim { color: var(--vr-fg-dimmer); }
 
 /* ── Light theme overrides (values that differ from CSS variable defaults) ── */
 .vr-layout--light .vr-tab-bar { background: #f0f0f0; }
@@ -466,10 +529,8 @@ export const layoutStyles = `
 .vr-layout--light .vr-picker-item { color: #444; }
 .vr-layout--light .vr-picker-item:hover { background: #e8e8e8; }
 .vr-layout--light .vr-help-panel {
-  background: #fff;
-  border-color: #d4d4d4;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
 }
-.vr-layout--light .vr-help-grid kbd { background: #e8e8e8; border-color: #d4d4d4; color: #333; }
 .vr-layout--light .vr-entity-search-item:hover { background: #e8f0ff; }
 .vr-layout--light .vr-entity-search-item--active { background: #cce0ff; }
 .vr-layout--light .vr-file-header { border-bottom-color: #e0e0e0; color: #666; }

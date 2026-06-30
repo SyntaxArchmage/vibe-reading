@@ -919,7 +919,7 @@ export function App() {
               className="vr-entity-search-input"
             />
             {entitySearch.trim() && (
-              <div style={{ fontSize: 10, color: "#666", padding: "2px 0 0" }}>
+              <div className="vr-entity-search-count">
                 {entitySearchResults.length} result{entitySearchResults.length !== 1 ? "s" : ""}
                 {entitySearchResults.length >= 50 && " (limit)"}
               </div>
@@ -928,7 +928,7 @@ export function App() {
           <div className="vr-entity-search-results">
             {!entitySearch.trim() && searchHistory.length > 0 && (
               <div style={{ padding: "6px 8px" }}>
-                <div style={{ fontSize: 9, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>Recent</div>
+                <div className="vr-entity-search-recent-label">Recent</div>
                 {searchHistory.map((h, i) => (
                   <div
                     key={`hist-${i}`}
@@ -936,13 +936,13 @@ export function App() {
                     onClick={() => { setEntitySearch(h); setEntitySearchIdx(0); }}
                     style={{ cursor: "pointer" }}
                   >
-                    <span style={{ fontSize: 11, color: "#888" }}>&#x1F50D; {h}</span>
+                    <span className="vr-entity-search-history-item">&#x1F50D; {h}</span>
                   </div>
                 ))}
               </div>
             )}
             {entitySearch.trim() && entitySearchResults.length === 0 && (
-              <div style={{ color: "#888", fontSize: 12, padding: 8 }}>No matches</div>
+              <div className="vr-entity-search-empty">No matches</div>
             )}
             {entitySearchResults.map((e, i) => {
               const q = entitySearch.toLowerCase().trim()
@@ -966,7 +966,7 @@ export function App() {
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span className="vr-entity-search-type">{e.type}</span>
-                    {e.detail.kind ? <span style={{ fontSize: 10, color: "#888" }}>({String(e.detail.kind)})</span> : null}
+                    {e.detail.kind ? <span className="vr-entity-search-kind">({String(e.detail.kind)})</span> : null}
                     <span className="vr-entity-search-name">
                       {q ? highlightMatch(nameStr, q) : nameStr}
                     </span>
@@ -1009,11 +1009,9 @@ export function App() {
               {(() => {
                 const fi = currentFile ? fileInfoMap.get(currentFile) : undefined;
                 return fi && fi.complexity > 0 ? (
-                  <span title={`complexity score: ${fi.complexity}`} style={{
-                    fontSize: 10, padding: "0 4px", borderRadius: 3, marginLeft: 2,
-                    background: fi.complexity > 50 ? "#4a2020" : fi.complexity > 25 ? "#3a3a20" : "#1a2a1a",
-                    color: fi.complexity > 50 ? "#f44747" : fi.complexity > 25 ? "#dcdcaa" : "#4ec9b0",
-                  }}>{fi.complexity}cx</span>
+                  <span title={`complexity score: ${fi.complexity}`} className={
+                    `vr-cx-badge ${fi.complexity > 50 ? "vr-cx-high" : fi.complexity > 25 ? "vr-cx-mid" : "vr-cx-low"}`
+                  }>{fi.complexity}cx</span>
                 ) : null;
               })()}
             </div>
@@ -1201,7 +1199,7 @@ export function App() {
             >
               {" > "}{i === breadcrumbPath.length - 1
                 ? <strong>{be.detail.name as string}</strong>
-                : <span style={{ color: "#666" }}>{be.detail.name as string}</span>}
+                : <span className="vr-breadcrumb-dim">{be.detail.name as string}</span>}
             </span>
           ))}
         </span>
@@ -1262,9 +1260,9 @@ export function App() {
                 }}
               >
                 <span className="vr-picker-path">{f.file}</span>
-                <span style={{ marginLeft: "auto", display: "flex", gap: 6, fontSize: 10, color: "#666", flexShrink: 0 }}>
+                <span className="vr-picker-stats">
                   {f.count > 0 && <span>{f.count}e</span>}
-                  {f.complexity > 0 && <span style={{ color: f.complexity > 10 ? "#f44747" : f.complexity > 5 ? "#dcdcaa" : "#4ec9b0" }}>{f.complexity}cx</span>}
+                  {f.complexity > 0 && <span className={`vr-cx-badge-inline ${f.complexity > 10 ? "vr-cx-high" : f.complexity > 5 ? "vr-cx-mid" : "vr-cx-low"}`}>{f.complexity}cx</span>}
                 </span>
               </div>
             ))}
@@ -1336,9 +1334,9 @@ export function App() {
                      className={`vr-picker-item ${i === symbolIdx ? "vr-picker-item--active" : ""}`}
                      onClick={() => { onCardClick(e); setSymbolOpen(false); }}
                 >
-                  <span style={{ fontSize: 10, color: "#888", marginRight: 4 }}>{kind}</span>
+                  <span className="vr-symbol-kind">{kind}</span>
                   <span>{String(e.detail.name)}</span>
-                  <span style={{ marginLeft: "auto", fontSize: 10, color: "#666" }}>L{e.anchor.start_line}</span>
+                  <span className="vr-symbol-line">L{e.anchor.start_line}</span>
                 </div>
               );
             })}
@@ -1373,20 +1371,20 @@ export function App() {
           </div>
           <div className="vr-help-footer">
             <div style={{ marginBottom: 4 }}>
-              <strong style={{ color: "#ccc" }}>Search syntax:</strong>{" "}
+              <strong className="vr-help-label">Search syntax:</strong>{" "}
               <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
             </div>
             <div>
-              <strong style={{ color: "#ccc" }}>Activity bar:</strong>{" "}
+              <strong className="vr-help-label">Activity bar:</strong>{" "}
               &#x1F4C1; Explorer · &#x1F50D; Search · &#x1F525; Heatmap · &#x2600;&#xFE0F;/&#x1F319; Theme
             </div>
           </div>
-          <div style={{ marginTop: 8, fontSize: 11, color: "#888" }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Entity Types</div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {[["function","#4ec9b0"],["class","#dcdcaa"],["interface","#9cdcfe"],["type","#9cdcfe"],
-                ["variable","#ce9178"],["enum","#b5cea8"],["method","#4ec9b0"],["decorated","#c586c0"]].map(([k,c]) => (
-                <span key={k} style={{ color: c as string }}>{k}</span>
+          <div className="vr-help-entity-types">
+            <div className="vr-help-entity-types-title">Entity Types</div>
+            <div className="vr-help-entity-types-list">
+              {[["function","vr-kind-fn"],["class","vr-kind-class"],["interface","vr-kind-iface"],["type","vr-kind-iface"],
+                ["variable","vr-kind-var"],["enum","vr-kind-enum"],["method","vr-kind-fn"],["decorated","vr-kind-deco"]].map(([k,c]) => (
+                <span key={k} className={c}>{k}</span>
               ))}
             </div>
           </div>
