@@ -8,6 +8,21 @@ import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree, fileTreeStyles } from "./components/FileTree";
 import type { DataEntity, TabId, CallGraph } from "./shared-types";
 
+function highlightMatch(text: string, query: string): React.ReactNode {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span style={{ background: "rgba(0,122,204,0.35)", borderRadius: 2, padding: "0 1px" }}>
+        {text.slice(idx, idx + query.length)}
+      </span>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 declare const PREVIEW_DATA: Record<
   string,
   { file: string; entities: DataEntity[] }
@@ -262,32 +277,78 @@ export function App() {
       (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
     ), []);
 
-  const entitySearchResults = entitySearch.trim()
-    ? (() => {
-        let q = entitySearch.toLowerCase().trim();
-        let typeFilter: string | null = null;
-        let fileFilter: string | null = null;
-        const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
-        if (typeMatch) {
-          typeFilter = typeMatch[1];
-          q = q.slice(typeMatch[0].length);
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("vr-search-history");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  const addSearchHistory = useCallback((q: string) => {
+    if (!q.trim()) return;
+    setSearchHistory(prev => {
+      const next = [q, ...prev.filter(h => h !== q)].slice(0, 8);
+      try { localStorage.setItem("vr-search-history", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  const entitySearchResults = useMemo(() => {
+    if (!entitySearch.trim()) return [];
+    let q = entitySearch.toLowerCase().trim();
+    let typeFilter: string | null = null;
+    let fileFilter: string | null = null;
+    const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
+    if (typeMatch) {
+      typeFilter = typeMatch[1];
+      q = q.slice(typeMatch[0].length);
+    }
+    const fileMatch = q.match(/^(?:file:|f:)(\S+)\s*/);
+    if (fileMatch) {
+      fileFilter = fileMatch[1];
+      q = q.slice(fileMatch[0].length);
+    }
+
+    if (!q && !typeFilter && !fileFilter) return [];
+
+    const scored = allEntities
+      .map(e => {
+        if (typeFilter && !e.type.startsWith(typeFilter)) return null;
+        if (fileFilter && !e.anchor.file.toLowerCase().includes(fileFilter)) return null;
+        if (!q) return { e, score: 1 };
+
+        const name = ((e.detail.name as string) || "").toLowerCase();
+        const summary = e.summary.toLowerCase();
+        const file = e.anchor.file.toLowerCase();
+
+        if (name === q) return { e, score: 100 };
+        if (name.startsWith(q)) return { e, score: 80 };
+        if (name.includes(q)) return { e, score: 60 };
+        if (summary.includes(q)) return { e, score: 40 };
+        if (file.includes(q)) return { e, score: 20 };
+
+        // Fuzzy match on name
+        let qi = 0;
+        let consecutive = 0;
+        let maxConsec = 0;
+        for (let ni = 0; ni < name.length && qi < q.length; ni++) {
+          if (name[ni] === q[qi]) {
+            qi++;
+            consecutive++;
+            maxConsec = Math.max(maxConsec, consecutive);
+          } else {
+            consecutive = 0;
+          }
         }
-        const fileMatch = q.match(/^(?:file:|f:)(\S+)\s*/);
-        if (fileMatch) {
-          fileFilter = fileMatch[1];
-          q = q.slice(fileMatch[0].length);
-        }
-        return allEntities.filter(e => {
-          if (typeFilter && !e.type.startsWith(typeFilter)) return false;
-          if (fileFilter && !e.anchor.file.toLowerCase().includes(fileFilter)) return false;
-          if (!q) return true;
-          const name = ((e.detail.name as string) || "").toLowerCase();
-          const summary = e.summary.toLowerCase();
-          const file = e.anchor.file.toLowerCase();
-          return name.includes(q) || summary.includes(q) || file.includes(q);
-        }).slice(0, 50);
-      })()
-    : [];
+        if (qi === q.length) return { e, score: 5 + maxConsec * 2 };
+
+        return null;
+      })
+      .filter((x): x is { e: typeof allEntities[0]; score: number } => x !== null)
+      .sort((a, b) => b.score - a.score);
+
+    return scored.map(s => s.e).slice(0, 50);
+  }, [entitySearch, allEntities]);
 
   const breadcrumbPath = useMemo(() => {
     if (!cursorLine) return [];
@@ -854,6 +915,7 @@ export function App() {
                   setEntitySearchIdx(i => Math.max(i - 1, 0));
                 } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
                   const hit = entitySearchResults[entitySearchIdx];
+                  addSearchHistory(entitySearch.trim());
                   selectFile((hit as any)._key);
                   setActiveTab(hit.type as TabId);
                   setEntitySearchOpen(false);
@@ -864,33 +926,63 @@ export function App() {
               }}
               className="vr-entity-search-input"
             />
+            {entitySearch.trim() && (
+              <div style={{ fontSize: 10, color: "#666", padding: "2px 0 0" }}>
+                {entitySearchResults.length} result{entitySearchResults.length !== 1 ? "s" : ""}
+                {entitySearchResults.length >= 50 && " (limit)"}
+              </div>
+            )}
           </div>
           <div className="vr-entity-search-results">
+            {!entitySearch.trim() && searchHistory.length > 0 && (
+              <div style={{ padding: "6px 8px" }}>
+                <div style={{ fontSize: 9, color: "#666", textTransform: "uppercase", marginBottom: 4 }}>Recent</div>
+                {searchHistory.map((h, i) => (
+                  <div
+                    key={`hist-${i}`}
+                    className="vr-entity-search-item"
+                    onClick={() => { setEntitySearch(h); setEntitySearchIdx(0); }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <span style={{ fontSize: 11, color: "#888" }}>&#x1F50D; {h}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {entitySearch.trim() && entitySearchResults.length === 0 && (
               <div style={{ color: "#888", fontSize: 12, padding: 8 }}>No matches</div>
             )}
-            {entitySearchResults.map((e, i) => (
-              <div
-                key={`es-${i}`}
-                ref={i === entitySearchIdx ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
-                className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
-                onClick={() => {
-                  selectFile((e as any)._key);
-                  setActiveTab(e.type as TabId);
-                  setEntitySearchOpen(false);
-                  setTimeout(() => {
-                    setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line || e.anchor.start_line });
-                  }, 100);
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span className="vr-entity-search-type">{e.type}</span>
-                  {e.detail.kind ? <span style={{ fontSize: 10, color: "#888" }}>({String(e.detail.kind)})</span> : null}
-                  <span className="vr-entity-search-name">{(e.detail.name as string) || e.summary}</span>
+            {entitySearchResults.map((e, i) => {
+              const q = entitySearch.toLowerCase().trim()
+                .replace(/^(?:type:|t:)\w+\s*/, "")
+                .replace(/^(?:file:|f:)\S+\s*/, "");
+              const nameStr = (e.detail.name as string) || e.summary;
+              return (
+                <div
+                  key={`es-${i}`}
+                  ref={i === entitySearchIdx ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
+                  className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
+                  onClick={() => {
+                    addSearchHistory(entitySearch.trim());
+                    selectFile((e as any)._key);
+                    setActiveTab(e.type as TabId);
+                    setEntitySearchOpen(false);
+                    setTimeout(() => {
+                      setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line || e.anchor.start_line });
+                    }, 100);
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span className="vr-entity-search-type">{e.type}</span>
+                    {e.detail.kind ? <span style={{ fontSize: 10, color: "#888" }}>({String(e.detail.kind)})</span> : null}
+                    <span className="vr-entity-search-name">
+                      {q ? highlightMatch(nameStr, q) : nameStr}
+                    </span>
+                  </div>
+                  <span className="vr-entity-search-file">{(e as any)._file}:{e.anchor.start_line}</span>
                 </div>
-                <span className="vr-entity-search-file">{(e as any)._file}:{e.anchor.start_line}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
