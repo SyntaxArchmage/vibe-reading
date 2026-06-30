@@ -74,3 +74,14 @@ export interface FlowDataType {
   edges: FlowEdge[];
   segments: FlowSegment[];
 }
+
+export interface CallGraphFile {
+  file: string;
+  imports: Array<{ source: string; names: string[] }>;
+  exports: string[];
+  calls: Array<{ callee: string; inFunction: string | null }>;
+}
+
+export interface CallGraph {
+  files: CallGraphFile[];
+}

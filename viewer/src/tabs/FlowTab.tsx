@@ -1,21 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { DataEntity } from "../shared-types";
+import type { DataEntity, CallGraph, CallGraphFile } from "../shared-types";
 import { matchesImportSource, isLocalSource } from "../utils/import-matching";
 import { DependencyGraph } from "../components/DependencyGraph";
-
-interface CallGraphFile {
-  file: string;
-  imports: Array<{ source: string; names: string[] }>;
-  exports: string[];
-  calls: Array<{ callee: string; inFunction: string | null }>;
-}
 
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
   currentFile?: string | null;
-  callGraph?: { files: CallGraphFile[] } | null;
+  callGraph?: CallGraph | null;
   onFileSelect?: (file: string) => void;
 }
 

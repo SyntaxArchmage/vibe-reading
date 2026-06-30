@@ -1,18 +1,12 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { DataEntity } from "../shared-types";
+import type { DataEntity, CallGraph } from "../shared-types";
 import { matchesImportSource } from "../utils/import-matching";
-
-interface CallGraphFile {
-  file: string;
-  imports: Array<{ source: string; names: string[] }>;
-  exports: string[];
-}
 
 interface Props {
   entities: DataEntity[];
   onCardClick: (entity: DataEntity) => void;
-  callGraph?: { files: CallGraphFile[] } | null;
+  callGraph?: CallGraph | null;
   currentFile?: string | null;
   onFileSelect?: (file: string) => void;
 }

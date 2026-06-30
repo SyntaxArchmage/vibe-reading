@@ -1,13 +1,7 @@
 import { useState, useMemo } from "react";
 import { AnimatePresence } from "motion/react";
 import { Card } from "../components/Card";
-import type { DataEntity } from "../shared-types";
-
-interface CallGraphFile {
-  file: string;
-  imports: Array<{ source: string; names: string[] }>;
-  exports: string[];
-}
+import type { DataEntity, CallGraph } from "../shared-types";
 
 interface Props {
   entities: DataEntity[];
@@ -15,7 +9,7 @@ interface Props {
   highlightEntity?: DataEntity | null;
   totalLines?: number;
   visibleRange?: { start: number; end: number } | null;
-  callGraph?: { files: CallGraphFile[] } | null;
+  callGraph?: CallGraph | null;
   currentFile?: string | null;
   onFileSelect?: (file: string) => void;
   bookmarks?: Set<string>;

@@ -6,21 +6,14 @@ import { JumpTab } from "./tabs/JumpTab";
 import { OutlineTab } from "./tabs/OutlineTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree, fileTreeStyles } from "./components/FileTree";
-import type { DataEntity, TabId } from "./shared-types";
+import type { DataEntity, TabId, CallGraph } from "./shared-types";
 
 declare const PREVIEW_DATA: Record<
   string,
   { file: string; entities: DataEntity[] }
 >;
 
-declare const CALL_GRAPH: {
-  files: Array<{
-    file: string;
-    imports: Array<{ source: string; names: string[] }>;
-    exports: string[];
-    calls: Array<{ callee: string; inFunction: string | null }>;
-  }>;
-} | null;
+declare const CALL_GRAPH: CallGraph | null;
 
 declare const VR_BASE: string | undefined;
 
@@ -347,6 +340,18 @@ export function App() {
       .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file)),
   []);
 
+  const fileKeyMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const f of allFiles) m.set(f.file, f.key);
+    return m;
+  }, [allFiles]);
+
+  const fileInfoMap = useMemo(() => {
+    const m = new Map<string, FileInfo>();
+    for (const f of allFiles) m.set(f.file, f);
+    return m;
+  }, [allFiles]);
+
   const filteredFiles = searchQuery.trim()
     ? (() => {
         const q = searchQuery.toLowerCase().trim();
@@ -417,14 +422,14 @@ export function App() {
       if (prev <= 0) return prev;
       const newIdx = prev - 1;
       const file = navHistoryRef.current[newIdx];
-      const fk = allFiles.find((f) => f.file === file)?.key;
+      const fk = fileKeyMap.get(file);
       if (fk) {
         selectFile(fk, true);
         return newIdx;
       }
       return prev;
     });
-  }, [allFiles, selectFile]);
+  }, [fileKeyMap, selectFile]);
 
   useEffect(() => {
     if (currentFile) {
@@ -446,14 +451,14 @@ export function App() {
       if (prev >= navHistoryRef.current.length - 1) return prev;
       const newIdx = prev + 1;
       const file = navHistoryRef.current[newIdx];
-      const fk = allFiles.find((f) => f.file === file)?.key;
+      const fk = fileKeyMap.get(file);
       if (fk) {
         selectFile(fk, true);
         return newIdx;
       }
       return prev;
     });
-  }, [allFiles, selectFile]);
+  }, [fileKeyMap, selectFile]);
 
   const [closedTabs, setClosedTabs] = useState<string[]>([]);
 
@@ -463,7 +468,7 @@ export function App() {
       setOpenFiles((prev) => {
         const next = prev.filter((f) => f !== file);
         if (file === currentFile && next.length > 0) {
-          const fileKey = allFiles.find((f) => f.file === next[next.length - 1])?.key;
+          const fileKey = fileKeyMap.get(next[next.length - 1]);
           if (fileKey) selectFile(fileKey);
         } else if (next.length === 0) {
           setCurrentFile(null);
@@ -473,21 +478,26 @@ export function App() {
         return next;
       });
     },
-    [currentFile, allFiles, selectFile]
+    [currentFile, fileKeyMap, selectFile]
   );
 
   const reopenTab = useCallback(() => {
     if (closedTabs.length === 0) return;
     const file = closedTabs[0];
     setClosedTabs(prev => prev.slice(1));
-    const fk = allFiles.find(f => f.file === file)?.key;
+    const fk = fileKeyMap.get(file);
     if (fk) selectFile(fk);
-  }, [closedTabs, allFiles, selectFile]);
+  }, [closedTabs, fileKeyMap, selectFile]);
+
+  const selectByFile = useCallback((file: string) => {
+    const fk = fileKeyMap.get(file);
+    if (fk) selectFile(fk);
+  }, [fileKeyMap, selectFile]);
 
   const onCardClick = useCallback((entity: DataEntity) => {
     if (entity.type === "jump" && entity.detail.target_file) {
       const targetFile = entity.detail.target_file as string;
-      const fk = allFiles.find((f) => f.file === targetFile)?.key;
+      const fk = fileKeyMap.get(targetFile);
       if (fk) {
         selectFile(fk);
         return;
@@ -497,7 +507,7 @@ export function App() {
       startLine: entity.anchor.start_line,
       endLine: entity.anchor.end_line || entity.anchor.start_line,
     });
-  }, [allFiles, selectFile]);
+  }, [fileKeyMap, selectFile]);
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -777,26 +787,17 @@ export function App() {
                            totalLines={sourceLines.length}
                            visibleRange={visibleRange}
                            callGraph={CALL_GRAPH} currentFile={currentFile}
-                           onFileSelect={(file) => {
-                             const fk = allFiles.find(f => f.file === file)?.key;
-                             if (fk) selectFile(fk);
-                           }}
+                           onFileSelect={selectByFile}
                            bookmarks={bookmarks}
                            onBookmark={toggleBookmark} />;
       case "flow":
-        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={(file) => {
-          const fk = allFiles.find(f => f.file === file)?.key;
-          if (fk) selectFile(fk);
-        }} />;
+        return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={selectByFile} />;
       case "history":
         return <HistoryTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile ?? undefined} />;
       case "jump":
         return <JumpTab entities={filtered} onCardClick={onCardClick}
                         callGraph={CALL_GRAPH} currentFile={currentFile}
-                        onFileSelect={(file) => {
-                          const fk = allFiles.find(f => f.file === file)?.key;
-                          if (fk) selectFile(fk);
-                        }} />;
+                        onFileSelect={selectByFile} />;
       case "outline":
         return <OutlineTab entities={entities} onCardClick={onCardClick} cursorLine={cursorLine} />;
     }
@@ -915,7 +916,7 @@ export function App() {
                 return commits ? <span className="vr-file-commits" title={`${commits} commits`}>{commits}c</span> : null;
               })()}
               {(() => {
-                const fi = allFiles.find(f => f.file === currentFile);
+                const fi = currentFile ? fileInfoMap.get(currentFile) : undefined;
                 return fi && fi.complexity > 0 ? (
                   <span title={`complexity score: ${fi.complexity}`} style={{
                     fontSize: 10, padding: "0 4px", borderRadius: 3, marginLeft: 2,
@@ -1003,8 +1004,8 @@ export function App() {
               >&#x2716;</button>
             )}
             {openFiles.map((file) => {
-              const fk = allFiles.find((f) => f.file === file)?.key;
-              const fi = allFiles.find((f) => f.file === file);
+              const fk = fileKeyMap.get(file);
+              const fi = fileInfoMap.get(file);
               return (
                 <div
                   key={file}
@@ -1073,7 +1074,7 @@ export function App() {
           {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
           {cursorLine > 0 && ` · Ln ${cursorLine}`}
           {currentFile && (() => {
-            const fi = allFiles.find(f => f.file === currentFile);
+            const fi = fileInfoMap.get(currentFile);
             return fi && fi.complexity > 0 ? ` · ${fi.complexity}cx` : "";
           })()}
           {sourceLines.length > 0 && ` · ${sourceLines.length} lines`}

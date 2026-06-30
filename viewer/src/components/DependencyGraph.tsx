@@ -1,14 +1,9 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { matchesImportSource, isLocalSource } from "../utils/import-matching";
-
-interface CallGraphFile {
-  file: string;
-  imports: Array<{ source: string; names: string[] }>;
-  exports: string[];
-}
+import type { CallGraph, CallGraphFile } from "../shared-types";
 
 interface Props {
-  callGraph: { files: CallGraphFile[] };
+  callGraph: CallGraph;
   currentFile?: string | null;
   onFileSelect?: (file: string) => void;
 }
