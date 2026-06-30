@@ -29,7 +29,7 @@ function JumpCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
     >
       <div className="vr-card-header">
         <div className="vr-card-left">
-          <span className="vr-card-badge" style={{ color: "#c586c0", borderColor: "#c586c055" }}>
+          <span className="vr-card-badge vr-jump-badge-out">
             &#x2192; jump
           </span>
           <div className="vr-card-title-group">
@@ -70,7 +70,7 @@ function ImportedByCard({ file, names, onFileSelect }: {
     >
       <div className="vr-card-header">
         <div className="vr-card-left">
-          <span className="vr-card-badge" style={{ color: "#4ec9b0", borderColor: "#4ec9b055" }}>
+          <span className="vr-card-badge vr-jump-badge-in">
             &#x2190; imported by
           </span>
           <div className="vr-card-title-group">
@@ -122,23 +122,23 @@ export function JumpTab({ entities, onCardClick, callGraph, currentFile, onFileS
             {entities.length > 0 && (
               <>
                 <text x={30} y={28} fontSize={9} fill="var(--vr-fg-dim)" textAnchor="middle">{entities.length} dep{entities.length > 1 ? "s" : ""}</text>
-                <line x1={60} y1={24} x2={120} y2={24} stroke="#c586c0" strokeWidth={1.5} markerEnd="url(#jump-arrow-out)" />
+                <line x1={60} y1={24} x2={120} y2={24} className="vr-jump-line-out" strokeWidth={1.5} markerEnd="url(#jump-arrow-out)" />
               </>
             )}
             <rect x={120} y={10} width={60} height={28} rx={4} fill="var(--vr-bg-tertiary)" stroke="var(--vr-accent)" strokeWidth={1.5} />
             <text x={150} y={28} fontSize={9} fill="var(--vr-fg)" textAnchor="middle" fontWeight="bold">{shortName.length > 10 ? shortName.slice(0, 9) + "…" : shortName}</text>
             {importedBy.length > 0 && (
               <>
-                <line x1={180} y1={24} x2={240} y2={24} stroke="#4ec9b0" strokeWidth={1.5} markerEnd="url(#jump-arrow-in)" />
+                <line x1={180} y1={24} x2={240} y2={24} className="vr-jump-line-in" strokeWidth={1.5} markerEnd="url(#jump-arrow-in)" />
                 <text x={270} y={28} fontSize={9} fill="var(--vr-fg-dim)" textAnchor="middle">{importedBy.length} user{importedBy.length > 1 ? "s" : ""}</text>
               </>
             )}
             <defs>
               <marker id="jump-arrow-out" viewBox="0 0 10 10" refX="10" refY="5" markerWidth={5} markerHeight={5} orient="auto">
-                <path d="M0,0 L10,5 L0,10 z" fill="#c586c0" />
+                <path d="M0,0 L10,5 L0,10 z" className="vr-jump-arrow-out-fill" />
               </marker>
               <marker id="jump-arrow-in" viewBox="0 0 10 10" refX="10" refY="5" markerWidth={5} markerHeight={5} orient="auto">
-                <path d="M0,0 L10,5 L0,10 z" fill="#4ec9b0" />
+                <path d="M0,0 L10,5 L0,10 z" className="vr-jump-arrow-in-fill" />
               </marker>
             </defs>
           </svg>

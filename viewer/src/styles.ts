@@ -940,6 +940,18 @@ export const sidebarStyles = `
 .vr-jump-reason { padding: 0 10px 8px; font-size: 11px; color: var(--vr-fg-dimmer); }
 .vr-jump-heading { font-size: 11px; color: var(--vr-fg-dim); padding: 4px 8px 2px; font-weight: 600; }
 .vr-jump-overview { padding: 4px 8px; border-bottom: 1px solid var(--vr-border); }
+.vr-jump-badge-out { color: #c586c0; border-color: rgba(197,134,192,0.33); }
+.vr-jump-badge-in { color: #4ec9b0; border-color: rgba(78,201,176,0.33); }
+.vr-layout--light .vr-jump-badge-out { color: #af00db; border-color: rgba(175,0,219,0.25); }
+.vr-layout--light .vr-jump-badge-in { color: #16825d; border-color: rgba(22,130,93,0.25); }
+.vr-jump-line-out { stroke: #c586c0; }
+.vr-jump-line-in { stroke: #4ec9b0; }
+.vr-jump-arrow-out-fill { fill: #c586c0; }
+.vr-jump-arrow-in-fill { fill: #4ec9b0; }
+.vr-layout--light .vr-jump-line-out { stroke: #af00db; }
+.vr-layout--light .vr-jump-line-in { stroke: #16825d; }
+.vr-layout--light .vr-jump-arrow-out-fill { fill: #af00db; }
+.vr-layout--light .vr-jump-arrow-in-fill { fill: #16825d; }
 
 /* Responsive layout */
 @media (max-width: 900px) {

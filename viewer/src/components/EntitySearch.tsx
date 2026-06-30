@@ -25,12 +25,11 @@ export function EntitySearch({ allEntities, currentFile, onSelect, onClose }: En
 
   const addHistory = useCallback((q: string) => {
     if (!q.trim()) return;
-    setHistory(prev => {
-      const next = [q, ...prev.filter(h => h !== q)].slice(0, 8);
-      try { localStorage.setItem("vr-search-history", JSON.stringify(next)); } catch {}
-      return next;
-    });
-  }, []);
+    const prev = history;
+    const next = [q, ...prev.filter(h => h !== q)].slice(0, 8);
+    try { localStorage.setItem("vr-search-history", JSON.stringify(next)); } catch {}
+    setHistory(next);
+  }, [history]);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];

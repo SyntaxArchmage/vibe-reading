@@ -358,6 +358,42 @@ def main() -> int:
         page.wait_for_timeout(300)
         check("Restored to dark", page.locator(".vr-layout--light").count() == 0)
 
+        # 20e. Entity Search
+        print("\n--- 20e. Entity Search ---")
+        page.keyboard.press("Control+Shift+F")
+        page.wait_for_timeout(500)
+        search_panel = page.locator(".vr-entity-search-panel")
+        check("Ctrl+Shift+F opens search", search_panel.count() > 0)
+        search_input = search_panel.locator(".vr-entity-search-input")
+        if search_input.count() > 0:
+            search_input.type("LLM")
+            page.wait_for_timeout(300)
+            search_items = search_panel.locator(".vr-entity-search-item")
+            check("Search results appear", search_items.count() > 0)
+            search_count = search_panel.locator(".vr-entity-search-count")
+            check("Result count shown", search_count.count() > 0)
+            search_input.press("ArrowDown")
+            page.wait_for_timeout(200)
+            active_item = search_panel.locator(".vr-entity-search-item--active")
+            check("Arrow key navigates", active_item.count() > 0)
+            search_input.press("Enter")
+            page.wait_for_timeout(500)
+            check("Enter selects result", search_panel.count() == 0)
+        page.wait_for_timeout(500)
+        page.keyboard.press("Control+Shift+F")
+        page.wait_for_timeout(800)
+        search_panel2 = page.locator(".vr-entity-search-panel")
+        check("Search panel reopens", search_panel2.count() > 0)
+        if search_panel2.count() > 0:
+            ls_works = page.evaluate('() => { try { localStorage.setItem("_t", "1"); localStorage.removeItem("_t"); return true; } catch { return false; } }')
+            if ls_works:
+                has_history = page.evaluate('() => { try { const h = localStorage.getItem("vr-search-history"); return h && JSON.parse(h).length > 0; } catch { return false; } }')
+                check("Search history in storage", has_history)
+            else:
+                check("Search history in storage", True, "localStorage unavailable (file://)")
+            page.keyboard.press("Escape")
+            page.wait_for_timeout(300)
+
         # 21. Source Content
         print("\n--- 21. Source Content ---")
         src = page.evaluate(
