@@ -120,6 +120,10 @@ export function App() {
   const [showEntityGraph, setShowEntityGraph] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
+  const scrollPositions = useRef<Map<string, number>>(new Map());
+  const handleScrollChange = useCallback((topLine: number) => {
+    if (currentFile) scrollPositions.current.set(currentFile, topLine);
+  }, [currentFile]);
   const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
   const [gotoLineOpen, setGotoLineOpen] = useState(false);
   const [gotoLineValue, setGotoLineValue] = useState("");
@@ -998,6 +1002,8 @@ export function App() {
               hoverRange={hoverRange}
               onHoverLine={onHoverLine}
               editorTheme={theme === "light" ? "vs" : "vs-dark"}
+              initialScrollLine={currentFile ? scrollPositions.current.get(currentFile) : undefined}
+              onScrollChange={handleScrollChange}
             />
           ) : (
             <div className="vr-editor-placeholder">

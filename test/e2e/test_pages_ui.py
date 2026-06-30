@@ -422,6 +422,20 @@ def main() -> int:
             check("Bookmark persisted", True, "skipped")
             check("Unbookmark works", True, "skipped")
 
+        # 20g-1. Flow Tab Details
+        print("\n--- 20g-1. Flow Tab Details ---")
+        flow_tab = page.locator(".vr-tab", has_text="Flow")
+        if flow_tab.count() > 0:
+            flow_tab.click()
+            page.wait_for_timeout(500)
+            flow_cards = page.locator(".vr-card")
+            check("Flow has cards", flow_cards.count() > 0)
+            if flow_cards.count() > 0:
+                flow_badge = flow_cards.first.locator(".vr-card-badge")
+                check("Flow card has badge", flow_badge.count() > 0)
+        page.locator(".vr-tab", has_text="Concept").click()
+        page.wait_for_timeout(300)
+
         # 20g. Outline Tab Details
         print("\n--- 20g. Outline Tab Details ---")
         outline_tab = page.locator(".vr-tab", has_text="Outline")

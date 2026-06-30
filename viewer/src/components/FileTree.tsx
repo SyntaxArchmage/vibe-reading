@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 
 interface FileTreeProps {
-  files: { key: string; file: string; count: number; commits: number }[];
+  files: { key: string; file: string; count: number; commits: number; complexity?: number }[];
   currentFile: string | null;
   onSelect: (key: string) => void;
 }
@@ -183,6 +183,11 @@ function DirNode({
                 </span>
                 {f.count > 0 && (
                   <span className="vr-tree-file-count">{f.count}</span>
+                )}
+                {f.complexity != null && f.complexity > 0 && (
+                  <span className={`vr-tree-cx ${f.complexity > 10 ? "vr-tree-cx--high" : f.complexity > 5 ? "vr-tree-cx--mid" : "vr-tree-cx--low"}`}
+                        title={`complexity: ${f.complexity}`}
+                  />
                 )}
               </div>
             );
@@ -455,6 +460,19 @@ export const fileTreeStyles = `
     flex-shrink: 0;
     margin-right: 4px;
   }
+  .vr-tree-cx {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: 3px;
+  }
+  .vr-tree-cx--low { background: #4ec9b0; }
+  .vr-tree-cx--mid { background: #dcdcaa; }
+  .vr-tree-cx--high { background: #f44747; }
+  .vr-layout--light .vr-tree-cx--low { background: #16825d; }
+  .vr-layout--light .vr-tree-cx--mid { background: #8b6914; }
+  .vr-layout--light .vr-tree-cx--high { background: #c72e2e; }
 
   /* Light theme overrides */
   .vr-layout--light .vr-tree-header { color: #555; border-bottom-color: #e0e0e0; }

@@ -33,6 +33,8 @@ interface MonacoEditorProps {
   hoverRange?: { startLine: number; endLine: number } | null;
   onHoverLine?: (line: number | null) => void;
   editorTheme?: string;
+  initialScrollLine?: number;
+  onScrollChange?: (topLine: number) => void;
 }
 
 function detectLanguage(filePath: string): string {
@@ -77,7 +79,7 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos, hoverRange, onHoverLine, editorTheme = "vs-dark" }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos, hoverRange, onHoverLine, editorTheme = "vs-dark", initialScrollLine, onScrollChange }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
@@ -139,6 +141,10 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
       }
     }
 
+    if (editorRef.current && initialScrollLine && initialScrollLine > 1) {
+      editorRef.current.revealLineInCenter(initialScrollLine);
+    }
+
     return () => {
       // Don't dispose on re-render, only on unmount
     };
@@ -172,6 +178,16 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
     const disposable = editor.onDidScrollChange(report);
     return () => disposable.dispose();
   }, [ready, onVisibleRange]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !onScrollChange) return;
+    const disposable = editor.onDidScrollChange(() => {
+      const ranges = editor.getVisibleRanges();
+      if (ranges.length > 0) onScrollChange(ranges[0].startLineNumber);
+    });
+    return () => disposable.dispose();
+  }, [ready, onScrollChange]);
 
   useEffect(() => {
     if (!ready || !hoverInfos?.length) return;
