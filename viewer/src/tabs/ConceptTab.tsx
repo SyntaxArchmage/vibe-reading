@@ -22,11 +22,12 @@ interface Props {
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
 
-function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
+function DensityBar({ entities, totalLines, onCardClick, visibleRange, highlightEntity }: {
   entities: DataEntity[];
   totalLines: number;
   onCardClick: (e: DataEntity) => void;
   visibleRange?: { start: number; end: number } | null;
+  highlightEntity?: DataEntity | null;
 }) {
   if (totalLines <= 0) return null;
   const handleBarClick = (ev: React.MouseEvent<HTMLDivElement>) => {
@@ -52,8 +53,10 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
         const width = Math.max(((e.anchor.end_line - e.anchor.start_line + 1) / totalLines) * 100, 0.5);
         const kind = (e.detail.node_type as string || "other").toLowerCase();
         const color = KIND_COLORS[kind] || "#b5cea8";
+        const isHighlight = highlightEntity === e;
         return (
-          <div key={i} className="vr-density-entity" onClick={(ev) => { ev.stopPropagation(); onCardClick(e); }}
+          <div key={i} className={`vr-density-entity ${isHighlight ? "vr-density-entity--active" : ""}`}
+               onClick={(ev) => { ev.stopPropagation(); onCardClick(e); }}
                title={`${(e.detail.name as string) || e.summary} (L${e.anchor.start_line})`}
                style={{ left: `${left}%`, width: `${width}%`, background: color }} />
         );
@@ -138,7 +141,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
   ) : null;
 
   const densityBar = totalLines && totalLines > 0
-    ? <DensityBar entities={filteredEntities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
+    ? <DensityBar entities={filteredEntities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} highlightEntity={highlightEntity} />
     : null;
 
   const miniGraph = showGraph ? (

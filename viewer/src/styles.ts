@@ -909,7 +909,12 @@ export const sidebarStyles = `
 .vr-layout--light .vr-density-viewport { background: rgba(0,0,0,0.06); }
 .vr-density-entity {
   position: absolute; top: 0; bottom: 0; opacity: 0.5; border-right: 1px solid var(--vr-bg-secondary);
+  transition: opacity 0.15s;
 }
+.vr-density-entity--active {
+  opacity: 1; box-shadow: 0 0 2px 1px var(--vr-accent); z-index: 1;
+}
+.vr-density-entity:hover { opacity: 0.8; }
 
 /* ConceptTab group */
 .vr-concept-group-header {

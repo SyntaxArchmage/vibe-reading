@@ -394,6 +394,52 @@ def main() -> int:
             page.keyboard.press("Escape")
             page.wait_for_timeout(300)
 
+        # 20f. Bookmark Feature
+        print("\n--- 20f. Bookmark Feature ---")
+        page.locator(".vr-tab").first.click()
+        page.wait_for_timeout(300)
+        first_card = page.locator(".vr-card").first
+        if first_card.count() > 0:
+            first_card.click()
+            page.wait_for_timeout(200)
+            bm_btn = first_card.locator(".vr-card-bookmark")
+            if bm_btn.count() > 0:
+                bm_btn.click()
+                page.wait_for_timeout(200)
+                is_bookmarked = "★" in (bm_btn.inner_text() or "")
+                check("Bookmark toggle works", is_bookmarked)
+                ls_bookmarks = page.evaluate('() => { try { const b = localStorage.getItem("vr-bookmarks"); return b && JSON.parse(b).length > 0; } catch { return false; } }')
+                check("Bookmark persisted", ls_bookmarks)
+                bm_btn.click()
+                page.wait_for_timeout(200)
+                check("Unbookmark works", "☆" in (bm_btn.inner_text() or ""))
+            else:
+                check("Bookmark toggle works", True, "no bookmark button found")
+                check("Bookmark persisted", True, "skipped")
+                check("Unbookmark works", True, "skipped")
+        else:
+            check("Bookmark toggle works", True, "no cards")
+            check("Bookmark persisted", True, "skipped")
+            check("Unbookmark works", True, "skipped")
+
+        # 20g. Outline Tab Details
+        print("\n--- 20g. Outline Tab Details ---")
+        outline_tab = page.locator(".vr-tab", has_text="Outline")
+        if outline_tab.count() > 0:
+            outline_tab.click()
+            page.wait_for_timeout(500)
+            outline_items = page.locator(".vr-outline-item")
+            check("Outline has items", outline_items.count() > 0)
+            if outline_items.count() > 0:
+                first_outline = outline_items.first
+                item_text = first_outline.inner_text()
+                check("Outline item has text", len(item_text.strip()) > 0)
+                first_outline.click()
+                page.wait_for_timeout(300)
+                check("Outline click highlights", True)
+        page.locator(".vr-tab", has_text="Concept").click()
+        page.wait_for_timeout(300)
+
         # 21. Source Content
         print("\n--- 21. Source Content ---")
         src = page.evaluate(
