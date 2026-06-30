@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
 import { matchesImportSource, isLocalSource } from "../utils/import-matching";
+import { DependencyGraph } from "../components/DependencyGraph";
 
 interface CallGraphFile {
   file: string;
@@ -262,8 +263,36 @@ export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileS
   const exportNames = exports.flatMap(e => (e.detail.names as string[]) || []);
   const totalImports = localDeps.length + externalDeps.length;
 
+  const [showGraph, setShowGraph] = useState(true);
+
   return (
     <div>
+      {callGraph && callGraph.files.length > 1 && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "flex-end",
+          padding: "2px 8px 0", fontSize: 10,
+        }}>
+          <button
+            onClick={() => setShowGraph(!showGraph)}
+            style={{
+              background: showGraph ? "rgba(0,122,204,0.15)" : "#2d2d2d",
+              border: "1px solid " + (showGraph ? "#007acc55" : "#3c3c3c"),
+              color: showGraph ? "#007acc" : "#888",
+              borderRadius: 3, padding: "2px 8px", cursor: "pointer",
+              fontSize: 10, fontFamily: "inherit",
+            }}
+          >
+            {showGraph ? "▼ Graph" : "▶ Graph"}
+          </button>
+        </div>
+      )}
+      {showGraph && callGraph && (
+        <DependencyGraph
+          callGraph={callGraph}
+          currentFile={currentFile}
+          onFileSelect={onFileSelect}
+        />
+      )}
       <FlowDiagram imports={imports} calls={calls} exports={exports} />
       {(totalImports > 0 || exportNames.length > 0) && (
         <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "0 0 6px" }}>
