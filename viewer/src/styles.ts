@@ -674,6 +674,13 @@ export const sidebarStyles = `
 .vr-card-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .vr-card-loc { font-size: 10px; color: var(--vr-fg-dim); white-space: nowrap; font-family: monospace; }
 .vr-card-lines { font-size: 10px; color: var(--vr-fg-dim); opacity: 0.6; }
+.vr-card-bookmark {
+  cursor: pointer; font-size: 12px; opacity: 0.3; margin-right: 2px;
+  transition: opacity 0.15s;
+}
+.vr-card-bookmark:hover { opacity: 0.7; }
+.vr-card-bookmark--active { opacity: 1; color: #dcdcaa; }
+.vr-layout--light .vr-card-bookmark--active { color: #795e26; }
 .vr-card-chevron { font-size: 10px; color: var(--vr-fg-dim); transition: transform 0.2s; opacity: 0.5; }
 .vr-card-chevron--open { transform: rotate(90deg); }
 
@@ -710,6 +717,7 @@ export const sidebarStyles = `
 .vr-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
 .vr-card-chip { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: var(--vr-bg-tertiary); color: var(--vr-fg-dim); white-space: nowrap; }
 .vr-card-chip--enriched { background: #1a3a2a; color: #4ec9b0; }
+.vr-card-chip--mono { font-family: monospace; }
 
 .vr-card-params { font-size: 11px; color: #9cdcfe; margin-top: 4px; font-family: monospace; }
 .vr-card-usages { margin-top: 6px; font-size: 11px; }

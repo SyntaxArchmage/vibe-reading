@@ -97,14 +97,14 @@ function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
             {kind === "calls" && (
               <div className="vr-card-chips">
                 {(entity.detail.callees as string[])?.map((c) => (
-                  <span key={c} className="vr-card-chip" style={{ fontFamily: "monospace" }}>{c}</span>
+                  <span key={c} className="vr-card-chip vr-card-chip--mono">{c}</span>
                 ))}
               </div>
             )}
             {kind === "exports" && (
               <div className="vr-card-chips">
                 {(entity.detail.names as string[])?.map((n) => (
-                  <span key={n} className="vr-card-chip" style={{ fontFamily: "monospace" }}>{n}</span>
+                  <span key={n} className="vr-card-chip vr-card-chip--mono">{n}</span>
                 ))}
               </div>
             )}

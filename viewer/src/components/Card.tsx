@@ -92,12 +92,7 @@ export function Card({
         <div className="vr-card-meta">
           {onBookmark && (
             <span
-              style={{
-                cursor: "pointer",
-                fontSize: 12,
-                opacity: bookmarked ? 1 : 0.3,
-                marginRight: 2,
-              }}
+              className={`vr-card-bookmark ${bookmarked ? "vr-card-bookmark--active" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onBookmark();
