@@ -1239,7 +1239,15 @@ export function App() {
           ))}
         </span>
         <span className="vr-statusbar-right">
-          {currentFile && `${entities.filter(e => e.type === "concept").length} concepts`}
+          {currentFile && (() => {
+            const concepts = entities.filter(e => e.type === "concept");
+            const enriched = concepts.filter(e => {
+              const d = e.detail.description as string | undefined;
+              return d && !/^(function|class|interface|type|enum|method|struct|impl|trait|module|decorated) ".+" spanning \d+ lines\.$/.test(d);
+            });
+            const pct = concepts.length > 0 ? Math.round(enriched.length / concepts.length * 100) : 0;
+            return `${concepts.length} concepts (${pct}%)`;
+          })()}
           {cursorLine > 0 && ` · Ln ${cursorLine}`}
           {currentFile && (() => {
             const fi = fileInfoMap.get(currentFile);
@@ -1378,21 +1386,30 @@ export function App() {
           <div className="vr-help-title">Keyboard Shortcuts</div>
           <div className="vr-help-grid">
             <kbd>Ctrl+P</kbd><span>File picker</span>
-            <kbd>Ctrl+Shift+F</kbd><span>Entity search</span>
+            <kbd>Ctrl+Shift+F</kbd><span>Entity search (fuzzy)</span>
             <kbd>Ctrl+Shift+O</kbd><span>Go to symbol</span>
+            <kbd>Ctrl+Shift+E</kbd><span>Focus file filter</span>
             <kbd>Ctrl+B</kbd><span>Toggle explorer</span>
             <kbd>Ctrl+D</kbd><span>Bookmark entity</span>
             <kbd>Ctrl+G</kbd><span>Go to line</span>
             <kbd>Ctrl+W</kbd><span>Close tab</span>
             <kbd>Ctrl+Shift+T</kbd><span>Reopen closed tab</span>
-            <kbd>Alt+1-5</kbd><span>Switch tab</span>
+            <kbd>Alt+1-5</kbd><span>Switch panel tab</span>
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
             <kbd>[ / ]</kbd><span>Previous/next file</span>
+            <kbd>j / k</kbd><span>Focus prev/next card</span>
             <kbd>?</kbd><span>Toggle this help</span>
             <kbd>Esc</kbd><span>Close overlays</span>
           </div>
           <div className="vr-help-footer">
-            <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
+            <div style={{ marginBottom: 4 }}>
+              <strong style={{ color: "#ccc" }}>Search syntax:</strong>{" "}
+              <code>t:concept</code> filter by type · <code>f:utils</code> filter by file
+            </div>
+            <div>
+              <strong style={{ color: "#ccc" }}>Activity bar:</strong>{" "}
+              &#x1F4C1; Explorer · &#x1F50D; Search · &#x1F525; Heatmap · &#x2600;&#xFE0F;/&#x1F319; Theme
+            </div>
           </div>
           <div style={{ marginTop: 8, fontSize: 11, color: "#888" }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Entity Types</div>
