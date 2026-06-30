@@ -1170,14 +1170,31 @@ export function App() {
                 style={{ fontSize: 10 }}
               >&#x2716;</button>
             )}
-            {openFiles.map((file) => {
+            {openFiles.map((file, tabIdx) => {
               const fk = fileKeyMap.get(file);
               const fi = fileInfoMap.get(file);
               return (
                 <div
                   key={file}
                   className={`vr-tab-item ${file === currentFile ? "vr-tab-item--active" : ""}`}
+                  draggable
                   onClick={() => fk && selectFile(fk)}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData("text/plain", String(tabIdx));
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const fromIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+                    if (isNaN(fromIdx) || fromIdx === tabIdx) return;
+                    setOpenFiles(prev => {
+                      const next = [...prev];
+                      const [moved] = next.splice(fromIdx, 1);
+                      next.splice(tabIdx, 0, moved);
+                      return next;
+                    });
+                  }}
                   title={fi ? `${fi.count} entities · ${fi.complexity}cx` : file}
                 >
                   <span className="vr-tab-item-label">{file.split("/").pop()}</span>
@@ -1229,6 +1246,10 @@ export function App() {
                   startLine: be.anchor.start_line,
                   endLine: be.anchor.end_line,
                 });
+                const idx = filtered.findIndex(e =>
+                  e.anchor.start_line === be.anchor.start_line && e.detail.name === be.detail.name
+                );
+                if (idx >= 0) setFocusedCardIdx(idx);
               }}
               title={`${be.detail.kind}: ${be.detail.name} (L${be.anchor.start_line}–${be.anchor.end_line})`}
             >
