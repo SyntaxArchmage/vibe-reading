@@ -243,7 +243,8 @@ function AuthorBar({ commits }: { commits: Array<{ author: string }> }) {
 }
 
 export function HistoryTab({ entities, onCardClick, currentFile }: Props) {
-  if (entities.length === 0 && !currentFile) {
+  const isStatic = typeof (globalThis as any).VR_BASE === "string";
+  if (entities.length === 0 && (isStatic || !currentFile)) {
     return <div className="vr-no-cards">No history cards for this file.</div>;
   }
 

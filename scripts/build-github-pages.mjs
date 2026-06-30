@@ -95,9 +95,9 @@ function main() {
 
   const template = fs.readFileSync(path.join(VIEWER_DIR, "index.html"), "utf-8");
   const dataScript = `<script>
-const VR_BASE = "/vibe-reading/";
-const PREVIEW_DATA = ${safeJson(analysisData)};
-const CALL_GRAPH = ${safeJson(callGraph)};
+var VR_BASE = "/vibe-reading/";
+var PREVIEW_DATA = ${safeJson(analysisData)};
+var CALL_GRAPH = ${safeJson(callGraph)};
 </script>`;
 
   const html = template

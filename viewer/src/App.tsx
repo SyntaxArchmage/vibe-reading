@@ -254,6 +254,16 @@ export function App() {
   const treeResize = useResizable(220, 120, 400);
   const sidebarResize = useResizable(340, 240, 600);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) setTreeOpen(false);
+    };
+    handler(mq);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const allEntities = useMemo(() =>
     Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
       (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
@@ -608,13 +618,27 @@ export function App() {
       .slice(0, 20);
   }, [symbolOpen, symbolQuery, entities]);
 
-  // Reset focused card when file or tab changes
   useEffect(() => { setFocusedCardIdx(null); }, [currentFile, activeTab]);
+
+  useEffect(() => {
+    const container = document.querySelector(".vr-content");
+    if (!container) return;
+    const cards = container.querySelectorAll(".vr-card");
+    cards.forEach((c, i) => {
+      c.classList.toggle("vr-card--focused", i === focusedCardIdx);
+    });
+    if (focusedCardIdx != null && cards[focusedCardIdx]) {
+      cards[focusedCardIdx].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [focusedCardIdx]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "p") {
         e.preventDefault();
+        setGotoLineOpen(false);
+        setSymbolOpen(false);
+        setSearchQuery("");
         setPickerOpen(true);
         setTimeout(() => searchRef.current?.focus(), 0);
         return;
@@ -629,6 +653,8 @@ export function App() {
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "O") {
         e.preventDefault();
+        setPickerOpen(false);
+        setGotoLineOpen(false);
         setSymbolOpen(true);
         setSymbolQuery("");
         setSymbolIdx(0);
@@ -643,6 +669,8 @@ export function App() {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "g") {
         e.preventDefault();
+        setPickerOpen(false);
+        setSymbolOpen(false);
         setGotoLineOpen(true);
         setGotoLineValue("");
         setTimeout(() => gotoLineRef.current?.focus(), 0);
@@ -693,7 +721,8 @@ export function App() {
       }
 
       const tag = (e.target as HTMLElement)?.tagName;
-      if (pickerOpen || entitySearchOpen || symbolOpen || gotoLineOpen || helpOpen || tag === "INPUT" || tag === "TEXTAREA") return;
+      const inEditor = !!(e.target as HTMLElement)?.closest(".vr-editor-wrap");
+      if (pickerOpen || entitySearchOpen || symbolOpen || gotoLineOpen || helpOpen || tag === "INPUT" || (tag === "TEXTAREA" && !inEditor)) return;
 
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -1345,7 +1374,8 @@ const layoutStyles = `
   }
 
   .vr-sidebar {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 200px;
     border-right: 1px solid #3c3c3c;
     display: flex;
     flex-direction: column;
@@ -1875,6 +1905,12 @@ const sidebarStyles = `
   .vr-card:hover {
     border-color: #007acc;
     box-shadow: 0 0 0 1px rgba(0,122,204,0.15);
+  }
+
+  .vr-card--focused {
+    border-color: #007acc;
+    box-shadow: 0 0 0 1px rgba(0,122,204,0.3);
+    background: #1a2233;
   }
 
   .vr-card-highlight {
