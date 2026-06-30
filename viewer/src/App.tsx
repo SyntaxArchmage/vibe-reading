@@ -637,28 +637,30 @@ export function App() {
     [hoverSource]
   );
 
-  const filtered = entities
-    .filter((e) => {
-      if (e.type !== activeTab) return false;
-      if (!cardFilter.trim()) return true;
-      const q = cardFilter.toLowerCase();
-      return e.summary.toLowerCase().includes(q) ||
-        (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
-        (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
-    })
-    .sort((a, b) => {
-      if (cardSort === "name") {
-        const na = String(a.detail?.name || a.summary).toLowerCase();
-        const nb = String(b.detail?.name || b.summary).toLowerCase();
-        return na.localeCompare(nb);
-      }
-      if (cardSort === "kind") {
-        const ka = String(a.detail?.kind || "").toLowerCase();
-        const kb = String(b.detail?.kind || "").toLowerCase();
-        return ka.localeCompare(kb) || a.anchor.start_line - b.anchor.start_line;
-      }
-      return a.anchor.start_line - b.anchor.start_line;
-    });
+  const filtered = useMemo(() => {
+    const q = cardFilter.toLowerCase().trim();
+    return entities
+      .filter((e) => {
+        if (e.type !== activeTab) return false;
+        if (!q) return true;
+        return e.summary.toLowerCase().includes(q) ||
+          (e.detail?.name && String(e.detail.name).toLowerCase().includes(q)) ||
+          (e.detail?.kind && String(e.detail.kind).toLowerCase().includes(q));
+      })
+      .sort((a, b) => {
+        if (cardSort === "name") {
+          const na = String(a.detail?.name || a.summary).toLowerCase();
+          const nb = String(b.detail?.name || b.summary).toLowerCase();
+          return na.localeCompare(nb);
+        }
+        if (cardSort === "kind") {
+          const ka = String(a.detail?.kind || "").toLowerCase();
+          const kb = String(b.detail?.kind || "").toLowerCase();
+          return ka.localeCompare(kb) || a.anchor.start_line - b.anchor.start_line;
+        }
+        return a.anchor.start_line - b.anchor.start_line;
+      });
+  }, [entities, activeTab, cardFilter, cardSort]);
 
   const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
 
