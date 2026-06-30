@@ -391,6 +391,109 @@ export const layoutStyles = `
 }
 .vr-help-footer { margin-top: 12px; font-size: 11px; color: #666; }
 .vr-help-footer code { background: #3c3c3c; padding: 1px 4px; border-radius: 2px; font-size: 10px; }
+
+/* ── Light theme ── */
+.vr-layout--light {
+  background: #f3f3f3;
+  color: #333;
+}
+.vr-layout--light .vr-activity-bar {
+  background: #e8e8e8;
+  border-right-color: #d4d4d4;
+}
+.vr-layout--light .vr-file-panel,
+.vr-layout--light .vr-entity-search-panel,
+.vr-layout--light .vr-heatmap-panel,
+.vr-layout--light .vr-sidebar {
+  background: #f9f9f9;
+  border-right-color: #d4d4d4;
+}
+.vr-layout--light .vr-tab-bar {
+  background: #f0f0f0;
+  border-bottom-color: #d4d4d4;
+}
+.vr-layout--light .vr-tab-item {
+  color: #555;
+  border-right-color: #d4d4d4;
+}
+.vr-layout--light .vr-tab-item--active {
+  background: #fff;
+  color: #333;
+}
+.vr-layout--light .vr-statusbar {
+  background: #2678ca;
+}
+.vr-layout--light .vr-card {
+  background: #fff;
+  border-color: #e0e0e0;
+}
+.vr-layout--light .vr-card:hover {
+  border-color: #0078d4;
+}
+.vr-layout--light .vr-card--focused {
+  border-color: #0078d4;
+  background: #e8f0ff;
+}
+.vr-layout--light .vr-card-name { color: #333; }
+.vr-layout--light .vr-card-summary,
+.vr-layout--light .vr-card-loc,
+.vr-layout--light .vr-card-detail { color: #666; }
+.vr-layout--light .vr-card-code-preview {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+}
+.vr-layout--light .vr-card-code-text { color: #333; }
+.vr-layout--light .vr-card-code-num { color: #999; }
+.vr-layout--light .vr-card-chip { background: #e8e8e8; color: #555; }
+.vr-layout--light .vr-content { scrollbar-color: #ccc transparent; }
+.vr-layout--light .vr-resize-handle:hover,
+.vr-layout--light .vr-resize-handle:active {
+  background: #0078d4;
+}
+.vr-layout--light .vr-picker {
+  background: #f9f9f9;
+  border-color: #d4d4d4;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+}
+.vr-layout--light .vr-picker-search,
+.vr-layout--light .vr-picker-input {
+  background: #fff;
+  color: #333;
+  border-color: #d4d4d4;
+}
+.vr-layout--light .vr-picker-item { color: #444; }
+.vr-layout--light .vr-picker-item:hover { background: #e8e8e8; }
+.vr-layout--light .vr-help-panel {
+  background: #fff;
+  border-color: #d4d4d4;
+}
+.vr-layout--light .vr-help-grid kbd { background: #e8e8e8; border-color: #d4d4d4; color: #333; }
+.vr-layout--light .vr-entity-search-input {
+  background: #fff;
+  color: #333;
+  border-color: #d4d4d4;
+}
+.vr-layout--light .vr-entity-search-item:hover { background: #e8f0ff; }
+.vr-layout--light .vr-entity-search-item--active { background: #cce0ff; }
+.vr-layout--light .vr-entity-search-type { background: #e8e8e8; color: #666; }
+.vr-layout--light .vr-entity-search-name { color: #333; }
+.vr-layout--light .vr-file-header { border-bottom-color: #e0e0e0; color: #666; }
+.vr-layout--light .vr-file-path { color: #333; }
+.vr-layout--light .vr-file-path:hover { color: #111; }
+.vr-layout--light .vr-card-detail { border-top-color: #e0e0e0; }
+.vr-layout--light .vr-tabs { border-bottom-color: #e0e0e0; }
+.vr-layout--light .vr-tab { color: #555; }
+.vr-layout--light .vr-tab--active { background: rgba(0,0,0,0.06); }
+.vr-layout--light .vr-sort-btn { background: #e8e8e8; border-color: #d4d4d4; color: #555; }
+.vr-layout--light .vr-sort-btn:hover:not(.vr-sort-btn--active) { background: #ddd; }
+.vr-layout--light .vr-card-filter-input {
+  background: #fff; color: #333; border-color: #d4d4d4;
+}
+.vr-layout--light .vr-breadcrumb { color: #555; }
+.vr-layout--light .vr-breadcrumb strong { color: #8a6d3b; }
+.vr-layout--light .vr-theme-btn {
+  background: #e8e8e8; color: #555; border-color: #d4d4d4;
+}
 `;
 
 export const sidebarStyles = `

@@ -554,4 +554,16 @@ export const fileHeatmapStyles = `
     gap: 16px;
     line-height: 1.6;
   }
+
+  /* Light theme overrides */
+  .vr-layout--light .vr-heatmap-header { color: #555; border-bottom-color: #e0e0e0; }
+  .vr-layout--light .vr-heatmap-mode-btn { color: #555; border-color: #ccc; }
+  .vr-layout--light .vr-heatmap-mode-btn:hover { color: #333; border-color: #999; }
+  .vr-layout--light .vr-heatmap-legend { border-bottom-color: #e0e0e0; }
+  .vr-layout--light .vr-heatmap-tooltip {
+    background: #fff;
+    border-color: #d4d4d4;
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
 `;

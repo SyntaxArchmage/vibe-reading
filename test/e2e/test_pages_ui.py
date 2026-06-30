@@ -297,6 +297,20 @@ def main() -> int:
         page.wait_for_timeout(300)
         check("Heatmap panel closes", page.locator(".vr-heatmap-panel").count() == 0)
 
+        # 20c. Theme Toggle
+        print("\n--- 20c. Theme Toggle ---")
+        theme_btn = page.locator(".vr-theme-btn")
+        check("Theme button exists", theme_btn.count() > 0)
+        dark_bg = page.evaluate('() => getComputedStyle(document.querySelector(".vr-layout")).backgroundColor')
+        theme_btn.click()
+        page.wait_for_timeout(500)
+        check("Light theme class applied", page.locator(".vr-layout--light").count() > 0)
+        light_bg = page.evaluate('() => getComputedStyle(document.querySelector(".vr-layout")).backgroundColor')
+        check("Background color changed", dark_bg != light_bg, f"dark={dark_bg} light={light_bg}")
+        theme_btn.click()
+        page.wait_for_timeout(500)
+        check("Dark theme restored", page.locator(".vr-layout--light").count() == 0)
+
         # 21. Source Content
         print("\n--- 21. Source Content ---")
         src = page.evaluate(

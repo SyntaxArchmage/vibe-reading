@@ -32,6 +32,7 @@ interface MonacoEditorProps {
   hoverInfos?: HoverInfo[];
   hoverRange?: { startLine: number; endLine: number } | null;
   onHoverLine?: (line: number | null) => void;
+  editorTheme?: string;
 }
 
 function detectLanguage(filePath: string): string {
@@ -76,7 +77,7 @@ function detectLanguage(filePath: string): string {
 
 export { detectLanguage };
 
-export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos, hoverRange, onHoverLine }: MonacoEditorProps) {
+export function MonacoEditor({ code, language, highlightRange, entityMarkers, onCursorLine, onVisibleRange, hoverInfos, hoverRange, onHoverLine, editorTheme = "vs-dark" }: MonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReturnType<typeof window.monaco.editor.create> | null>(null);
   const decorationsRef = useRef<string[]>([]);
@@ -116,7 +117,7 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
       editorRef.current = window.monaco.editor.create(containerRef.current, {
         value: code,
         language,
-        theme: "vs-dark",
+        theme: editorTheme,
         readOnly: true,
         minimap: { enabled: true },
         scrollBeyondLastLine: false,
@@ -142,6 +143,12 @@ export function MonacoEditor({ code, language, highlightRange, entityMarkers, on
       // Don't dispose on re-render, only on unmount
     };
   }, [ready, code, language]);
+
+  useEffect(() => {
+    if (ready && window.monaco) {
+      window.monaco.editor.setTheme(editorTheme);
+    }
+  }, [ready, editorTheme]);
 
   useEffect(() => {
     const editor = editorRef.current;

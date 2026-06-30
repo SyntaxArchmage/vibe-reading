@@ -448,4 +448,16 @@ export const fileTreeStyles = `
     flex-shrink: 0;
     margin-right: 4px;
   }
+
+  /* Light theme overrides */
+  .vr-layout--light .vr-tree-header { color: #555; border-bottom-color: #e0e0e0; }
+  .vr-layout--light .vr-tree-collapse-btn { color: #555; border-color: #ccc; }
+  .vr-layout--light .vr-tree-collapse-btn:hover { color: #333; border-color: #999; }
+  .vr-layout--light .vr-tree-filter { border-bottom-color: #e0e0e0; }
+  .vr-layout--light .vr-tree-filter-input { background: #fff; color: #333; border-color: #ccc; }
+  .vr-layout--light .vr-tree-dir { color: #444; }
+  .vr-layout--light .vr-tree-dir:hover { background: rgba(0,0,0,0.04); }
+  .vr-layout--light .vr-tree-file { color: #555; }
+  .vr-layout--light .vr-tree-file:hover { background: rgba(0,0,0,0.04); }
+  .vr-layout--light .vr-tree-file--active { background: rgba(0,120,212,0.12); color: #333; }
 `;

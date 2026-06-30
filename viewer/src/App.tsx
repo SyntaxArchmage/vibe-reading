@@ -232,6 +232,16 @@ export function App() {
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
   const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const [heatmapOpen, setHeatmapOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    try { return (localStorage.getItem("vr-theme") as "dark" | "light") || "dark"; } catch { return "dark"; }
+  });
+  const toggleTheme = useCallback(() => {
+    setTheme(t => {
+      const next = t === "dark" ? "light" : "dark";
+      try { localStorage.setItem("vr-theme", next); } catch {}
+      return next;
+    });
+  }, []);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
   const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
@@ -891,7 +901,7 @@ export function App() {
   };
 
   return (
-    <div className="vr-layout">
+    <div className={`vr-layout ${theme === "light" ? "vr-layout--light" : ""}`}>
       <style>{layoutStyles}</style>
       <style>{sidebarStyles}</style>
       <style>{fileTreeStyles}</style>
@@ -919,6 +929,15 @@ export function App() {
           title="File Heatmap"
         >
           &#x1F525;
+        </button>
+        <div style={{ flex: 1 }} />
+        <button
+          className="vr-activity-btn vr-theme-btn"
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+          style={{ opacity: 0.6, fontSize: 14, marginBottom: 8 }}
+        >
+          {theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19"}
         </button>
       </div>
 
@@ -1170,6 +1189,7 @@ export function App() {
               hoverInfos={hoverInfos}
               hoverRange={hoverRange}
               onHoverLine={onHoverLine}
+              editorTheme={theme === "light" ? "vs" : "vs-dark"}
             />
           ) : (
             <div className="vr-editor-placeholder">
