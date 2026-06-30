@@ -7,6 +7,7 @@ import { OutlineTab } from "./tabs/OutlineTab";
 import { MonacoEditor, detectLanguage } from "./MonacoEditor";
 import { FileTree, fileTreeStyles } from "./components/FileTree";
 import { FileHeatmap, fileHeatmapStyles } from "./components/FileHeatmap";
+import { entityMiniGraphStyles } from "./components/EntityMiniGraph";
 import type { DataEntity, TabId, CallGraph } from "./shared-types";
 import { layoutStyles, sidebarStyles } from "./styles";
 
@@ -242,6 +243,7 @@ export function App() {
       return next;
     });
   }, []);
+  const [showEntityGraph, setShowEntityGraph] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [cursorLine, setCursorLine] = useState(0);
   const [visibleRange, setVisibleRange] = useState<{ start: number; end: number } | null>(null);
@@ -889,7 +891,8 @@ export function App() {
                            callGraph={CALL_GRAPH} currentFile={currentFile}
                            onFileSelect={selectByFile}
                            bookmarks={bookmarks}
-                           onBookmark={toggleBookmark} />;
+                           onBookmark={toggleBookmark}
+                           showGraph={showEntityGraph} />;
       case "flow":
         return <FlowTab entities={filtered} onCardClick={onCardClick} currentFile={currentFile} callGraph={CALL_GRAPH} onFileSelect={selectByFile} />;
       case "history":
@@ -909,6 +912,7 @@ export function App() {
       <style>{sidebarStyles}</style>
       <style>{fileTreeStyles}</style>
       <style>{fileHeatmapStyles}</style>
+      <style>{entityMiniGraphStyles}</style>
 
       {/* Activity bar — icon strip */}
       <div className="vr-activity-bar">
@@ -1120,6 +1124,14 @@ export function App() {
                   >{s === "line" ? "#" : s === "name" ? "Az" : "Kd"}</button>
                 ))}
               </div>
+              {activeTab === "concept" && (
+                <button
+                  className={`vr-sort-btn ${showEntityGraph ? "vr-sort-btn--active" : ""}`}
+                  onClick={() => setShowEntityGraph(v => !v)}
+                  title="Toggle entity graph"
+                  style={{ marginLeft: 4, fontSize: 11 }}
+                >&#x2726;</button>
+              )}
               {cardFilter && (
                 <span className="vr-card-filter-count">
                   {filtered.length}/{entities.filter((e) => e.type === activeTab).length}

@@ -253,10 +253,28 @@ def main() -> int:
 
         # 19. Sort
         print("\n--- 19. Card Sort ---")
-        check("Sort buttons", page.locator(".vr-sort-btn").count() == 3)
+        check("Sort buttons", page.locator(".vr-sort-btn").count() >= 3)
         page.locator(".vr-sort-btn", has_text="Az").click()
         page.wait_for_timeout(300)
         check("Az activates", page.locator(".vr-sort-btn--active", has_text="Az").count() > 0)
+
+        # 19b. Entity Graph
+        print("\n--- 19b. Entity Graph ---")
+        page.locator(".vr-tab", has_text="Concept").click()
+        page.wait_for_timeout(500)
+        page.locator(".vr-tree-file").nth(3).click()
+        page.wait_for_timeout(1000)
+        graph_btns = page.locator("button", has_text="\u2726")
+        check("Graph toggle button", graph_btns.count() > 0)
+        if graph_btns.count() > 0:
+            graph_btns.first.click()
+            page.wait_for_timeout(500)
+            check("Mini graph appears", page.locator(".vr-mini-graph").count() > 0)
+            mini_svg = page.locator(".vr-mini-graph svg")
+            check("Mini graph SVG", mini_svg.count() > 0)
+            graph_btns.first.click()
+            page.wait_for_timeout(300)
+            check("Mini graph hides", page.locator(".vr-mini-graph").count() == 0)
 
         # 20. Navigation Buttons
         print("\n--- 20. Navigation ---")

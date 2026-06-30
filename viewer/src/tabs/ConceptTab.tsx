@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { AnimatePresence } from "motion/react";
 import { Card } from "../components/Card";
+import { EntityMiniGraph } from "../components/EntityMiniGraph";
 import type { DataEntity, CallGraph } from "../shared-types";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
   onFileSelect?: (file: string) => void;
   bookmarks?: Set<string>;
   onBookmark?: (key: string) => void;
+  showGraph?: boolean;
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
@@ -72,7 +74,7 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   );
 }
 
-export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect, bookmarks, onBookmark }: Props) {
+export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines, visibleRange, callGraph, currentFile, onFileSelect, bookmarks, onBookmark, showGraph }: Props) {
   if (entities.length === 0) {
     return <div className="vr-no-cards">No concept cards for this file.</div>;
   }
@@ -152,6 +154,11 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
     ? <DensityBar entities={filteredEntities} totalLines={totalLines} onCardClick={onCardClick} visibleRange={visibleRange} />
     : null;
 
+  const miniGraph = showGraph ? (
+    <EntityMiniGraph entities={entities} onCardClick={onCardClick}
+                     highlightEntity={highlightEntity} currentFile={currentFile} />
+  ) : null;
+
   const fileSummary = useMemo(() => {
     const concepts = entities.filter(e => e.type === "concept");
     const enriched = concepts.filter(e => {
@@ -195,6 +202,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
         {summaryLine}
         {searchBox}
         {densityBar}
+        {miniGraph}
         <AnimatePresence mode="popLayout">
           {filteredEntities.map((e, i) => (
             <Card key={`${e.anchor.start_line}-${i}`} entity={e} onClick={onCardClick}
@@ -232,6 +240,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       </div>
       {searchBox}
       {densityBar}
+      {miniGraph}
       {groups.map(([kind, items]) => (
         <div key={kind}>
           <div className="vr-concept-group-header" onClick={() => toggle(kind)}
