@@ -285,9 +285,10 @@ export function App() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  const allEntities = useMemo(() =>
+  type SearchableEntity = DataEntity & { _file: string; _key: string };
+  const allEntities: SearchableEntity[] = useMemo(() =>
     Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
-      (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file as string, _key: key }))
+      (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file, _key: key }))
     ), []);
 
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
@@ -971,7 +972,7 @@ export function App() {
                 } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
                   const hit = entitySearchResults[entitySearchIdx];
                   addSearchHistory(entitySearch.trim());
-                  selectFile((hit as any)._key);
+                  selectFile((hit as SearchableEntity)._key);
                   setActiveTab(hit.type as TabId);
                   setEntitySearchOpen(false);
                   setTimeout(() => {
@@ -1019,7 +1020,7 @@ export function App() {
                   className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
                   onClick={() => {
                     addSearchHistory(entitySearch.trim());
-                    selectFile((e as any)._key);
+                    selectFile((e as SearchableEntity)._key);
                     setActiveTab(e.type as TabId);
                     setEntitySearchOpen(false);
                     setTimeout(() => {
@@ -1034,7 +1035,7 @@ export function App() {
                       {q ? highlightMatch(nameStr, q) : nameStr}
                     </span>
                   </div>
-                  <span className="vr-entity-search-file">{(e as any)._file}:{e.anchor.start_line}</span>
+                  <span className="vr-entity-search-file">{(e as SearchableEntity)._file}:{e.anchor.start_line}</span>
                 </div>
               );
             })}
