@@ -667,16 +667,39 @@ export function App() {
 
   const hoverInfos = useMemo(
     () => entities
-      .filter(e => e.type === "concept" && e.detail.name)
-      .map(e => ({
-        startLine: e.anchor.start_line,
-        endLine: e.anchor.end_line,
-        name: String(e.detail.name),
-        kind: String(e.detail.node_type || e.detail.kind || ""),
-        summary: e.summary,
-        params: e.detail.params as string[] | undefined,
-        returnType: e.detail.return_type as string | undefined,
-      })),
+      .filter(e => (e.type === "concept" && e.detail.name) || (e.type === "flow" && e.detail.kind === "imports"))
+      .map(e => {
+        const d = e.detail;
+        if (e.type === "flow" && d.kind === "imports") {
+          const names = (d.names as string[]) || [];
+          const source = String(d.source || "");
+          return {
+            startLine: e.anchor.start_line,
+            endLine: e.anchor.end_line,
+            name: source,
+            kind: "import",
+            summary: names.length > 0
+              ? `Imports: \`${names.join("`, `")}\` from \`${source}\``
+              : `Imports module \`${source}\``,
+          };
+        }
+        let summary = e.summary;
+        if (d.description && d.description !== e.summary) {
+          summary += `\n\n${d.description}`;
+        }
+        if (d.why) summary += `\n\n**Why:** ${d.why}`;
+        if (d.analogy) summary += `\n\n**Analogy:** ${d.analogy}`;
+        if (d.pattern) summary += `\n\n**Pattern:** ${d.pattern}`;
+        return {
+          startLine: e.anchor.start_line,
+          endLine: e.anchor.end_line,
+          name: String(d.name),
+          kind: String(d.node_type || d.kind || ""),
+          summary,
+          params: d.params as string[] | undefined,
+          returnType: d.return_type as string | undefined,
+        };
+      }),
     [entities]
   );
   const focusedEntity = focusedCardIdx != null ? filtered[focusedCardIdx] ?? null : null;
