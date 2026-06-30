@@ -74,7 +74,7 @@ function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
               <>
                 {(entity.detail.local_deps as string[] | undefined)?.length ? (
                   <div style={{ marginBottom: 6 }}>
-                    <span style={{ fontSize: 10, color: "#888", textTransform: "uppercase" }}>Local</span>
+                    <span className="vr-flow-dep-label">Local</span>
                     <div className="vr-card-chips" style={{ marginTop: 2 }}>
                       {(entity.detail.local_deps as string[]).map((d) => (
                         <span key={d} className="vr-card-chip">{d}</span>
@@ -84,7 +84,7 @@ function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
                 ) : null}
                 {(entity.detail.external_deps as string[] | undefined)?.length ? (
                   <div>
-                    <span style={{ fontSize: 10, color: "#888", textTransform: "uppercase" }}>External</span>
+                    <span className="vr-flow-dep-label">External</span>
                     <div className="vr-card-chips" style={{ marginTop: 2 }}>
                       {(entity.detail.external_deps as string[]).map((d) => (
                         <span key={d} className="vr-card-chip">{d}</span>
@@ -115,13 +115,6 @@ function FlowCard({ entity, onClick }: { entity: DataEntity; onClick: (e: DataEn
   );
 }
 
-const diagramStyles: Record<string, React.CSSProperties> = {
-  container: { display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 8px", marginBottom: 8, borderBottom: "1px solid #333" },
-  node: { padding: "4px 10px", borderRadius: 4, fontSize: 11, fontFamily: "monospace", textAlign: "center" as const, maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const },
-  connector: { width: 1, height: 12, background: "#555" },
-  label: { fontSize: 9, color: "#666", textTransform: "uppercase" as const, marginBottom: 2 },
-};
-
 function FlowDiagram({ imports, calls, exports }: {
   imports: DataEntity[];
   calls: DataEntity[];
@@ -136,29 +129,29 @@ function FlowDiagram({ imports, calls, exports }: {
   const hasDown = exportNames.length > 0;
 
   return (
-    <div style={diagramStyles.container}>
+    <div className="vr-flow-diagram">
       {hasUp && (
         <>
-          <div style={diagramStyles.label}>imports ({localDeps.length + externalDeps.length})</div>
-          <div style={{ ...diagramStyles.node, background: "#1a2a3a", color: "#4fc1ff", border: "1px solid #4fc1ff33" }}>
+          <div className="vr-flow-label">imports ({localDeps.length + externalDeps.length})</div>
+          <div className="vr-flow-node vr-flow-node--import">
             {localDeps.length > 0 && <span>{localDeps.slice(0, 3).join(", ")}{localDeps.length > 3 ? ` +${localDeps.length - 3}` : ""}</span>}
             {localDeps.length > 0 && externalDeps.length > 0 && <span> | </span>}
-            {externalDeps.length > 0 && <span style={{ color: "#888" }}>{externalDeps.slice(0, 2).join(", ")}{externalDeps.length > 2 ? ` +${externalDeps.length - 2}` : ""}</span>}
+            {externalDeps.length > 0 && <span className="vr-flow-ext">{externalDeps.slice(0, 2).join(", ")}{externalDeps.length > 2 ? ` +${externalDeps.length - 2}` : ""}</span>}
           </div>
-          <div style={diagramStyles.connector} />
-          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
+          <div className="vr-flow-connector" />
+          <div className="vr-flow-arrow">▼</div>
         </>
       )}
-      <div style={{ ...diagramStyles.node, background: "#2a2d2e", color: "#d4d4d4", border: "1px solid #555", fontWeight: "bold" }}>
+      <div className="vr-flow-node vr-flow-node--self">
         this file
-        {callees.length > 0 && <span style={{ color: "#dcdcaa", fontWeight: "normal" }}> → {callees.slice(0, 3).join(", ")}{callees.length > 3 ? ` +${callees.length - 3}` : ""}</span>}
+        {callees.length > 0 && <span className="vr-flow-callees"> → {callees.slice(0, 3).join(", ")}{callees.length > 3 ? ` +${callees.length - 3}` : ""}</span>}
       </div>
       {hasDown && (
         <>
-          <div style={{ color: "#555", fontSize: 10 }}>▼</div>
-          <div style={diagramStyles.connector} />
-          <div style={diagramStyles.label}>exports ({exportNames.length})</div>
-          <div style={{ ...diagramStyles.node, background: "#1a3a2a", color: "#4ec9b0", border: "1px solid #4ec9b033" }}>
+          <div className="vr-flow-arrow">▼</div>
+          <div className="vr-flow-connector" />
+          <div className="vr-flow-label">exports ({exportNames.length})</div>
+          <div className="vr-flow-node vr-flow-node--export">
             {exportNames.slice(0, 4).join(", ")}{exportNames.length > 4 ? ` +${exportNames.length - 4}` : ""}
           </div>
         </>
@@ -194,47 +187,48 @@ function CrossFileInfo({ currentFile, callGraph, onFileSelect }: { currentFile: 
   if (importers.length === 0 && dependencies.length === 0) return null;
 
   return (
-    <div style={{ padding: "8px 10px", borderBottom: "1px solid #333", fontSize: 11 }}>
+    <div className="vr-crossfile">
       {circular && (
-        <div style={{ color: "#f44747", fontSize: 10, marginBottom: 6, padding: "2px 6px",
-                      background: "#3a1a1a", borderRadius: 3, border: "1px solid #f4474733" }}>
+        <div className="vr-crossfile-circular">
           &#x26A0; Circular dependency detected
         </div>
       )}
       {dependencies.length > 0 && (
         <>
-          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4 }}>
+          <div className="vr-crossfile-heading">
             Depends on ({dependencies.length})
           </div>
           {dependencies.slice(0, 6).map(dep => (
             <div
               key={dep.source}
-              style={{ color: dep.resolved ? "#9cdcfe" : "#666", padding: "2px 0", cursor: dep.resolved && onFileSelect ? "pointer" : "default" }}
+              className={`vr-crossfile-link${dep.resolved ? "" : " vr-crossfile-link--unresolved"}`}
+              style={{ cursor: dep.resolved && onFileSelect ? "pointer" : "default" }}
               onClick={() => dep.resolved && onFileSelect?.(dep.resolved)}
             >
               {dep.resolved || dep.source}
-              {dep.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({dep.names.join(", ")})</span>}
+              {dep.names.length > 0 && <span className="vr-crossfile-names">({dep.names.join(", ")})</span>}
             </div>
           ))}
-          {dependencies.length > 6 && <div style={{ color: "#666" }}>+{dependencies.length - 6} more</div>}
+          {dependencies.length > 6 && <div className="vr-crossfile-more">+{dependencies.length - 6} more</div>}
         </>
       )}
       {importers.length > 0 && (
         <>
-          <div style={{ color: "#888", textTransform: "uppercase", fontSize: 9, marginBottom: 4, marginTop: dependencies.length > 0 ? 8 : 0 }}>
+          <div className="vr-crossfile-heading" style={{ marginTop: dependencies.length > 0 ? 8 : 0 }}>
             Imported by ({importers.length})
           </div>
           {importers.slice(0, 8).map(f => (
             <div
               key={f.file}
-              style={{ color: "#9cdcfe", padding: "2px 0", cursor: onFileSelect ? "pointer" : "default" }}
+              className="vr-crossfile-link"
+              style={{ cursor: onFileSelect ? "pointer" : "default" }}
               onClick={() => onFileSelect?.(f.file)}
             >
               {f.file}
-              {f.names.length > 0 && <span style={{ color: "#666", marginLeft: 4 }}>({f.names.slice(0, 3).join(", ")}{f.names.length > 3 ? ` +${f.names.length - 3}` : ""})</span>}
+              {f.names.length > 0 && <span className="vr-crossfile-names">({f.names.slice(0, 3).join(", ")}{f.names.length > 3 ? ` +${f.names.length - 3}` : ""})</span>}
             </div>
           ))}
-          {importers.length > 8 && <div style={{ color: "#666" }}>+{importers.length - 8} more</div>}
+          {importers.length > 8 && <div className="vr-crossfile-more">+{importers.length - 8} more</div>}
         </>
       )}
     </div>
@@ -261,19 +255,10 @@ export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileS
   return (
     <div>
       {callGraph && callGraph.files.length > 1 && (
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "flex-end",
-          padding: "2px 8px 0", fontSize: 10,
-        }}>
+        <div className="vr-flow-graph-toggle-bar">
           <button
             onClick={() => setShowGraph(!showGraph)}
-            style={{
-              background: showGraph ? "rgba(0,122,204,0.15)" : "#2d2d2d",
-              border: "1px solid " + (showGraph ? "#007acc55" : "#3c3c3c"),
-              color: showGraph ? "#007acc" : "#888",
-              borderRadius: 3, padding: "2px 8px", cursor: "pointer",
-              fontSize: 10, fontFamily: "inherit",
-            }}
+            className={`vr-flow-graph-toggle${showGraph ? " vr-flow-graph-toggle--active" : ""}`}
           >
             {showGraph ? "▼ Graph" : "▶ Graph"}
           </button>
@@ -288,7 +273,7 @@ export function FlowTab({ entities, onCardClick, currentFile, callGraph, onFileS
       )}
       <FlowDiagram imports={imports} calls={calls} exports={exports} />
       {(totalImports > 0 || exportNames.length > 0) && (
-        <div style={{ fontSize: 10, color: "#666", textAlign: "center", padding: "0 0 6px" }}>
+        <div className="vr-flow-summary">
           {totalImports} imports ({localDeps.length} local) · {exportNames.length} exports
           {totalImports > 0 && exportNames.length > 0 && (
             <span> · ratio {(exportNames.length / totalImports).toFixed(1)}</span>

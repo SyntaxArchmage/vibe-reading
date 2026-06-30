@@ -357,59 +357,37 @@ export function DependencyGraph({ callGraph, currentFile, onFileSelect }: Props)
   const svgH = height + pad * 2;
 
   return (
-    <div style={{ borderBottom: "1px solid #333", padding: "8px 0" }}>
-      <div style={{
-        fontSize: 10, color: "#888", textTransform: "uppercase",
-        padding: "0 8px 6px", fontWeight: 600, display: "flex",
-        alignItems: "center", gap: 8, flexWrap: "wrap",
-      }}>
+    <div className="vr-dep-graph">
+      <div className="vr-dep-graph-toolbar">
         <span>Dependency Graph</span>
-        <span style={{ color: "#666", fontWeight: 400 }}>
+        <span className="vr-dep-graph-meta">
           {nodes.length} files · {graph.edges.length} edges
         </span>
         <span style={{ flex: 1 }} />
         <button
           onClick={() => setGrouped(!grouped)}
           data-testid="graph-group-toggle"
-          style={{
-            background: grouped ? "#1a3a5a" : "#2a2d2e",
-            border: `1px solid ${grouped ? "#007acc" : "#555"}`,
-            color: grouped ? "#fff" : "#aaa",
-            borderRadius: 3, padding: "1px 8px", fontSize: 10,
-            cursor: "pointer",
-          }}
+          className={`vr-dep-graph-btn${grouped ? " vr-dep-graph-btn--active" : ""}`}
         >
           {grouped ? "☰ Grouped" : "☰ Flat"}
         </button>
         <button
           onClick={() => setZoom((z) => Math.min(z + 0.2, 3))}
           data-testid="graph-zoom-in"
-          style={{
-            background: "#2a2d2e", border: "1px solid #555",
-            color: "#aaa", borderRadius: 3, padding: "1px 6px",
-            fontSize: 12, cursor: "pointer",
-          }}
+          className="vr-dep-graph-btn"
         >+</button>
-        <span style={{ color: "#888", fontSize: 10, minWidth: 32, textAlign: "center" }}>
+        <span className="vr-dep-graph-zoom">
           {Math.round(zoom * 100)}%
         </span>
         <button
           onClick={() => setZoom((z) => Math.max(z - 0.2, 0.3))}
           data-testid="graph-zoom-out"
-          style={{
-            background: "#2a2d2e", border: "1px solid #555",
-            color: "#aaa", borderRadius: 3, padding: "1px 6px",
-            fontSize: 12, cursor: "pointer",
-          }}
+          className="vr-dep-graph-btn"
         >−</button>
         <button
           onClick={resetView}
           data-testid="graph-reset"
-          style={{
-            background: "#2a2d2e", border: "1px solid #555",
-            color: "#aaa", borderRadius: 3, padding: "1px 8px",
-            fontSize: 10, cursor: "pointer",
-          }}
+          className="vr-dep-graph-btn"
         >Reset</button>
       </div>
       <div

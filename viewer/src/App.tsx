@@ -667,6 +667,33 @@ export function App() {
 
   const sourceLines = useMemo(() => sourceCode ? sourceCode.split("\n") : [], [sourceCode]);
 
+  const exportMarkdown = useCallback(() => {
+    const file = currentFile || "unknown";
+    const concepts = filtered.filter(e => e.type === "concept");
+    if (concepts.length === 0) return;
+    const lines: string[] = [`# ${file}\n`];
+    for (const e of concepts) {
+      const d = e.detail;
+      const name = (d.name as string) || e.summary;
+      const kind = (d.kind as string) || "";
+      lines.push(`## ${name}${kind ? ` (${kind})` : ""}\n`);
+      lines.push(`**Lines:** ${e.anchor.start_line}–${e.anchor.end_line}\n`);
+      if (d.description) lines.push(`${d.description}\n`);
+      if (d.why) lines.push(`**Why:** ${d.why}\n`);
+      if (d.pattern) lines.push(`**Pattern:** ${d.pattern}\n`);
+      if (d.analogy) lines.push(`**Analogy:** ${d.analogy}\n`);
+      if (d.design) lines.push(`**Design:** ${d.design}\n`);
+      lines.push("");
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.replace(/[/\\]/g, "_").replace(/\.\w+$/, "") + "_notes.md";
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [filtered, currentFile]);
+
   const onVisibleRange = useCallback((start: number, end: number) => {
     setVisibleRange({ start, end });
   }, []);
@@ -849,9 +876,20 @@ export function App() {
           if (filtered.length === 0) return null;
           return prev == null ? 0 : Math.max(prev - 1, 0);
         });
-      } else if (e.key === "Enter" && focusedCardIdx != null && filtered[focusedCardIdx]) {
+      } else if (e.key === "Enter" && focusedCardIdx != null) {
         e.preventDefault();
-        onCardClick(filtered[focusedCardIdx]);
+        const container = document.querySelector(".vr-content");
+        const cards = container?.querySelectorAll(".vr-card");
+        const card = cards?.[focusedCardIdx];
+        if (card) {
+          const header = card.querySelector(".vr-card-header") as HTMLElement;
+          header?.click();
+        }
+      } else if (e.key === " " && focusedCardIdx != null && filtered[focusedCardIdx]) {
+        e.preventDefault();
+        const ent = filtered[focusedCardIdx];
+        const key = `${currentFile}:${ent.anchor.start_line}:${ent.detail?.name || ""}`;
+        toggleBookmark(key);
       }
     };
     document.addEventListener("keydown", handler, true);
@@ -1125,12 +1163,20 @@ export function App() {
                 ))}
               </div>
               {activeTab === "concept" && (
-                <button
-                  className={`vr-sort-btn ${showEntityGraph ? "vr-sort-btn--active" : ""}`}
-                  onClick={() => setShowEntityGraph(v => !v)}
-                  title="Toggle entity graph"
-                  style={{ marginLeft: 4, fontSize: 11 }}
-                >&#x2726;</button>
+                <>
+                  <button
+                    className={`vr-sort-btn ${showEntityGraph ? "vr-sort-btn--active" : ""}`}
+                    onClick={() => setShowEntityGraph(v => !v)}
+                    title="Toggle entity graph"
+                    style={{ marginLeft: 4, fontSize: 11 }}
+                  >&#x2726;</button>
+                  <button
+                    className="vr-sort-btn"
+                    onClick={exportMarkdown}
+                    title="Export as Markdown"
+                    style={{ marginLeft: 2, fontSize: 11 }}
+                  >&#x2913;</button>
+                </>
               )}
               {cardFilter && (
                 <span className="vr-card-filter-count">
@@ -1419,6 +1465,8 @@ export function App() {
             <kbd>Alt+←/→</kbd><span>Navigate back/forward</span>
             <kbd>[ / ]</kbd><span>Previous/next file</span>
             <kbd>j / k</kbd><span>Focus prev/next card</span>
+            <kbd>Enter</kbd><span>Expand/collapse focused card</span>
+            <kbd>Space</kbd><span>Bookmark focused card</span>
             <kbd>?</kbd><span>Toggle this help</span>
             <kbd>Esc</kbd><span>Close overlays</span>
           </div>

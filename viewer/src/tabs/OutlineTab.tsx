@@ -81,25 +81,14 @@ function OutlineItem({ node, depth, onCardClick, cursorLine }: {
   return (
     <>
       <div
-        style={{
-          paddingLeft: depth * 14 + 4,
-          paddingTop: 2,
-          paddingBottom: 2,
-          paddingRight: 4,
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-          cursor: "pointer",
-          fontSize: 12,
-          background: isAtCursor ? "rgba(0,122,204,0.12)" : "transparent",
-          borderLeft: isAtCursor ? "2px solid #007acc" : "2px solid transparent",
-        }}
+        className={`vr-outline-item ${isAtCursor ? "vr-outline-item--active" : ""}`}
+        style={{ paddingLeft: depth * 14 + 4 }}
         onClick={() => onCardClick(e)}
         title={`${kind}: ${name} (L${e.anchor.start_line}–${e.anchor.end_line})`}
       >
         {hasChildren ? (
           <span
-            style={{ fontSize: 8, width: 10, textAlign: "center", flexShrink: 0, color: "#888" }}
+            className="vr-outline-arrow"
             onClick={(ev) => { ev.stopPropagation(); setCollapsed(!collapsed); }}
           >
             {collapsed ? "▶" : "▼"}
@@ -107,16 +96,13 @@ function OutlineItem({ node, depth, onCardClick, cursorLine }: {
         ) : (
           <span style={{ width: 10, flexShrink: 0 }} />
         )}
-        <span style={{
-          fontSize: 9, fontWeight: 700, color, width: 12, textAlign: "center", flexShrink: 0,
-          fontFamily: "monospace",
-        }}>
+        <span className="vr-outline-icon" style={{ color }}>
           {icon}
         </span>
-        <span style={{ color: "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span className="vr-outline-name">
           {name}
         </span>
-        <span style={{ fontSize: 10, color: "#666", marginLeft: "auto", flexShrink: 0 }}>
+        <span className="vr-outline-line">
           {e.anchor.start_line}
         </span>
       </div>
@@ -156,8 +142,7 @@ export function OutlineTab({ entities, onCardClick, cursorLine }: Props) {
         <div style={{ padding: "2px 8px 4px" }}>
           <input type="text" value={filter} onChange={e => setFilter(e.target.value)}
             placeholder={`Filter ${outline.length} symbols...`}
-            style={{ width: "100%", boxSizing: "border-box", background: "#1e1e1e", color: "#ccc",
-                     border: "1px solid #444", borderRadius: 3, padding: "2px 6px", fontSize: 11, outline: "none" }}
+            className="vr-outline-filter"
           />
         </div>
       )}

@@ -144,8 +144,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       <input
         type="text" value={cardSearch} onChange={e => setCardSearch(e.target.value)}
         placeholder={`Filter ${entities.length} entities...`}
-        style={{ width: "100%", boxSizing: "border-box", background: "#1e1e1e", color: "#ccc",
-                 border: "1px solid #444", borderRadius: 3, padding: "2px 6px", fontSize: 11, outline: "none" }}
+        className="vr-outline-filter"
       />
     </div>
   ) : null;

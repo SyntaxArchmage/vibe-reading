@@ -139,14 +139,7 @@ export function Card({
             )}
 
             {params && params.length > 0 && (
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "#9cdcfe",
-                  marginTop: 4,
-                  fontFamily: "monospace",
-                }}
-              >
+              <div className="vr-card-params">
                 ({params.join(", ")}){returnType ? ` → ${returnType}` : ""}
               </div>
             )}
@@ -323,14 +316,14 @@ export function Card({
             </div>
 
             {usages && usages.length > 0 && (
-              <div style={{ marginTop: 6, fontSize: 11 }}>
-                <div style={{ color: "#888", marginBottom: 2 }}>
+              <div className="vr-card-usages">
+                <div className="vr-card-usages-header">
                   Used by {usages.length} file{usages.length > 1 ? "s" : ""}:
                 </div>
                 {usages.map((u, i) => (
                   <div
                     key={i}
-                    style={{ color: "#9cdcfe", cursor: "pointer", padding: "1px 0" }}
+                    className="vr-card-usage-file"
                     onClick={(e) => {
                       e.stopPropagation();
                       onFileSelect?.(u.file);

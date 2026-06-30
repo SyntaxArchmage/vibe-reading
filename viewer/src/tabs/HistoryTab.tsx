@@ -83,11 +83,11 @@ function HistoryCard({ entity, onClick }: { entity: DataEntity; onClick: (e: Dat
               </div>
             )}
             {kind === "recent_changes" && (
-              <div style={{ fontSize: 11, fontFamily: "monospace" }}>
+              <div className="vr-history-commits">
                 {(entity.detail.commits as Array<{ hash: string; date: string; author: string; message: string }>)?.map((c) => (
-                  <div key={c.hash} style={{ padding: "3px 0", borderBottom: "1px solid #333" }}>
-                    <span style={{ color: "#dcdcaa" }}>{c.hash}</span>{" "}
-                    <span style={{ color: "#666" }}>{formatDate(c.date)}</span>{" "}
+                  <div key={c.hash} className="vr-history-commit">
+                    <span className="vr-history-hash">{c.hash}</span>{" "}
+                    <span className="vr-history-date">{formatDate(c.date)}</span>{" "}
                     <span>{c.message}</span>
                   </div>
                 ))}
@@ -145,14 +145,14 @@ function BlameView({ file }: { file: string }) {
 
   if (!lines && !loading && !error) {
     return (
-      <button onClick={fetchBlame} style={blameButtonStyle}>
+      <button onClick={fetchBlame} className="vr-blame-btn">
         Show Git Blame
       </button>
     );
   }
 
-  if (loading) return <div style={{ color: "#888", fontSize: 12, padding: 8 }}>Loading blame...</div>;
-  if (error) return <div style={{ color: "#f44747", fontSize: 12, padding: 8 }}>{error}</div>;
+  if (loading) return <div className="vr-blame-msg">Loading blame...</div>;
+  if (error) return <div className="vr-blame-msg vr-blame-msg--error">{error}</div>;
 
   const authors = [...new Set(lines!.map(l => l.author))];
   const authorColors: Record<string, string> = {};
@@ -160,38 +160,26 @@ function BlameView({ file }: { file: string }) {
   authors.forEach((a, i) => { authorColors[a] = palette[i % palette.length]; });
 
   return (
-    <div style={{ fontSize: 11, fontFamily: "monospace", maxHeight: 400, overflowY: "auto" }}>
-      <div style={{ display: "flex", gap: 8, padding: "4px 0", borderBottom: "1px solid #333", marginBottom: 4 }}>
-        <span style={{ width: 30, color: "#666", flexShrink: 0 }}>Line</span>
-        <span style={{ width: 70, color: "#666", flexShrink: 0 }}>SHA</span>
-        <span style={{ width: 90, color: "#666", flexShrink: 0 }}>Author</span>
-        <span style={{ width: 80, color: "#666", flexShrink: 0 }}>Date</span>
-        <span style={{ color: "#666" }}>Code</span>
+    <div className="vr-blame-table">
+      <div className="vr-blame-header">
+        <span className="vr-blame-col vr-blame-col--line">Line</span>
+        <span className="vr-blame-col vr-blame-col--sha">SHA</span>
+        <span className="vr-blame-col vr-blame-col--author">Author</span>
+        <span className="vr-blame-col vr-blame-col--date">Date</span>
+        <span className="vr-blame-col">Code</span>
       </div>
       {lines!.map(l => (
-        <div key={l.line} style={{ display: "flex", gap: 8, padding: "1px 0" }}>
-          <span style={{ width: 30, color: "#666", textAlign: "right", flexShrink: 0 }}>{l.line}</span>
-          <span style={{ width: 70, color: "#dcdcaa", flexShrink: 0 }}>{l.sha}</span>
-          <span style={{ width: 90, color: authorColors[l.author] || "#d4d4d4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flexShrink: 0 }}>{l.author}</span>
-          <span style={{ width: 80, color: "#888", flexShrink: 0 }}>{l.date}</span>
-          <span style={{ color: "#d4d4d4", whiteSpace: "pre", overflow: "hidden", textOverflow: "ellipsis" }}>{l.content}</span>
+        <div key={l.line} className="vr-blame-row">
+          <span className="vr-blame-col vr-blame-col--line" style={{ textAlign: "right" }}>{l.line}</span>
+          <span className="vr-blame-col vr-blame-col--sha vr-blame-sha">{l.sha}</span>
+          <span className="vr-blame-col vr-blame-col--author" style={{ color: authorColors[l.author] || "var(--vr-fg)" }}>{l.author}</span>
+          <span className="vr-blame-col vr-blame-col--date">{l.date}</span>
+          <span className="vr-blame-code">{l.content}</span>
         </div>
       ))}
     </div>
   );
 }
-
-const blameButtonStyle: React.CSSProperties = {
-  background: "#2d2d2d",
-  color: "#9cdcfe",
-  border: "1px solid #444",
-  borderRadius: 4,
-  padding: "6px 12px",
-  cursor: "pointer",
-  fontSize: 12,
-  width: "100%",
-  marginTop: 8,
-};
 
 function CommitTimeline({ commits }: { commits: Array<{ date: string }> }) {
   if (!commits || commits.length < 2) return null;
@@ -205,12 +193,11 @@ function CommitTimeline({ commits }: { commits: Array<{ date: string }> }) {
   }
   const max = Math.max(...buckets, 1);
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 24, padding: "4px 8px" }}
+    <div className="vr-commit-timeline"
          title={`Commit frequency over last ${WEEKS} weeks`}>
       {buckets.map((v, i) => (
-        <div key={i} style={{
-          flex: 1, background: v > 0 ? "#4ec9b0" : "#333",
-          height: `${Math.max((v / max) * 100, 4)}%`, borderRadius: 1, minHeight: 2, opacity: v > 0 ? 0.7 : 0.3 }} />
+        <div key={i} className={`vr-commit-bar${v > 0 ? " vr-commit-bar--active" : ""}`}
+             style={{ height: `${Math.max((v / max) * 100, 4)}%` }} />
       ))}
     </div>
   );
