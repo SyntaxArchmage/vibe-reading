@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState } from "react";
 import type { DataEntity } from "../shared-types";
+import { kindColor } from "../utils/kind-colors";
 
 interface EntityMiniGraphProps {
   entities: DataEntity[];
@@ -23,22 +24,7 @@ interface GraphEdge {
   type: "contains" | "sibling";
 }
 
-const KIND_COLORS: Record<string, string> = {
-  class: "#dcdcaa",
-  function: "#4ec9b0",
-  method: "#4ec9b0",
-  variable: "#ce9178",
-  type: "#9cdcfe",
-  interface: "#9cdcfe",
-  enum: "#b5cea8",
-  class_definition: "#dcdcaa",
-  function_definition: "#4ec9b0",
-  decorated_definition: "#4ec9b0",
-};
-
-function nodeColor(kind: string): string {
-  return KIND_COLORS[kind] || "#888";
-}
+const nodeColor = kindColor;
 
 const W = 300;
 const H_PER_NODE = 24;

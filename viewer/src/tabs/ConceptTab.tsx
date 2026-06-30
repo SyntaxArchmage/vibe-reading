@@ -3,6 +3,7 @@ import { AnimatePresence } from "motion/react";
 import { Card } from "../components/Card";
 import { EntityMiniGraph } from "../components/EntityMiniGraph";
 import type { DataEntity, CallGraph } from "../shared-types";
+import { KIND_COLORS } from "../utils/kind-colors";
 
 interface Props {
   entities: DataEntity[];
@@ -20,16 +21,6 @@ interface Props {
 }
 
 const KIND_ORDER = ["class", "function", "method", "variable", "type", "interface", "enum", "other"];
-
-const KIND_COLORS: Record<string, string> = {
-  function: "#4ec9b0",
-  class: "#dcdcaa",
-  method: "#4ec9b0",
-  variable: "#ce9178",
-  type: "#9cdcfe",
-  interface: "#9cdcfe",
-  enum: "#b5cea8",
-};
 
 function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
   entities: DataEntity[];
@@ -165,7 +156,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
   }, [entities, allGroups]);
 
   const summaryLine = (
-    <div style={{ fontSize: 10, color: "#666", padding: "4px 8px 2px" }}>
+    <div className="vr-concept-summary">
       <div style={{ textAlign: "center" }}>
         {fileSummary.total} concept{fileSummary.total !== 1 ? "s" : ""}
         {fileSummary.enriched > 0 && fileSummary.enriched < fileSummary.total && ` · ${fileSummary.enriched} enriched`}
@@ -173,17 +164,15 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
         {totalLines ? ` · ${totalLines} lines` : ""}
       </div>
       {allGroups.length > 1 && (
-        <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, flexWrap: "wrap" }}>
+        <div className="vr-concept-kind-filters">
           <span
-            style={{ cursor: "pointer", padding: "0 4px", borderRadius: 2,
-                     background: !kindFilter ? "#333" : "transparent", color: !kindFilter ? "#fff" : "#888" }}
+            className={`vr-concept-kind-chip ${!kindFilter ? "vr-concept-kind-chip--active" : ""}`}
             onClick={() => setKindFilter(null)}
           >all</span>
           {allGroups.map(([kind, items]) => (
             <span key={kind}
-              style={{ cursor: "pointer", padding: "0 4px", borderRadius: 2,
-                       background: kindFilter === kind ? "#333" : "transparent",
-                       color: KIND_COLORS[kind] || "#b5cea8" }}
+              className={`vr-concept-kind-chip ${kindFilter === kind ? "vr-concept-kind-chip--active" : ""}`}
+              style={{ color: KIND_COLORS[kind] || "#b5cea8" }}
               onClick={() => setKindFilter(kindFilter === kind ? null : kind)}
             >{kind}({items.length})</span>
           ))}

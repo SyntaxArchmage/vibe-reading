@@ -175,7 +175,7 @@ function DirNode({
                 title={f.commits > 0 ? `${f.commits} commits` : undefined}
               >
                 {heat && <span className="vr-tree-heat" style={{ background: heat }} />}
-                <span style={{ fontSize: 10, color: "#666", flexShrink: 0, width: 14, textAlign: "center" }}>
+                <span className="vr-tree-file-icon">
                   {extIcon(f.name)}
                 </span>
                 <span className="vr-tree-file-name">
@@ -437,8 +437,15 @@ export const fileTreeStyles = `
   .vr-tree-file-count {
     flex-shrink: 0;
     font-size: 10px;
-    color: #666;
+    color: var(--vr-fg-dimmer, #666);
     margin-left: 4px;
+  }
+  .vr-tree-file-icon {
+    font-size: 10px;
+    color: var(--vr-fg-dimmer, #666);
+    flex-shrink: 0;
+    width: 14px;
+    text-align: center;
   }
 
   .vr-tree-heat {

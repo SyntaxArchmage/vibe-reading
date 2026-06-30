@@ -922,6 +922,19 @@ export const sidebarStyles = `
   border-radius: 3px; cursor: pointer; padding: 1px 4px;
 }
 .vr-concept-collapse-btn:hover { border-color: var(--vr-accent); }
+.vr-concept-summary {
+  font-size: 10px; color: var(--vr-fg-dimmer); padding: 4px 8px 2px;
+}
+.vr-concept-kind-filters {
+  display: flex; gap: 3px; justify-content: center; margin-top: 3px; flex-wrap: wrap;
+}
+.vr-concept-kind-chip {
+  cursor: pointer; padding: 0 4px; border-radius: 2px;
+  color: var(--vr-fg-dim); background: transparent;
+}
+.vr-concept-kind-chip--active {
+  background: var(--vr-input-bg); color: var(--vr-fg);
+}
 
 /* Jump tab */
 .vr-jump-reason { padding: 0 10px 8px; font-size: 11px; color: var(--vr-fg-dimmer); }

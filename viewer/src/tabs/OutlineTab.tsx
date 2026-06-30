@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import type { DataEntity } from "../shared-types";
+import { KIND_COLORS } from "../utils/kind-colors";
 
 interface Props {
   entities: DataEntity[];
@@ -20,16 +21,6 @@ const KIND_ICONS: Record<string, string> = {
   type: "T",
   interface: "I",
   enum: "E",
-};
-
-const KIND_COLORS: Record<string, string> = {
-  class: "#dcdcaa",
-  function: "#4ec9b0",
-  method: "#4ec9b0",
-  variable: "#ce9178",
-  type: "#9cdcfe",
-  interface: "#9cdcfe",
-  enum: "#b5cea8",
 };
 
 function buildOutline(entities: DataEntity[]): OutlineNode[] {

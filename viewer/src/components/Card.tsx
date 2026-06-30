@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DataEntity } from "../shared-types";
+import { KIND_COLORS } from "../utils/kind-colors";
 
 interface CardProps {
   entity: DataEntity;
@@ -12,17 +13,6 @@ interface CardProps {
   onBookmark?: () => void;
   sourceLines?: string[];
 }
-
-const KIND_COLORS: Record<string, string> = {
-  function: "#4ec9b0",
-  class: "#dcdcaa",
-  interface: "#9cdcfe",
-  type: "#9cdcfe",
-  method: "#4ec9b0",
-  enum: "#b5cea8",
-  variable: "#ce9178",
-  decorated: "#c586c0",
-};
 
 function kindLabel(kind: string): string {
   return kind.charAt(0).toUpperCase() + kind.slice(1);
