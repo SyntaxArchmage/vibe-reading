@@ -11,6 +11,7 @@ import { entityMiniGraphStyles } from "./components/EntityMiniGraph";
 import type { DataEntity, TabId, CallGraph } from "./shared-types";
 import { layoutStyles, sidebarStyles } from "./styles";
 import { highlightMatch, loadSourceContent, pickDefaultFileKey } from "./utils/app-helpers";
+import { EntitySearch } from "./components/EntitySearch";
 
 declare const PREVIEW_DATA: Record<
   string,
@@ -104,9 +105,7 @@ export function App() {
   const [cardFilter, setCardFilter] = useState("");
   const [cardSort, setCardSort] = useState<"line" | "name" | "kind">("line");
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
-  const [entitySearch, setEntitySearch] = useState("");
   const [entitySearchOpen, setEntitySearchOpen] = useState(false);
-  const [entitySearchIdx, setEntitySearchIdx] = useState(0);
   const [heatmapOpen, setHeatmapOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     try { return (localStorage.getItem("vr-theme") as "dark" | "light") || "dark"; } catch { return "dark"; }
@@ -147,7 +146,6 @@ export function App() {
   const [cardHoveredEntity, setCardHoveredEntity] = useState<DataEntity | null>(null);
   const [focusedCardIdx, setFocusedCardIdx] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const entitySearchRef = useRef<HTMLInputElement>(null);
 
   const treeResize = useResizable(220, 120, 400);
   const sidebarResize = useResizable(340, 240, 600);
@@ -162,84 +160,10 @@ export function App() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  type SearchableEntity = DataEntity & { _file: string; _key: string };
-  const allEntities: SearchableEntity[] = useMemo(() =>
+  const allSearchEntities = useMemo(() =>
     Object.entries(PREVIEW_DATA).flatMap(([key, data]) =>
       (data.entities as DataEntity[]).map(e => ({ ...e, _file: data.file, _key: key }))
     ), []);
-
-  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("vr-search-history");
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
-
-  const addSearchHistory = useCallback((q: string) => {
-    if (!q.trim()) return;
-    setSearchHistory(prev => {
-      const next = [q, ...prev.filter(h => h !== q)].slice(0, 8);
-      try { localStorage.setItem("vr-search-history", JSON.stringify(next)); } catch {}
-      return next;
-    });
-  }, []);
-
-  const entitySearchResults = useMemo(() => {
-    if (!entitySearch.trim()) return [];
-    let q = entitySearch.toLowerCase().trim();
-    let typeFilter: string | null = null;
-    let fileFilter: string | null = null;
-    const typeMatch = q.match(/^(?:type:|t:)(\w+)\s*/);
-    if (typeMatch) {
-      typeFilter = typeMatch[1];
-      q = q.slice(typeMatch[0].length);
-    }
-    const fileMatch = q.match(/^(?:file:|f:)(\S+)\s*/);
-    if (fileMatch) {
-      fileFilter = fileMatch[1];
-      q = q.slice(fileMatch[0].length);
-    }
-
-    if (!q && !typeFilter && !fileFilter) return [];
-
-    const scored = allEntities
-      .map(e => {
-        if (typeFilter && !e.type.startsWith(typeFilter)) return null;
-        if (fileFilter && !e.anchor.file.toLowerCase().includes(fileFilter)) return null;
-        if (!q) return { e, score: 1 };
-
-        const name = ((e.detail.name as string) || "").toLowerCase();
-        const summary = e.summary.toLowerCase();
-        const file = e.anchor.file.toLowerCase();
-
-        if (name === q) return { e, score: 100 };
-        if (name.startsWith(q)) return { e, score: 80 };
-        if (name.includes(q)) return { e, score: 60 };
-        if (summary.includes(q)) return { e, score: 40 };
-        if (file.includes(q)) return { e, score: 20 };
-
-        // Fuzzy match on name
-        let qi = 0;
-        let consecutive = 0;
-        let maxConsec = 0;
-        for (let ni = 0; ni < name.length && qi < q.length; ni++) {
-          if (name[ni] === q[qi]) {
-            qi++;
-            consecutive++;
-            maxConsec = Math.max(maxConsec, consecutive);
-          } else {
-            consecutive = 0;
-          }
-        }
-        if (qi === q.length) return { e, score: 5 + maxConsec * 2 };
-
-        return null;
-      })
-      .filter((x): x is { e: typeof allEntities[0]; score: number } => x !== null)
-      .sort((a, b) => b.score - a.score);
-
-    return scored.map(s => s.e).slice(0, 50);
-  }, [entitySearch, allEntities]);
 
   const breadcrumbPath = useMemo(() => {
     if (!cursorLine) return [];
@@ -695,10 +619,7 @@ export function App() {
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
         e.preventDefault();
-        setEntitySearchOpen((v) => {
-          if (!v) setTimeout(() => entitySearchRef.current?.focus(), 0);
-          return !v;
-        });
+        setEntitySearchOpen(v => !v);
       }
       if (e.altKey && e.key >= "1" && e.key <= "5") {
         e.preventDefault();
@@ -843,7 +764,7 @@ export function App() {
         </button>
         <button
           className={`vr-activity-btn ${entitySearchOpen ? "vr-activity-btn--active" : ""}`}
-          onClick={() => { setEntitySearchOpen(!entitySearchOpen); if (!entitySearchOpen) setTimeout(() => entitySearchRef.current?.focus(), 0); }}
+          onClick={() => setEntitySearchOpen(!entitySearchOpen)}
           title="Search Entities"
         >
           &#x1F50D;
@@ -876,107 +797,18 @@ export function App() {
 
       {/* Entity search panel */}
       {entitySearchOpen && (
-        <div className="vr-entity-search-panel">
-          <div className="vr-entity-search-header">
-            <input
-              ref={entitySearchRef}
-              type="text"
-              placeholder="Search... (t:concept, f:filename, Esc to close)"
-              value={entitySearch}
-              onChange={(e) => { setEntitySearch(e.target.value); setEntitySearchIdx(0); }}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown") {
-                  e.preventDefault();
-                  setEntitySearchIdx(i => {
-                    const next = Math.min(i + 1, entitySearchResults.length - 1);
-                    const hit = entitySearchResults[next];
-                    if (hit && (hit as SearchableEntity)._file === currentFile) {
-                      setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
-                    }
-                    return next;
-                  });
-                } else if (e.key === "ArrowUp") {
-                  e.preventDefault();
-                  setEntitySearchIdx(i => {
-                    const next = Math.max(i - 1, 0);
-                    const hit = entitySearchResults[next];
-                    if (hit && (hit as SearchableEntity)._file === currentFile) {
-                      setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
-                    }
-                    return next;
-                  });
-                } else if (e.key === "Enter" && entitySearchResults[entitySearchIdx]) {
-                  const hit = entitySearchResults[entitySearchIdx];
-                  addSearchHistory(entitySearch.trim());
-                  selectFile((hit as SearchableEntity)._key);
-                  setActiveTab(hit.type as TabId);
-                  setEntitySearchOpen(false);
-                  setTimeout(() => {
-                    setHighlightRange({ startLine: hit.anchor.start_line, endLine: hit.anchor.end_line || hit.anchor.start_line });
-                  }, 100);
-                }
-              }}
-              className="vr-entity-search-input"
-            />
-            {entitySearch.trim() && (
-              <div className="vr-entity-search-count">
-                {entitySearchResults.length} result{entitySearchResults.length !== 1 ? "s" : ""}
-                {entitySearchResults.length >= 50 && " (limit)"}
-              </div>
-            )}
-          </div>
-          <div className="vr-entity-search-results">
-            {!entitySearch.trim() && searchHistory.length > 0 && (
-              <div style={{ padding: "6px 8px" }}>
-                <div className="vr-entity-search-recent-label">Recent</div>
-                {searchHistory.map((h, i) => (
-                  <div
-                    key={`hist-${i}`}
-                    className="vr-entity-search-item"
-                    onClick={() => { setEntitySearch(h); setEntitySearchIdx(0); }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <span className="vr-entity-search-history-item">&#x1F50D; {h}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {entitySearch.trim() && entitySearchResults.length === 0 && (
-              <div className="vr-entity-search-empty">No matches</div>
-            )}
-            {entitySearchResults.map((e, i) => {
-              const q = entitySearch.toLowerCase().trim()
-                .replace(/^(?:type:|t:)\w+\s*/, "")
-                .replace(/^(?:file:|f:)\S+\s*/, "");
-              const nameStr = (e.detail.name as string) || e.summary;
-              return (
-                <div
-                  key={`es-${i}`}
-                  ref={i === entitySearchIdx ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
-                  className={`vr-entity-search-item ${i === entitySearchIdx ? "vr-entity-search-item--active" : ""}`}
-                  onClick={() => {
-                    addSearchHistory(entitySearch.trim());
-                    selectFile((e as SearchableEntity)._key);
-                    setActiveTab(e.type as TabId);
-                    setEntitySearchOpen(false);
-                    setTimeout(() => {
-                      setHighlightRange({ startLine: e.anchor.start_line, endLine: e.anchor.end_line || e.anchor.start_line });
-                    }, 100);
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span className="vr-entity-search-type">{e.type}</span>
-                    {e.detail.kind ? <span className="vr-entity-search-kind">({String(e.detail.kind)})</span> : null}
-                    <span className="vr-entity-search-name">
-                      {q ? highlightMatch(nameStr, q) : nameStr}
-                    </span>
-                  </div>
-                  <span className="vr-entity-search-file">{(e as SearchableEntity)._file}:{e.anchor.start_line}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <EntitySearch
+          allEntities={allSearchEntities}
+          currentFile={currentFile}
+          onSelect={(fileKey, tab, anchor) => {
+            selectFile(fileKey);
+            setActiveTab(tab);
+            setTimeout(() => {
+              setHighlightRange({ startLine: anchor.start, endLine: anchor.end });
+            }, 100);
+          }}
+          onClose={() => setEntitySearchOpen(false)}
+        />
       )}
 
       {/* File heatmap panel */}

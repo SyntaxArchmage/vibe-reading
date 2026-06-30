@@ -329,6 +329,35 @@ def main() -> int:
         page.wait_for_timeout(500)
         check("Dark theme restored", page.locator(".vr-layout--light").count() == 0)
 
+        # 20d. Light Theme Details
+        print("\n--- 20d. Light Theme Details ---")
+        theme_btn.click()
+        page.wait_for_timeout(500)
+        check("Light mode active", page.locator(".vr-layout--light").count() > 0)
+        light_sidebar_bg = page.evaluate(
+            '() => getComputedStyle(document.querySelector(".vr-sidebar")).backgroundColor'
+        )
+        check("Sidebar uses CSS var bg", light_sidebar_bg != dark_bg, f"sidebar={light_sidebar_bg}")
+        card_el = page.locator(".vr-card").first
+        if card_el.count() > 0:
+            card_bg = card_el.evaluate("el => getComputedStyle(el).backgroundColor")
+            check("Card bg light", card_bg != "rgb(45, 45, 45)", f"card_bg={card_bg}")
+        tab_active = page.locator(".vr-tab--active")
+        if tab_active.count() > 0:
+            tab_color = tab_active.evaluate("el => getComputedStyle(el).color")
+            check("Active tab color light", tab_color != "rgb(204, 204, 204)")
+        cx_badge = page.locator(".vr-cx-badge")
+        if cx_badge.count() > 0:
+            badge_bg = cx_badge.first.evaluate("el => getComputedStyle(el).backgroundColor")
+            check("CX badge uses light colors", badge_bg not in ["rgb(74, 32, 32)", "rgb(58, 58, 32)", "rgb(26, 42, 26)"], f"bg={badge_bg}")
+        tree_file = page.locator(".vr-tree-file").first
+        if tree_file.count() > 0:
+            tree_color = tree_file.evaluate("el => getComputedStyle(el).color")
+            check("Tree file color light", tree_color != "rgb(204, 204, 204)")
+        theme_btn.click()
+        page.wait_for_timeout(300)
+        check("Restored to dark", page.locator(".vr-layout--light").count() == 0)
+
         # 21. Source Content
         print("\n--- 21. Source Content ---")
         src = page.evaluate(
