@@ -48,16 +48,13 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
     if (nearest) onCardClick(nearest);
   };
   return (
-    <div style={{ height: 18, background: "#181818", margin: "0 8px 6px", borderRadius: 3,
-                  position: "relative", overflow: "hidden", cursor: "pointer" }}
-         onClick={handleBarClick}
+    <div className="vr-density-bar" onClick={handleBarClick}
          title="Entity density — click to jump to nearest entity">
       {visibleRange && (
-        <div style={{ position: "absolute", top: 0, bottom: 0,
-                      left: `${(visibleRange.start / totalLines) * 100}%`,
-                      width: `${((visibleRange.end - visibleRange.start) / totalLines) * 100}%`,
-                      background: "rgba(255,255,255,0.06)", borderLeft: "1px solid #555", borderRight: "1px solid #555",
-                      pointerEvents: "none" }} />
+        <div className="vr-density-viewport" style={{
+          left: `${(visibleRange.start / totalLines) * 100}%`,
+          width: `${((visibleRange.end - visibleRange.start) / totalLines) * 100}%`,
+        }} />
       )}
       {entities.map((e, i) => {
         const left = (e.anchor.start_line / totalLines) * 100;
@@ -65,10 +62,9 @@ function DensityBar({ entities, totalLines, onCardClick, visibleRange }: {
         const kind = (e.detail.node_type as string || "other").toLowerCase();
         const color = KIND_COLORS[kind] || "#b5cea8";
         return (
-          <div key={i} onClick={(ev) => { ev.stopPropagation(); onCardClick(e); }}
+          <div key={i} className="vr-density-entity" onClick={(ev) => { ev.stopPropagation(); onCardClick(e); }}
                title={`${(e.detail.name as string) || e.summary} (L${e.anchor.start_line})`}
-               style={{ position: "absolute", left: `${left}%`, width: `${width}%`, top: 0, bottom: 0,
-                        background: color, opacity: 0.5, borderRight: "1px solid #252525" }} />
+               style={{ left: `${left}%`, width: `${width}%`, background: color }} />
         );
       })}
     </div>
@@ -225,8 +221,7 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 8px" }}>
         {summaryLine}
         <button
-          style={{ fontSize: 9, color: "#888", background: "none", border: "1px solid #444", borderRadius: 3,
-                   cursor: "pointer", padding: "1px 4px" }}
+          className="vr-concept-collapse-btn"
           onClick={() => {
             if (allCollapsed) {
               setCollapsed(new Set());
@@ -244,10 +239,8 @@ export function ConceptTab({ entities, onCardClick, highlightEntity, totalLines,
       {miniGraph}
       {groups.map(([kind, items]) => (
         <div key={kind}>
-          <div className="vr-concept-group-header" onClick={() => toggle(kind)}
-               style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px 2px", cursor: "pointer",
-                        color: "#888", userSelect: "none", display: "flex", gap: 4, alignItems: "center" }}>
-            <span style={{ fontSize: 9 }}>{collapsed.has(kind) ? "▶" : "▼"}</span>
+          <div className="vr-concept-group-header" onClick={() => toggle(kind)}>
+            <span className="vr-concept-group-arrow">{collapsed.has(kind) ? "▶" : "▼"}</span>
             {kind} ({items.length})
           </div>
           {!collapsed.has(kind) && (

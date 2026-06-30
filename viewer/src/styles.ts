@@ -835,6 +835,33 @@ export const sidebarStyles = `
 .vr-dep-graph-btn:hover { border-color: var(--vr-accent); }
 .vr-dep-graph-btn--active { background: rgba(0,122,204,0.15); border-color: var(--vr-accent); color: var(--vr-accent); }
 
+/* Density bar */
+.vr-density-bar {
+  height: 18px; background: var(--vr-bg); margin: 0 8px 6px; border-radius: 3px;
+  position: relative; overflow: hidden; cursor: pointer; border: 1px solid var(--vr-border);
+}
+.vr-density-viewport {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(255,255,255,0.06); border-left: 1px solid var(--vr-border); border-right: 1px solid var(--vr-border);
+  pointer-events: none;
+}
+.vr-layout--light .vr-density-viewport { background: rgba(0,0,0,0.06); }
+.vr-density-entity {
+  position: absolute; top: 0; bottom: 0; opacity: 0.5; border-right: 1px solid var(--vr-bg-secondary);
+}
+
+/* ConceptTab group */
+.vr-concept-group-header {
+  font-size: 11px; font-weight: 600; padding: 6px 8px 2px; cursor: pointer;
+  color: var(--vr-fg-dim); user-select: none; display: flex; gap: 4px; align-items: center;
+}
+.vr-concept-group-arrow { font-size: 9px; }
+.vr-concept-collapse-btn {
+  font-size: 9px; color: var(--vr-fg-dim); background: none; border: 1px solid var(--vr-border);
+  border-radius: 3px; cursor: pointer; padding: 1px 4px;
+}
+.vr-concept-collapse-btn:hover { border-color: var(--vr-accent); }
+
 /* Jump tab */
 .vr-jump-reason { padding: 0 10px 8px; font-size: 11px; color: var(--vr-fg-dimmer); }
 .vr-jump-heading { font-size: 11px; color: var(--vr-fg-dim); padding: 4px 8px 2px; font-weight: 600; }
